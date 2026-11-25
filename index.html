@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Natuurkunde Tools — Overzicht</title>
+<style>
+  :root{
+    --bg:#ffffff; --panel:#ffffff; --panel-alt:#f4f5f7; --border:#d9dde3;
+    --text:#1c232c; --muted:#6b7684;
+    --serif:'Iowan Old Style','Palatino Linotype',Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,'SF Mono',Consolas,'Liberation Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.5;padding:40px 20px 60px;}
+  .shell{max-width:1020px;margin:0 auto;}
+  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  h1{font-family:var(--serif);font-size:2.2rem;font-weight:600;margin:0 0 8px;}
+  .sub{color:var(--muted);font-size:1rem;max-width:640px;margin:0 0 28px;}
+  .sectie{margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:34px;}
+  .card{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px 20px;box-shadow:0 1px 3px rgba(28,35,44,.06);transition:transform .15s, box-shadow .15s;}
+  .card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(28,35,44,.1);}
+  .cat-tag{display:inline-block;font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:5px;margin-bottom:10px;background:#e3eef8;color:#1f4f7a;}
+  .card h3{font-family:var(--serif);font-size:1.08rem;font-weight:600;margin:0 0 6px;}
+  .card p{font-size:.86rem;color:var(--muted);margin:0 0 12px;}
+  .card .open{font-family:var(--mono);font-size:.76rem;font-weight:600;color:#1f4f7a;}
+  .card.leeg{border-style:dashed;box-shadow:none;color:var(--muted);display:flex;align-items:center;justify-content:center;min-height:150px;font-size:.86rem;}
+  footer{color:var(--muted);font-size:.8rem;border-top:1px solid var(--border);padding-top:16px;}
+  footer a{color:inherit;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="eyebrow">Interactieve tools · vwo</div>
+  <h1>Natuurkunde Tools</h1>
+  <p class="sub">Oefentools voor in de les en thuis. Elke tool is één bestand en werkt in de browser, ook offline.</p>
+
+  <div class="sectie">Klas 3</div>
+  <div class="grid">
+    <a class="card" href="Beweging_3V.html">
+      <span class="cat-tag">Beweging · 3V</span>
+      <h3>Beweging: s, v, t en a</h3>
+      <p>Eenheden omrekenen (m/s ↔ km/u), eenparige beweging, (s,t)- en (v,t)-diagrammen bouwen vanuit een verhaal, aflezen en koppelen, versnelling en F = m·a.</p>
+      <span class="open">Open tool →</span>
+    </a>
+    <div class="card leeg">Meer tools volgen</div>
+  </div>
+
+  <footer>Zie ook de <a href="https://lhbeun.github.io/Chemistrytools/">scheikundetools</a>.</footer>
+</div>
+</body>
+</html>

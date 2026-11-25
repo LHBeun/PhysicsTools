@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beweging 3V – s, v, t, a en F</title>
+<style>
+:root{
+  --bg:#0f172a; --panel:#16213a; --panel2:#1c2a48; --line:#2b3b5f; --text:#e5ecf7; --muted:#9fb0cc;
+  --s:#60a5fa; --v:#f59e0b; --a:#a78bfa; --ok:#34d399; --bad:#f87171; --accent:#38bdf8;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.5}
+header{padding:18px 24px 0;background:linear-gradient(180deg,#132044,#0f172a)}
+header h1{margin:0 0 2px;font-size:1.5rem;letter-spacing:.3px}
+header .sub{color:var(--muted);font-size:.92rem;margin-bottom:12px}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{background:transparent;border:1px solid transparent;border-bottom:none;color:var(--muted);padding:9px 14px;border-radius:10px 10px 0 0;cursor:pointer;font-size:.95rem}
+nav button.active{background:var(--panel);color:var(--text);border-color:var(--line)}
+nav button .nr{display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--line);color:var(--text);font-size:.75rem;line-height:20px;text-align:center;margin-right:6px}
+nav button.active .nr{background:var(--accent);color:#06243a}
+main{max-width:1180px;margin:0 auto;padding:18px 20px 60px}
+section.tab{display:none}
+section.tab.active{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px}
+.card h2{margin:0 0 8px;font-size:1.2rem}
+.card h3{margin:14px 0 6px;font-size:1.02rem}
+.doel{background:#12304a;border:1px solid #1f4d73;border-radius:10px;padding:8px 12px;font-size:.92rem;color:#cfe6ff;margin-bottom:12px}
+.doel b{color:#fff}
+details.uitleg{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:16px}
+details.uitleg summary{cursor:pointer;font-weight:600}
+.muted{color:var(--muted)}
+.btn{background:var(--accent);color:#06243a;border:none;padding:8px 14px;border-radius:9px;font-weight:600;cursor:pointer;font-size:.93rem}
+.btn:hover{filter:brightness(1.1)}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--panel2)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+input.num, input.ans{background:#0b1324;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 9px;font-size:1rem;width:110px}
+input.ans.ok, input.num.ok{border-color:var(--ok);box-shadow:0 0 0 2px #34d39933}
+input.ans.bad, input.num.bad{border-color:var(--bad);box-shadow:0 0 0 2px #f8717133}
+select{background:#0b1324;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:6px 8px;font-size:.93rem}
+select.ok{border-color:var(--ok)} select.bad{border-color:var(--bad)}
+.ansrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+.fb{margin-top:8px;min-height:1.2em}
+.fb .good{color:var(--ok)} .fb .wrong{color:var(--bad)}
+.uitw{margin-top:10px;background:#0b1324;border:1px dashed var(--line);border-radius:10px;padding:10px 14px}
+.hidden{display:none!important}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 3px;font-size:.95em}
+.fr>span:first-child{border-bottom:1.5px solid currentColor;padding:0 4px}
+.fr>span:last-child{padding:0 4px}
+.fr.fu{font-size:.78em;margin:0 2px}
+.fr .fr.fu{font-size:.85em}
+.upick{display:inline-flex;gap:3px}
+.uopt{background:#0b1324;border:1px solid var(--line);color:var(--text);border-radius:7px;padding:2px 8px;cursor:pointer;min-height:34px}
+.uopt.on{border-color:var(--accent);background:#12304a}
+.eq{margin:6px 0;font-size:1.03rem}
+.formula{display:inline-block;background:#0b1324;border:1px solid var(--line);border-radius:10px;padding:6px 14px;font-size:1.15rem;margin:4px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.diagcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.diagcard h3{margin:0 0 6px;font-size:1rem;display:flex;align-items:center;gap:8px}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+svg.diag{width:100%;height:auto;background:#0b1324;border-radius:10px;touch-action:none;user-select:none}
+svg.diag.interactive{cursor:crosshair}
+.shapes{margin-top:8px;display:flex;flex-direction:column;gap:5px;font-size:.92rem}
+.shapes .srow{display:flex;align-items:center;gap:8px}
+.shapes .srow .lbl{min-width:150px;color:var(--muted)}
+table.kt{border-collapse:collapse;margin-top:6px}
+table.kt th, table.kt td{border:1px solid var(--line);padding:5px 8px;text-align:center}
+table.kt th{background:var(--panel2);font-weight:600}
+table.kt input.num{width:90px;text-align:center}
+.story{font-size:1.05rem;line-height:1.65}
+.story .frag{display:block;margin:2px 0}
+.ctrls{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.ctrls label{font-size:.9rem;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.legend{font-size:.85rem;color:var(--muted);margin-top:6px}
+.axpanel{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;font-size:.9rem}
+.axpanel .axrow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:4px 0}
+.axpanel .axrow span.t{min-width:115px;color:var(--muted)}
+.opts4{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(max-width:700px){.opts4{grid-template-columns:1fr}}
+.optcard{border:2px solid var(--line);border-radius:12px;padding:6px;cursor:pointer;background:var(--panel2)}
+.optcard:hover{border-color:var(--accent)}
+.optcard.ok{border-color:var(--ok)} .optcard.bad{border-color:var(--bad)}
+.optcard .ol{font-weight:700;margin:0 0 2px 4px}
+.mcopt{display:block;width:100%;text-align:left;margin:6px 0;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 12px;cursor:pointer;font-size:.97rem}
+.mcopt:hover{border-color:var(--accent)}
+.mcopt.ok{border-color:var(--ok);background:#0f3a2e} .mcopt.bad{border-color:var(--bad);background:#3a1717}
+.qnum{margin:12px 0;padding:10px 12px;border-left:3px solid var(--line);background:#121c33;border-radius:0 10px 10px 0}
+.tag{display:inline-block;font-size:.75rem;background:#3b2f0b;color:#fcd34d;border:1px solid #7c5d0b;border-radius:6px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+.schema{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:8px 0}
+.schema .box{background:#0b1324;border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-weight:600}
+.schema .arrows{display:flex;flex-direction:column;font-size:.9rem;color:var(--muted)}
+ul.tight{margin:4px 0;padding-left:20px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Beweging</h1>
+  <div class="sub">Afstand, snelheid, tijd, versnelling en kracht · 3 vwo</div>
+  <nav id="nav"></nav>
+</header>
+<main>
+
+<!-- ============ TAB 1: EENHEDEN ============ -->
+<section class="tab" id="t-eenheden">
+  <div class="doel"><b>Leerdoel</b> – Je kunt snelheden omrekenen van m/s naar km/u en terug, en je kunt uitleggen waar de factor 3,6 vandaan komt.</div>
+  <details class="uitleg" open>
+    <summary>Uitleg en voorbeeld</summary>
+    <p>Een snelheid van 1 m/s betekent: elke seconde 1 meter. In één uur zitten 3600 seconden, dus in één uur leg je dan 3600 m af. Dat is 3,6 km.</p>
+    <div class="eq">1 m/s = <span class="fr"><span>3600 m</span><span>1 h</span></span> = <span class="fr"><span>3,6 km</span><span>1 h</span></span> = 3,6 km/u</div>
+    <div class="schema">
+      <div class="box">m/s</div>
+      <div class="arrows"><span>— vermenigvuldigen met 3,6 →</span><span>← delen door 3,6 —</span></div>
+      <div class="box">km/u</div>
+    </div>
+    <p class="muted">Controle: dezelfde snelheid is in km/u altijd een <b>groter</b> getal dan in m/s.</p>
+    <h3>Voorbeeld</h3>
+    <p>Een wielrenner rijdt met 12 m/s. Hoeveel km/u is dat?</p>
+    <div class="eq">v = 12 m/s · 3,6 = 43,2 km/u</div>
+    <p>Een tram rijdt met 54 km/u. Hoeveel m/s is dat?</p>
+    <div class="eq">v = <span class="fr"><span>54 km/u</span><span>3,6</span></span> = 15 m/s</div>
+  </details>
+  <div class="card"><h2>Oefenen</h2><div id="ex-eenheden"></div></div>
+</section>
+
+<!-- ============ TAB 2: EENPARIG ============ -->
+<section class="tab" id="t-eenparig">
+  <div class="doel"><b>Leerdoel</b> – Je kunt rekenen met v = <span class="fr"><span>s</span><span>t</span></span> en de formule omschrijven, met de eenheid bij elke stap.</div>
+  <details class="uitleg" open>
+    <summary>Uitleg en voorbeeld</summary>
+    <p>Bij een <b>eenparige beweging</b> is de snelheid constant: elke seconde wordt dezelfde afstand afgelegd.</p>
+    <div class="formula">v = <span class="fr"><span>s</span><span>t</span></span></div>
+    <ul class="tight">
+      <li><b>v</b> = snelheid in m/s</li>
+      <li><b>s</b> = afgelegde afstand in m</li>
+      <li><b>t</b> = tijd in s</li>
+    </ul>
+    <p>In het algemeen geeft <span class="fr"><span>s</span><span>t</span></span> de <b>gemiddelde snelheid</b>: v<sub>gem</sub> = <span class="fr"><span>s</span><span>t</span></span>. Alleen bij een eenparige beweging is de snelheid op elk moment gelijk aan de gemiddelde snelheid. Daarom schrijf je dan gewoon v.</p>
+    <p>Omschrijven: s = v · t &nbsp;en&nbsp; t = <span class="fr"><span>s</span><span>v</span></span></p>
+    <h3>Voorbeeld</h3>
+    <p>Een hardloper legt met constante snelheid 400 m af in 80 s. Bereken de snelheid.</p>
+    <div class="eq">v = <span class="fr"><span>s</span><span>t</span></span> = <span class="fr"><span>400 m</span><span>80 s</span></span> = 5,0 m/s</div>
+    <p>Hoe lang doet dezelfde hardloper over 1500 m?</p>
+    <div class="eq">t = <span class="fr"><span>s</span><span>v</span></span> = <span class="fr"><span>1500 m</span><span>5,0 m/s</span></span> = 300 s</div>
+    <p class="muted">Let op: reken eerst om naar m en s als de gegevens in km, minuten of km/u staan.</p>
+  </details>
+  <div class="card"><h2>Oefenen</h2><div id="ex-eenparig"></div></div>
+</section>
+
+<!-- ============ TAB 3: GRAFIEK BOUWEN ============ -->
+<section class="tab" id="t-bouwen">
+  <div class="doel"><b>Leerdoel</b> – Je kunt bij een verhaal een (s,t)-diagram en een (v,t)-diagram opbouwen: knikpunten bepalen, uitrekenen en plaatsen, en per stuk de juiste vorm kiezen.</div>
+  <details class="uitleg" id="bouwUitleg" open>
+    <summary>Uitleg en uitgewerkt voorbeeld</summary>
+    <p>Zo bouw je een diagram bij een verhaal:</p>
+    <ol>
+      <li><b>Knip het verhaal in stukken</b>: in elk stuk is de beweging steeds hetzelfde. Waar de beweging verandert, ligt een <b>knikpunt</b>.</li>
+      <li><b>Reken voor elk knikpunt</b> de tijd, de afstand en de snelheid uit. Zet ze in een tabel.</li>
+      <li><b>Zet de punten</b> in het diagram.</li>
+      <li><b>Kies per stuk de vorm</b>:
+        <ul class="tight">
+          <li><b>(s,t)-diagram</b>: snelheid constant → recht · versnellen → steeds steiler · vertragen → steeds minder steil</li>
+          <li><b>(v,t)-diagram</b>: versnelling constant (of nul) → recht</li>
+        </ul>
+      </li>
+    </ol>
+    <h3>Voorbeeld</h3>
+    <p class="story">Han fietst over een recht fietspad. Hij trekt vanuit stilstand in 4 s gelijkmatig op tot 6 m/s. Daarna houdt hij die snelheid 10 s vast. Tot slot remt hij in 6 s gelijkmatig af tot stilstand.</p>
+    <p><b>Stukken:</b> optrekken (0–4 s), constante snelheid (4–14 s), afremmen (14–20 s). Knikpunten op t = 0, 4, 14 en 20 s.</p>
+    <p><b>Afstanden:</b> bij gelijkmatig optrekken of afremmen reken je met de gemiddelde snelheid.</p>
+    <div class="eq">Stuk 1: v<sub>gem</sub> = <span class="fr"><span>0 m/s + 6 m/s</span><span>2</span></span> = 3 m/s &nbsp;→&nbsp; s = v<sub>gem</sub> · t = 3 m/s · 4 s = 12 m</div>
+    <div class="eq">Stuk 2: s = 6 m/s · 10 s = 60 m &nbsp;→&nbsp; samen 12 m + 60 m = 72 m</div>
+    <div class="eq">Stuk 3: v<sub>gem</sub> = <span class="fr"><span>6 m/s + 0 m/s</span><span>2</span></span> = 3 m/s &nbsp;→&nbsp; s = v<sub>gem</sub> · t = 3 m/s · 6 s = 18 m &nbsp;→&nbsp; samen 72 m + 18 m = 90 m</div>
+    <table class="kt"><tr><th>t (s)</th><td>0</td><td>4</td><td>14</td><td>20</td></tr><tr><th>s (m)</th><td>0</td><td>12</td><td>72</td><td>90</td></tr><tr><th>v (m/s)</th><td>0</td><td>6</td><td>6</td><td>0</td></tr></table>
+    <div class="grid2" style="margin-top:12px">
+      <div><svg class="diag" id="exS" viewBox="0 0 460 300"></svg><div class="legend">Stuk 1 steeds steiler · stuk 2 recht · stuk 3 steeds minder steil</div></div>
+      <div><svg class="diag" id="exV" viewBox="0 0 460 300"></svg><div class="legend">Alle stukken recht: de versnelling is per stuk constant</div></div>
+    </div>
+  </details>
+
+  <div class="card">
+    <div class="ctrls">
+      <label>Beweging
+        <select id="bInhoud">
+          <option value="eenparig">Alleen eenparig (constante snelheid, stilstaan)</option>
+          <option value="versneld" selected>Met optrekken en afremmen</option>
+        </select>
+      </label>
+      <label>Diagrammen
+        <select id="bDiag">
+          <option value="beide" selected>(s,t) en (v,t) naast elkaar</option>
+          <option value="s">alleen (s,t)</option>
+          <option value="v">alleen (v,t)</option>
+        </select>
+      </label>
+      <label>Niveau
+        <select id="bNiveau">
+          <option value="1">1 – tijdstippen van knikpunten gegeven</option>
+          <option value="2" selected>2 – zelf knikpunten bepalen</option>
+          <option value="3">3 – ook zelf de assen maken</option>
+        </select>
+      </label>
+      <div class="btnrow" style="margin-top:16px">
+        <button class="btn" id="bNieuw">Nieuw verhaal</button>
+        <button class="btn ghost" id="bWis">Wis mijn diagram</button>
+      </div>
+    </div>
+    <p class="muted" id="bDiagNote" style="margin:8px 0 0;font-size:.88rem"></p>
+  </div>
+
+  <div class="card"><h2>Verhaal</h2><div class="story" id="bStory"></div></div>
+
+  <div class="grid2" id="bDiagrams">
+    <div class="diagcard" id="cardS">
+      <h3><span class="dot" style="background:var(--s)"></span>(s,t)-diagram</h3>
+      <div id="axS"></div>
+      <svg class="diag interactive" id="svgS" viewBox="0 0 460 300"></svg>
+      <div class="shapes" id="shapesS"></div>
+    </div>
+    <div class="diagcard" id="cardV">
+      <h3><span class="dot" style="background:var(--v)"></span>(v,t)-diagram</h3>
+      <div id="axV"></div>
+      <svg class="diag interactive" id="svgV" viewBox="0 0 460 300"></svg>
+      <div class="shapes" id="shapesV"></div>
+    </div>
+  </div>
+  <p class="legend">Klik in een diagram om een punt te zetten. Sleep een punt om het te verplaatsen. Dubbelklik op een punt om het weg te halen. Je kunt de waarden ook in de tabel typen.</p>
+
+  <div class="card">
+    <h2>Tabel met knikpunten</h2>
+    <div id="bTable"></div>
+    <div class="btnrow"><button class="btn ghost" id="bAddRow">+ Rij toevoegen</button><button class="btn" id="bCheck">Controleer</button></div>
+    <div class="fb" id="bFb"></div>
+  </div>
+</section>
+
+<!-- ============ TAB 4: AFLEZEN EN KOPPELEN ============ -->
+<section class="tab" id="t-aflezen">
+  <div class="doel"><b>Leerdoel</b> – Je kunt uit een (s,t)- en (v,t)-diagram aflezen hoe iets beweegt, snelheid en versnelling bepalen, en een (s,t)-diagram aan het bijpassende (v,t)-diagram koppelen.</div>
+  <div class="card">
+    <div class="ctrls">
+      <label>Opdracht
+        <select id="aType">
+          <option value="verhaal">Diagram → verhaal en aflezen</option>
+          <option value="koppel">Koppel (s,t) en (v,t)</option>
+          <option value="twee">Uitdaging: twee personen</option>
+        </select>
+      </label>
+      <div class="btnrow" style="margin-top:16px"><button class="btn" id="aNieuw">Nieuwe opdracht</button></div>
+    </div>
+  </div>
+  <div id="aBody"></div>
+</section>
+
+<!-- ============ TAB 5: VERSNELLING ============ -->
+<section class="tab" id="t-versnelling">
+  <div class="doel"><b>Leerdoel</b> – Je kunt rekenen met a = <span class="fr"><span>Δv</span><span>Δt</span></span> (ook bij vertragen) en de afstand tijdens gelijkmatig optrekken of afremmen berekenen met de gemiddelde snelheid.</div>
+  <details class="uitleg" open>
+    <summary>Uitleg en voorbeeld</summary>
+    <p>De <b>versnelling</b> geeft aan hoeveel de snelheid per seconde verandert.</p>
+    <div class="formula">a<sub>gem</sub> = <span class="fr"><span>Δv</span><span>Δt</span></span> = <span class="fr"><span>v<sub>eind</sub> − v<sub>begin</sub></span><span>Δt</span></span></div>
+    <ul class="tight">
+      <li><b>a<sub>gem</sub></b> = gemiddelde versnelling in m/s² (m/s per s)</li>
+      <li><b>Δv</b> = verandering van de snelheid in m/s</li>
+      <li><b>Δt</b> = tijdsduur in s</li>
+    </ul>
+    <p>Met deze formule bereken je de <b>gemiddelde versnelling</b> over de tijdsduur Δt: hoeveel de snelheid in die tijd gemiddeld per seconde verandert.</p>
+    <p>Bij een <b>eenparig versnelde beweging</b> (gelijkmatig versnellen) neemt de snelheid elke seconde precies evenveel toe. De versnelling is dan op elk moment gelijk aan de gemiddelde versnelling, en daarom schrijf je dan gewoon <b>a</b>. Het (v,t)-diagram is dan een rechte, schuine lijn en het (s,t)-diagram wordt steeds steiler.</p>
+    <p>Neemt de snelheid af (vertragen, afremmen), dan is Δv negatief en dus ook a negatief.</p>
+    <h3>Afstand tijdens gelijkmatig optrekken of afremmen</h3>
+    <p>Tijdens het optrekken verandert de snelheid voortdurend. Je kunt dus niet zomaar s = v · t gebruiken: welke v zou je dan moeten nemen? Daarom reken je met de <b>gemiddelde snelheid</b> v<sub>gem</sub>: de constante snelheid waarmee je in dezelfde tijd dezelfde afstand zou afleggen.</p>
+    <p><b>Alleen als de snelheid gelijkmatig verandert</b> (a is constant, het (v,t)-diagram is een rechte lijn), ligt de gemiddelde snelheid precies midden tussen de beginsnelheid en de eindsnelheid:</p>
+    <div class="eq">v<sub>gem</sub> = <span class="fr"><span>v<sub>begin</sub> + v<sub>eind</sub></span><span>2</span></span> &nbsp;&nbsp;<i class="muted">(alleen bij een eenparig versnelde of eenparig vertraagde beweging)</i></div>
+    <div class="eq">s = v<sub>gem</sub> · t &nbsp;&nbsp;<i class="muted">(t = de tijdsduur van het optrekken of afremmen)</i></div>
+    <p>Verandert de snelheid niet gelijkmatig (een gekromde lijn in het (v,t)-diagram), dan klopt deze formule voor v<sub>gem</sub> niet.</p>
+    <h3>Voorbeeld</h3>
+    <p>Een scooter trekt in 5,0 s gelijkmatig op van 2,0 m/s naar 12 m/s. Bereken de versnelling en de afgelegde afstand.</p>
+    <div class="eq">a = <span class="fr"><span>Δv</span><span>Δt</span></span> = <span class="fr"><span>12 m/s − 2,0 m/s</span><span>5,0 s</span></span> = <span class="fr"><span>10 m/s</span><span>5,0 s</span></span> = 2,0 m/s²</div>
+    <div class="eq">v<sub>gem</sub> = <span class="fr"><span>2,0 m/s + 12 m/s</span><span>2</span></span> = 7,0 m/s &nbsp;→&nbsp; s = 7,0 m/s · 5,0 s = 35 m</div>
+  </details>
+  <div class="card"><h2>Oefenen</h2><div id="ex-versnelling"></div></div>
+</section>
+
+<!-- ============ TAB 6: KRACHT ============ -->
+<section class="tab" id="t-kracht">
+  <div class="doel"><b>Leerdoelen</b> – Je kunt rekenen met F<sub>res</sub> = m · a en de formule omschrijven. Je kunt uitleggen dat er bij een constante snelheid geen resulterende kracht nodig is.</div>
+  <details class="uitleg" open>
+    <summary>Uitleg en voorbeeld</summary>
+    <p>De <b>resulterende kracht</b> F<sub>res</sub> is wat er overblijft als je alle krachten op een voorwerp samen neemt. Alleen een resulterende kracht verandert de snelheid.</p>
+    <div class="formula">F<sub>res</sub> = m · a</div>
+    <ul class="tight">
+      <li><b>F<sub>res</sub></b> = resulterende kracht in N (newton)</li>
+      <li><b>m</b> = massa in kg</li>
+      <li><b>a</b> = versnelling in m/s²</li>
+    </ul>
+    <p>Omschrijven: a = <span class="fr"><span>F<sub>res</sub></span><span>m</span></span> &nbsp;en&nbsp; m = <span class="fr"><span>F<sub>res</sub></span><span>a</span></span></p>
+    <ul class="tight">
+      <li>F<sub>res</sub> = 0 N → a = 0 m/s² → het voorwerp staat stil <b>of</b> beweegt met constante snelheid.</li>
+      <li>F<sub>res</sub> in de bewegingsrichting → versnellen. F<sub>res</sub> tegen de bewegingsrichting in → vertragen.</li>
+    </ul>
+    <h3>Voorbeeld</h3>
+    <p>Een kar van 40 kg krijgt een versnelling van 1,5 m/s². Bereken de resulterende kracht.</p>
+    <div class="eq">F<sub>res</sub> = m · a = 40 kg · 1,5 m/s² = 60 N</div>
+  </details>
+  <div class="card"><h2>Rekenen</h2><div id="ex-kracht"></div></div>
+  <div class="card"><h2>Begrijpen</h2><div id="mc-kracht"></div></div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+/* ================= HULPFUNCTIES ================= */
+const $ = s => document.querySelector(s);
+const rnd = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+function fmt(x, d=2){
+  if(!isFinite(x)) return '–';
+  const r = Math.round(x*Math.pow(10,d))/Math.pow(10,d);
+  return r.toLocaleString('nl-NL',{maximumFractionDigits:d, useGrouping:false});
+}
+function fmtF(x, d){ // vast aantal decimalen
+  return x.toLocaleString('nl-NL',{minimumFractionDigits:d,maximumFractionDigits:d,useGrouping:false});
+}
+function parseNum(s){
+  if(s==null) return NaN;
+  s = String(s).trim().replace(/\s/g,'').replace(',','.');
+  if(s==='' || s==='-' ) return NaN;
+  return Number(s);
+}
+const frac = (n,d) => `<span class="fr"><span>${n}</span><span>${d}</span></span>`;
+function close(a,b,rel=0.02,abs=1e-6){ return Math.abs(a-b) <= Math.max(Math.abs(b)*rel, abs); }
+const NAMEN = ['Cato','Jet','Eef','Ernst','Anne','Sieka','Han'];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+
+/* Label als "v (m/s)" tekenen met breukstreep voor de eenheid */
+function drawUnitLabel(g, x, y, label, anchor){
+  const m = label.match(/^(.*)\(([^/()]+)\/([^()]+)\)\s*$/);
+  const cw = 6.8;
+  if(!m){ const t=svgEl('text',{x,y,'text-anchor':anchor,fill:'#e5ecf7','font-size':12},g); t.textContent=label; return; }
+  const pre=m[1]+'(', num=m[2], den=m[3];
+  const fw=Math.max(num.length,den.length)*cw+4;
+  const total=pre.length*5.2+fw+cw;
+  let x0 = anchor==='end' ? x-total : x;
+  const t1=svgEl('text',{x:x0,y,'text-anchor':'start',fill:'#e5ecf7','font-size':12},g); t1.textContent=pre;
+  const fx=x0+pre.length*5.2;
+  const tn=svgEl('text',{x:fx+fw/2,y:y-6,'text-anchor':'middle',fill:'#e5ecf7','font-size':11},g); tn.textContent=num;
+  svgEl('line',{x1:fx+1,x2:fx+fw-1,y1:y-3,y2:y-3,stroke:'#e5ecf7','stroke-width':1},g);
+  const td=svgEl('text',{x:fx+fw/2,y:y+8,'text-anchor':'middle',fill:'#e5ecf7','font-size':11},g); td.textContent=den;
+  const t3=svgEl('text',{x:fx+fw,y,'text-anchor':'start',fill:'#e5ecf7','font-size':12},g); t3.textContent=')';
+}
+/* Eenheden kiezen met knoppen (zodat de breukstreep zichtbaar is) */
+function unitPick(cls){
+  return `<span class="upick ${cls}" data-val="">`+['s','m','m/s','km/u','m/s²'].map(u=>`<button type="button" class="uopt" data-v="${u}">${u}</button>`).join('')+`</span>`;
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.uopt'); if(!b) return;
+  const p=b.closest('.upick'); p.dataset.val=b.dataset.v;
+  p.querySelectorAll('.uopt').forEach(x=>x.classList.toggle('on',x===b));
+});
+/* Alle eenheden met een schuine streep in de tekst omzetten naar een breukstreep */
+const UNIT_RE=/(km\/u|m\/s²|m\/s)/g;
+const UNIT_PARTS={'km/u':['km','u'],'m/s²':['m','s²'],'m/s':['m','s']};
+function unitFracs(root){
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(n){
+    const p=n.parentElement; if(!p) return NodeFilter.FILTER_REJECT;
+    if(p.closest('script,style,option,select,svg,textarea,title')) return NodeFilter.FILTER_REJECT;
+    UNIT_RE.lastIndex=0; return UNIT_RE.test(n.nodeValue)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT; }});
+  const nodes=[]; while(walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(n=>{
+    const frag=document.createDocumentFragment(); let last=0; const txt=n.nodeValue; UNIT_RE.lastIndex=0; let mm;
+    while((mm=UNIT_RE.exec(txt))){
+      if(mm.index>last) frag.appendChild(document.createTextNode(txt.slice(last,mm.index)));
+      const [a,b]=UNIT_PARTS[mm[1]]; const sp=document.createElement('span'); sp.className='fr fu';
+      sp.innerHTML=`<span>${a}</span><span>${b}</span>`; frag.appendChild(sp); last=mm.index+mm[0].length;
+    }
+    if(last<txt.length) frag.appendChild(document.createTextNode(txt.slice(last)));
+    n.parentNode.replaceChild(frag,n);
+  });
+}
+new MutationObserver(muts=>{ muts.forEach(m=>m.addedNodes.forEach(nd=>{ if(nd.nodeType===1) unitFracs(nd); else if(nd.nodeType===3 && nd.parentElement) unitFracs(nd.parentElement); })); }).observe(document.body,{childList:true,subtree:true});
+
+/* ================= TABS ================= */
+const TABS = [
+  ['t-eenheden','Eenheden'],['t-eenparig','Eenparig'],['t-bouwen','Diagram bouwen'],
+  ['t-aflezen','Aflezen en koppelen'],['t-versnelling','Versnelling'],['t-kracht','Kracht']
+];
+const nav = $('#nav');
+TABS.forEach(([id,name],i)=>{
+  const b=document.createElement('button');
+  b.innerHTML=`<span class="nr">${i+1}</span>${name}`;
+  b.onclick=()=>showTab(id);
+  b.dataset.id=id; nav.appendChild(b);
+});
+function showTab(id){
+  document.querySelectorAll('section.tab').forEach(s=>s.classList.toggle('active', s.id===id));
+  nav.querySelectorAll('button').forEach(b=>b.classList.toggle('active', b.dataset.id===id));
+  try{ localStorage.setItem('beweging3v_tab', id); }catch(e){}
+}
+
+/* ================= NUMERIEKE VRAAG-WIDGET ================= */
+/* q = {html, answer, unit, label, uitw, hints:[{val,msg}], rel} */
+function numQ(container, q){
+  const div = document.createElement('div');
+  div.className='qnum';
+  div.innerHTML = `<div>${q.html}</div>
+    <div class="ansrow"><span>${q.label||''}</span><input class="ans" inputmode="decimal" autocomplete="off"><span>${q.unit||''}</span>
+    <button class="btn chk">Controleer</button><button class="btn ghost show hidden">Toon uitwerking</button></div>
+    <div class="fb"></div><div class="uitw hidden">${q.uitw||''}</div>`;
+  container.appendChild(div);
+  const inp=div.querySelector('input'), fb=div.querySelector('.fb'), uw=div.querySelector('.uitw'), sh=div.querySelector('.show');
+  const check=()=>{
+    const x=parseNum(inp.value);
+    sh.classList.remove('hidden');
+    if(isNaN(x)){ fb.innerHTML='<span class="wrong">Vul een getal in.</span>'; return; }
+    if(close(x,q.answer,q.rel||0.02)){
+      inp.className='ans ok'; fb.innerHTML='<span class="good">Goed!</span>';
+    } else {
+      inp.className='ans bad';
+      let msg='Nog niet goed. Kijk je berekening na.';
+      for(const h of (q.hints||[])){ if(close(x,h.val,q.rel||0.02)){ msg=h.msg; break; } }
+      fb.innerHTML=`<span class="wrong">${msg}</span>`;
+    }
+  };
+  div.querySelector('.chk').onclick=check;
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter') check(); });
+  sh.onclick=()=>uw.classList.toggle('hidden');
+  return div;
+}
+
+/* Oefenblok met "Nieuwe opgave" en "Uitdaging" */
+function exerciseBlock(id, gens, chalGens){
+  const root = $(id);
+  root.innerHTML = `<div class="qs"></div><div class="btnrow"><button class="btn ghost nw">Nieuwe opgave</button><button class="btn ghost ch">Uitdaging <span class="tag">★</span></button></div>`;
+  const qs = root.querySelector('.qs');
+  let last='';
+  const load = (pool, chal)=>{
+    let q, tries=0;
+    do { q = pick(pool)(); tries++; } while(q.html===last && tries<10);
+    last=q.html;
+    qs.innerHTML='';
+    if(chal) q.html = `<span class="tag">★ Uitdaging</span><br>`+q.html;
+    numQ(qs,q);
+  };
+  root.querySelector('.nw').onclick=()=>load(gens,false);
+  root.querySelector('.ch').onclick=()=>load(chalGens,true);
+  load(gens,false);
+}
+
+/* ================= TAB 1: EENHEDEN ================= */
+const CTX_SNEL = [
+  {wie:'Een hardloper', vs:[3,4,5,6,7]},
+  {wie:'Een fietser', vs:[4,5,6,7,8,9]},
+  {wie:'Een scooter', vs:[8,10,11,13,14]},
+  {wie:'Een auto', vs:[18,20,22,25,30]},
+  {wie:'Een sneltrein', vs:[35,40,45,50,55]},
+  {wie:'Een zwaluw', vs:[16,17,19,21]}
+];
+const genEenheden = [
+  ()=>{ const c=pick(CTX_SNEL); let v=pick(c.vs); if(v===12) v=13;
+    if(Math.random()<0.3) v=v+0.5;
+    const ans=v*3.6;
+    return {html:`${c.wie} beweegt met een snelheid van ${fmt(v)} m/s. Reken deze snelheid om naar km/u.`,
+      label:'v =', unit:'km/u', answer:ans,
+      uitw:`<div class="eq">v = ${fmt(v)} m/s · 3,6 = ${fmt(ans,1)} km/u</div>`,
+      hints:[{val:v/3.6,msg:'Je hebt gedeeld door 3,6. Dezelfde snelheid is in km/u juist een groter getal dan in m/s.'}]};
+  },
+  ()=>{ const v=pick([18,36,72,90,108,126,27,45,63,81,99,144]);
+    const ans=v/3.6;
+    return {html:`Een voertuig rijdt met ${v} km/u. Reken deze snelheid om naar m/s.`,
+      label:'v =', unit:'m/s', answer:ans,
+      uitw:`<div class="eq">v = ${frac(v+' km/u','3,6')} = ${fmt(ans,1)} m/s</div>`,
+      hints:[{val:v*3.6,msg:'Je hebt vermenigvuldigd met 3,6. Dezelfde snelheid is in m/s juist een kleiner getal dan in km/u.'}]};
+  },
+  ()=>{ const v=pick([2,3,4,5,6,7,8,9,11,14,16]);
+    return {html:`Wat is groter: ${v} m/s of ${fmt(v*3)} km/u? Reken ${v} m/s om naar km/u.`,
+      label:'v =', unit:'km/u', answer:v*3.6,
+      uitw:`<div class="eq">v = ${v} m/s · 3,6 = ${fmt(v*3.6,1)} km/u</div><p>${fmt(v*3.6,1)} km/u is groter dan ${fmt(v*3)} km/u, dus ${v} m/s is groter.</p>`,
+      hints:[{val:v/3.6,msg:'Je hebt gedeeld door 3,6. Dezelfde snelheid is in km/u juist een groter getal dan in m/s.'}]};
+  }
+];
+const chalEenheden = [
+  ()=>{ const d=pick([3,4.5,6,7.2,9,12]); const min=pick([10,12,15,20,25,30]);
+    const ans=d*1000/(min*60);
+    return {html:`Een fietser legt met constante snelheid ${fmt(d)} km af in ${min} minuten. Bereken de snelheid in m/s.`,
+      label:'v =', unit:'m/s', answer:ans,
+      uitw:`<div class="eq">s = ${fmt(d)} km = ${fmt(d*1000)} m &nbsp; en &nbsp; t = ${min} min = ${min} · 60 s = ${min*60} s</div>
+            <div class="eq">v = ${frac('s','t')} = ${frac(fmt(d*1000)+' m', (min*60)+' s')} = ${fmt(ans,2)} m/s</div>`,
+      hints:[{val:d/min,msg:'Je hebt km en minuten niet eerst omgerekend naar m en s.'},{val:d/(min/60),msg:'Dit is de snelheid in km/u. De vraag is in m/s.'}]};
+  },
+  ()=>{ const kmh=pick([36,54,72,90,108]); const t=pick([20,30,45,60,90]);
+    const v=kmh/3.6; const s=v*t;
+    return {html:`Een auto rijdt ${t} s met een constante snelheid van ${kmh} km/u. Bereken de afstand die de auto aflegt, in m.`,
+      label:'s =', unit:'m', answer:s,
+      uitw:`<div class="eq">v = ${frac(kmh+' km/u','3,6')} = ${fmt(v)} m/s</div><div class="eq">s = v · t = ${fmt(v)} m/s · ${t} s = ${fmt(s)} m</div>`,
+      hints:[{val:kmh*t,msg:'Je hebt km/u niet eerst omgerekend naar m/s.'}]};
+  }
+];
+
+/* ================= TAB 2: EENPARIG ================= */
+const genEenparig = [
+  ()=>{ const c=pick(CTX_SNEL); const v=pick(c.vs); const t=pick([20,25,40,50,60,120]); const s=v*t;
+    if(s===400&&t===80) return genEenparig[0]();
+    return {html:`${c.wie} legt met constante snelheid ${s} m af in ${t} s. Bereken de snelheid.`,
+      label:'v =', unit:'m/s', answer:v,
+      uitw:`<div class="eq">v = ${frac('s','t')} = ${frac(s+' m',t+' s')} = ${fmt(v)} m/s</div>`,
+      hints:[{val:s*t,msg:'Je hebt s en t vermenigvuldigd. Snelheid is afstand <i>per</i> tijd.'},{val:t/s,msg:'Je hebt t gedeeld door s. Het is afstand gedeeld door tijd.'}]};
+  },
+  ()=>{ const c=pick(CTX_SNEL); const v=pick(c.vs); const t=pick([15,30,45,90,150,240]); const s=v*t;
+    return {html:`${c.wie} beweegt ${t} s met een constante snelheid van ${v} m/s. Bereken de afgelegde afstand.`,
+      label:'s =', unit:'m', answer:s,
+      uitw:`<div class="eq">s = v · t = ${v} m/s · ${t} s = ${s} m</div>`,
+      hints:[{val:v/t,msg:'Je hebt gedeeld. Schrijf v = '+frac('s','t')+' om: s = v · t.'},{val:t/v,msg:'Schrijf v = '+frac('s','t')+' om: s = v · t.'}]};
+  },
+  ()=>{ const c=pick(CTX_SNEL); const v=pick(c.vs); const t=pick([12,25,35,80,160,300]); const s=v*t;
+    if(s===1500&&v===5) return genEenparig[2]();
+    return {html:`${c.wie} beweegt met een constante snelheid van ${v} m/s. Bereken hoe lang het duurt om ${s} m af te leggen.`,
+      label:'t =', unit:'s', answer:t,
+      uitw:`<div class="eq">t = ${frac('s','v')} = ${frac(s+' m',v+' m/s')} = ${t} s</div>`,
+      hints:[{val:s*v,msg:'Je hebt vermenigvuldigd. Schrijf v = '+frac('s','t')+' om: t = '+frac('s','v')+'.'},{val:v/s,msg:'Je hebt v gedeeld door s. Het is t = '+frac('s','v')+'.'}]};
+  }
+];
+const chalEenparig = [
+  ()=>{ const n=pick(NAMEN);
+    const s1=pick([1.2,1.8,2.4,3.0]), m1=pick([4,5,6,8]), stop=pick([2,3,4,5]), s2=pick([0.6,0.9,1.5,2.1]), m2=pick([2,3,4,6]);
+    const S=(s1+s2)*1000, T=(m1+stop+m2)*60, ans=S/T;
+    const wrong=(s1*1000/(m1*60)+s2*1000/(m2*60))/2, wrong2=S/((m1+m2)*60);
+    return {html:`${n} fietst ${fmt(s1)} km in ${m1} minuten. Daarna staat ${n} ${stop} minuten stil bij een stoplicht. Dan fietst ${n} nog ${fmt(s2)} km in ${m2} minuten. Bereken de gemiddelde snelheid over de hele rit, in m/s.`,
+      label:'v<sub>gem</sub> =', unit:'m/s', answer:ans,
+      uitw:`<div class="eq">s<sub>totaal</sub> = ${fmt(s1)} km + ${fmt(s2)} km = ${fmt(s1+s2)} km = ${fmt(S)} m</div>
+            <div class="eq">t<sub>totaal</sub> = ${m1} min + ${stop} min + ${m2} min = ${m1+stop+m2} min = ${T} s</div>
+            <div class="eq">v<sub>gem</sub> = ${frac('s<sub>totaal</sub>','t<sub>totaal</sub>')} = ${frac(fmt(S)+' m',T+' s')} = ${fmt(ans,2)} m/s</div>`,
+      hints:[{val:wrong,msg:'Je hebt het gemiddelde van twee snelheden genomen. Gebruik de totale afstand en de totale tijd.'},{val:wrong2,msg:'De tijd dat er stilgestaan wordt, hoort ook bij de totale tijd.'}]};
+  },
+  ()=>{ const v=pick([25,30,35,40]); const t=pick([4,5,6,8]); const s=v*t*3600/3.6/1000;
+    const vkmh=v*3.6;
+    return {html:`Een trein rijdt met een constante snelheid van ${fmt(vkmh)} km/u. Bereken hoeveel km de trein aflegt in ${t} minuten.`,
+      label:'s =', unit:'km', answer:v*t*60/1000,
+      uitw:`<div class="eq">v = ${frac(fmt(vkmh)+' km/u','3,6')} = ${v} m/s &nbsp; en &nbsp; t = ${t} min = ${t*60} s</div>
+            <div class="eq">s = v · t = ${v} m/s · ${t*60} s = ${v*t*60} m = ${fmt(v*t*60/1000)} km</div>`,
+      hints:[{val:vkmh*t,msg:'Je hebt km/u vermenigvuldigd met minuten. Reken eerst om naar m/s en s.'},{val:v*t*60,msg:'Dit is de afstand in m. De vraag is in km.'}]};
+  }
+];
+
+/* ================= TAB 5: VERSNELLING ================= */
+const VOERT = [
+  {wie:'Een scooter', v:[2,4,6,8,10,12,14]},
+  {wie:'Een auto', v:[0,5,10,15,20,25,30]},
+  {wie:'Een fietser', v:[0,2,3,4,5,6,8]},
+  {wie:'Een sprinter', v:[0,2,4,6,8,10]},
+  {wie:'Een trein', v:[0,10,20,30,40]}
+];
+function twoSpeeds(c){ let a,b; do{ a=pick(c.v); b=pick(c.v);}while(a===b); return [a,b]; }
+const genVersnelling = [
+  ()=>{ const c=pick(VOERT); let [v0,v1]=twoSpeeds(c); if(v1<v0)[v0,v1]=[v1,v0];
+    const dt=pick([2,4,5,8,10]); const a=(v1-v0)/dt;
+    return {html:`${c.wie} trekt in ${dt} s gelijkmatig op van ${v0} m/s naar ${v1} m/s. Bereken de versnelling tijdens het optrekken.`,
+      label:'a =', unit:'m/s²', answer:a,
+      uitw:`<div class="eq">a = ${frac('Δv','Δt')} = ${frac(`${v1} m/s − ${v0} m/s`, dt+' s')} = ${frac((v1-v0)+' m/s',dt+' s')} = ${fmt(a)} m/s²</div>`,
+      hints:[{val:v1/dt,msg:'Je hebt de eindsnelheid gebruikt in plaats van de verandering van de snelheid (Δv).'},{val:(v1-v0)*dt,msg:'Je hebt vermenigvuldigd. Versnelling is snelheidsverandering <i>per</i> seconde.'}]};
+  },
+  ()=>{ const c=pick(VOERT); let [v0,v1]=twoSpeeds(c); if(v1>v0)[v0,v1]=[v1,v0];
+    const dt=pick([2,4,5,8,10]); const a=(v1-v0)/dt;
+    const tekst = v1===0 ? 'tot stilstand' : `tot ${v1} m/s`;
+    return {html:`${c.wie} remt in ${dt} s gelijkmatig af van ${v0} m/s ${tekst}. Bereken de versnelling tijdens het remmen.`,
+      label:'a =', unit:'m/s²', answer:a,
+      uitw:`<div class="eq">a = ${frac('Δv','Δt')} = ${frac(`${v1} m/s − ${v0} m/s`, dt+' s')} = ${frac((v1-v0)+' m/s',dt+' s')} = ${fmt(a)} m/s²</div><p>De snelheid neemt af, dus a is negatief.</p>`,
+      hints:[{val:-a,msg:'Let op het teken: de snelheid neemt af, dus Δv = v<sub>eind</sub> − v<sub>begin</sub> is negatief.'}]};
+  },
+  ()=>{ const c=pick(VOERT); const v0=pick(c.v.filter(x=>x<=10)); const a=pick([0.5,1,1.5,2,2.5,3]); const dt=pick([2,4,6,8]);
+    const v1=v0+a*dt;
+    return {html:`${c.wie} rijdt met ${v0} m/s en versnelt daarna ${dt} s lang gelijkmatig met ${fmt(a)} m/s². Bereken de snelheid aan het eind van die ${dt} s.`,
+      label:'v<sub>eind</sub> =', unit:'m/s', answer:v1,
+      uitw:`<div class="eq">Δv = a · Δt = ${fmt(a)} m/s² · ${dt} s = ${fmt(a*dt)} m/s</div><div class="eq">v<sub>eind</sub> = v<sub>begin</sub> + Δv = ${v0} m/s + ${fmt(a*dt)} m/s = ${fmt(v1)} m/s</div>`,
+      hints:[{val:a*dt,msg:'Dit is de toename van de snelheid (Δv). Tel de beginsnelheid er nog bij op.'}]};
+  },
+  ()=>{ const c=pick(VOERT); let [v0,v1]=twoSpeeds(c); if(v1<v0)[v0,v1]=[v1,v0];
+    const a=pick([0.5,1,2,2.5]); const dv=v1-v0; const dt=dv/a;
+    return {html:`${c.wie} versnelt gelijkmatig met ${fmt(a)} m/s² van ${v0} m/s naar ${v1} m/s. Bereken hoe lang dat duurt.`,
+      label:'Δt =', unit:'s', answer:dt,
+      uitw:`<div class="eq">Δt = ${frac('Δv','a')} = ${frac(`${v1} m/s − ${v0} m/s`, fmt(a)+' m/s²')} = ${frac(dv+' m/s',fmt(a)+' m/s²')} = ${fmt(dt)} s</div>`,
+      hints:[{val:dv*a,msg:'Je hebt vermenigvuldigd. Schrijf a = '+frac('Δv','Δt')+' om: Δt = '+frac('Δv','a')+'.'},{val:v1/a,msg:'Gebruik Δv (de verandering van de snelheid), niet de eindsnelheid.'}]};
+  },
+  ()=>{ const c=pick(VOERT); let [v0,v1]=twoSpeeds(c); const dt=pick([2,4,6,8,10]);
+    const vg=(v0+v1)/2, s=vg*dt; const op = v1>v0 ? 'trekt' : 'remt'; const rest = v1>v0?'op':'af';
+    const tot = v1===0 ? 'tot stilstand' : `tot ${v1} m/s`;
+    return {html:`${c.wie} ${op} in ${dt} s gelijkmatig ${rest} van ${v0} m/s ${tot}. Bereken de afstand die ${c.wie.toLowerCase()} in die tijd aflegt.`,
+      label:'s =', unit:'m', answer:s,
+      uitw:`<div class="eq">v<sub>gem</sub> = ${frac(`${v0} m/s + ${v1} m/s`,'2')} = ${fmt(vg)} m/s</div><div class="eq">s = v<sub>gem</sub> · t = ${fmt(vg)} m/s · ${dt} s = ${fmt(s)} m</div>`,
+      hints:[{val:Math.max(v0,v1)*dt,msg:'Je rekende met de hoogste snelheid. Tijdens het optrekken of afremmen is de snelheid gemiddeld lager: gebruik v<sub>gem</sub>.'},{val:Math.abs(v1-v0)*dt,msg:'Gebruik de gemiddelde snelheid, niet de snelheidsverandering.'}]};
+  }
+];
+const chalVersnelling = [
+  ()=>{ const kmh=pick([36,54,72,90,108]); const dt=pick([4,5,6,8,10,12]); const v=kmh/3.6; const a=v/dt;
+    return {html:`Een auto trekt vanuit stilstand in ${dt} s gelijkmatig op tot ${kmh} km/u. Bereken de versnelling tijdens het optrekken.`,
+      label:'a =', unit:'m/s²', answer:a,
+      uitw:`<div class="eq">v<sub>eind</sub> = ${frac(kmh+' km/u','3,6')} = ${fmt(v)} m/s</div><div class="eq">a = ${frac('Δv','Δt')} = ${frac(fmt(v)+' m/s − 0 m/s',dt+' s')} = ${fmt(a)} m/s²</div>`,
+      hints:[{val:kmh/dt,msg:'Reken de snelheid eerst om van km/u naar m/s.'}]};
+  },
+  ()=>{ const kmh=pick([36,54,72]); const a=pick([-2,-2.5,-4,-5]); const v=kmh/3.6; const dt=-v/a; const s=v/2*dt;
+    return {html:`Een auto rijdt met ${kmh} km/u en remt gelijkmatig af tot stilstand. De versnelling is ${fmt(a)} m/s². Bereken de remweg (de afstand tijdens het remmen).`,
+      label:'s =', unit:'m', answer:s,
+      uitw:`<div class="eq">v<sub>begin</sub> = ${frac(kmh+' km/u','3,6')} = ${fmt(v)} m/s</div>
+        <div class="eq">Δt = ${frac('Δv','a')} = ${frac('0 m/s − '+fmt(v)+' m/s',fmt(a)+' m/s²')} = ${fmt(dt)} s</div>
+        <div class="eq">v<sub>gem</sub> = ${frac(fmt(v)+' m/s + 0 m/s','2')} = ${fmt(v/2)} m/s</div>
+        <div class="eq">s = v<sub>gem</sub> · t = ${fmt(v/2)} m/s · ${fmt(dt)} s = ${fmt(s,1)} m</div>`,
+      hints:[{val:v*dt,msg:'Bij gelijkmatig remmen tot stilstand is de gemiddelde snelheid de helft van de beginsnelheid: gebruik v<sub>gem</sub>.'}]};
+  }
+];
+
+/* ================= TAB 6: KRACHT ================= */
+const genKracht = [
+  ()=>{ const c=pick([['Een winkelwagen',[20,25,30,40]],['Een kar',[50,60,80]],['Een fietser met fiets',[70,80,90]],['Een auto',[900,1100,1200,1500]]]);
+    const m=pick(c[1]); const a=pick([0.5,1.2,2,2.5,3]); const F=m*a;
+    if(m===40&&a===1.5) return genKracht[0]();
+    return {html:`${c[0]} heeft een massa van ${m} kg en krijgt een versnelling van ${fmt(a)} m/s². Bereken de resulterende kracht.`,
+      label:'F<sub>res</sub> =', unit:'N', answer:F,
+      uitw:`<div class="eq">F<sub>res</sub> = m · a = ${m} kg · ${fmt(a)} m/s² = ${fmt(F)} N</div>`,
+      hints:[{val:m/a,msg:'Je hebt gedeeld. F<sub>res</sub> = m · a.'}]};
+  },
+  ()=>{ const m=pick([0.5,2,4,5,8,10,25]); const a=pick([1.5,2,3,4,6]); const F=m*a;
+    return {html:`Op een voorwerp met een massa van ${fmt(m)} kg werkt een resulterende kracht van ${fmt(F)} N. Bereken de versnelling.`,
+      label:'a =', unit:'m/s²', answer:a,
+      uitw:`<div class="eq">a = ${frac('F<sub>res</sub>','m')} = ${frac(fmt(F)+' N',fmt(m)+' kg')} = ${fmt(a)} m/s²</div>`,
+      hints:[{val:F*m,msg:'Je hebt vermenigvuldigd. Schrijf om: a = '+frac('F<sub>res</sub>','m')+'.'},{val:m/F,msg:'Je hebt m gedeeld door F. Het is a = '+frac('F<sub>res</sub>','m')+'.'}]};
+  },
+  ()=>{ const m=pick([3,6,12,15,60,75]); const a=pick([0.5,2,2.5,4]); const F=m*a;
+    return {html:`Een resulterende kracht van ${fmt(F)} N geeft een voorwerp een versnelling van ${fmt(a)} m/s². Bereken de massa van het voorwerp.`,
+      label:'m =', unit:'kg', answer:m,
+      uitw:`<div class="eq">m = ${frac('F<sub>res</sub>','a')} = ${frac(fmt(F)+' N',fmt(a)+' m/s²')} = ${fmt(m)} kg</div>`,
+      hints:[{val:F*a,msg:'Je hebt vermenigvuldigd. Schrijf om: m = '+frac('F<sub>res</sub>','a')+'.'}]};
+  }
+];
+const chalKracht = [
+  ()=>{ const m=pick([800,1000,1200,1500]); const kmh=pick([36,54,72,90]); const dt=pick([5,6,8,10]); const v=kmh/3.6; const a=v/dt; const F=m*a;
+    return {html:`Een auto met een massa van ${m} kg trekt vanuit stilstand in ${dt} s gelijkmatig op tot ${kmh} km/u. Bereken de resulterende kracht op de auto tijdens het optrekken.`,
+      label:'F<sub>res</sub> =', unit:'N', answer:F,
+      uitw:`<div class="eq">v<sub>eind</sub> = ${frac(kmh+' km/u','3,6')} = ${fmt(v)} m/s</div>
+        <div class="eq">a = ${frac('Δv','Δt')} = ${frac(fmt(v)+' m/s − 0 m/s',dt+' s')} = ${fmt(a)} m/s²</div>
+        <div class="eq">F<sub>res</sub> = m · a = ${m} kg · ${fmt(a)} m/s² = ${fmt(F,0)} N</div>`,
+      hints:[{val:m*kmh/dt,msg:'Reken de snelheid eerst om van km/u naar m/s.'}]};
+  },
+  ()=>{ const m=pick([60,70,80]); const Fm=pick([300,400,500]); const Fw=pick([100,150,200]); const a=(Fm-Fw)/m;
+    return {html:`Een sprinter (${m} kg) zet zich af met een voorwaartse kracht van ${Fm} N. De luchtweerstand en wrijving samen zijn ${Fw} N, naar achteren. Bereken de versnelling van de sprinter.`,
+      label:'a =', unit:'m/s²', answer:a,
+      uitw:`<div class="eq">F<sub>res</sub> = ${Fm} N − ${Fw} N = ${Fm-Fw} N (naar voren)</div><div class="eq">a = ${frac('F<sub>res</sub>','m')} = ${frac((Fm-Fw)+' N',m+' kg')} = ${fmt(a)} m/s²</div>`,
+      hints:[{val:Fm/m,msg:'Gebruik de resulterende kracht: de kracht naar achteren werkt tegen.'},{val:(Fm+Fw)/m,msg:'De krachten werken in tegengestelde richting: trek ze van elkaar af.'}]};
+  }
+];
+const MC_KRACHT = [
+  {q:'Een fietser rijdt met een constante snelheid van 5 m/s over een recht, vlak fietspad. Wat geldt voor de resulterende kracht op de fietser?',
+   o:['De resulterende kracht is naar voren gericht.','De resulterende kracht is 0 N.','De resulterende kracht is naar achteren gericht.','Dat hangt af van hoe hard de fietser trapt.'], c:1,
+   e:'De snelheid verandert niet, dus a = 0 m/s². Uit F<sub>res</sub> = m · a volgt F<sub>res</sub> = 0 N. De trapkracht is precies even groot als de wrijving en luchtweerstand samen.'},
+  {q:'Een bal rolt over de vloer en komt langzaam tot stilstand. In welke richting werkt de resulterende kracht tijdens het uitrollen?',
+   o:['In de richting waarin de bal rolt.','Tegen de richting in waarin de bal rolt.','Er werkt geen resulterende kracht.','Eerst naar voren, daarna naar achteren.'], c:1,
+   e:'De bal vertraagt: de versnelling is tegen de bewegingsrichting in. Dan is de resulterende kracht dat ook (wrijving).'},
+  {q:'Karretje A heeft twee keer zoveel massa als karretje B. Op beide karretjes werkt dezelfde resulterende kracht. Wat geldt voor de versnelling van A?',
+   o:['Twee keer zo groot als die van B.','Even groot als die van B.','Half zo groot als die van B.','Vier keer zo klein als die van B.'], c:2,
+   e:'a = <span class="fr"><span>F<sub>res</sub></span><span>m</span></span>. Bij dezelfde kracht en twee keer zoveel massa is de versnelling half zo groot.'},
+  {q:'Een ruimtesonde ver in de ruimte zet haar motor uit. Er werken (bijna) geen krachten op. Wat gebeurt er met de snelheid?',
+   o:['De sonde remt langzaam af tot stilstand.','De sonde staat meteen stil.','De snelheid blijft gelijk.','De sonde gaat steeds sneller.'], c:2,
+   e:'Zonder resulterende kracht is a = 0 m/s²: de snelheid verandert niet. Er is geen kracht nodig om te blijven bewegen.'},
+  {q:'Van een voorwerp is de versnelling 0 m/s². Welke uitspraak is juist?',
+   o:['Het voorwerp staat stil.','Het voorwerp staat stil of beweegt met een constante snelheid.','Er werken geen krachten op het voorwerp.','Het voorwerp vertraagt.'], c:1,
+   e:'a = 0 betekent dat de snelheid niet verandert. Die snelheid kan 0 m/s zijn, maar ook bijvoorbeeld 20 m/s. Er kunnen wel krachten werken; ze heffen elkaar dan op (F<sub>res</sub> = 0 N).'},
+  {q:'Een auto rijdt met een constante snelheid. De bestuurder geeft daarna méér gas, waardoor de voorwaartse kracht groter wordt dan de tegenwerkende krachten. Wat gebeurt er?',
+   o:['De auto gaat met een hogere, constante snelheid rijden.','De auto versnelt zolang de voorwaartse kracht groter is.','De auto blijft even snel rijden.','De auto vertraagt.'], c:1,
+   e:'Er is nu een resulterende kracht naar voren, dus de auto versnelt. Dat blijft zo totdat de tegenwerkende krachten (zoals luchtweerstand, die groter wordt bij hogere snelheid) weer even groot zijn.'}
+];
+function initMC(){
+  const root=$('#mc-kracht'); let order=shuffle(MC_KRACHT.map((_,i)=>i)), idx=0;
+  const render=()=>{
+    const it=MC_KRACHT[order[idx]];
+    root.innerHTML=`<p class="muted">Vraag ${idx+1} van ${order.length}</p><p>${it.q}</p><div class="opts"></div><div class="fb"></div><div class="btnrow"><button class="btn ghost nx">Volgende vraag</button></div>`;
+    const opts=root.querySelector('.opts');
+    it.o.forEach((o,i)=>{ const b=document.createElement('button'); b.className='mcopt'; b.innerHTML=`${'ABCD'[i]}. ${o}`;
+      b.onclick=()=>{ opts.querySelectorAll('.mcopt').forEach(x=>x.classList.remove('ok','bad'));
+        if(i===it.c){ b.classList.add('ok'); root.querySelector('.fb').innerHTML=`<span class="good">Goed!</span> ${it.e}`; }
+        else { b.classList.add('bad'); root.querySelector('.fb').innerHTML=`<span class="wrong">Nog niet goed. Denk aan F<sub>res</sub> = m · a: wat zegt de versnelling over de kracht?</span>`; }
+      };
+      opts.appendChild(b);
+    });
+    root.querySelector('.nx').onclick=()=>{ idx=(idx+1)%order.length; if(idx===0) order=shuffle(order); render(); };
+  };
+  render();
+}
+
+/* ================= BEWEGINGSMODEL ================= */
+/* seg: {type:'acc'|'dec'|'const'|'stil'|'jerk', t0, dt, v0, v1, s0} */
+function buildScenario(segsIn){
+  let t=0, s=0; const segs=[];
+  for(const g of segsIn){
+    const seg = Object.assign({}, g, {t0:t, s0:s});
+    seg.ds = segDist(seg);
+    segs.push(seg); t+=seg.dt; s+=seg.ds;
+  }
+  return {segs, T:t, S:s};
+}
+function segDist(g){
+  if(g.type==='jerk') return g.v0*g.dt + (g.v1-g.v0)*g.dt/3;
+  return (g.v0+g.v1)/2*g.dt;
+}
+function segAt(sc,t){ for(const g of sc.segs){ if(t<=g.t0+g.dt+1e-9) return g; } return sc.segs[sc.segs.length-1]; }
+function vAt(sc,t,side){
+  const g=segAtSide(sc,t,side); const u=(t-g.t0);
+  if(g.type==='jerk') return g.v0+(g.v1-g.v0)*Math.pow(u/g.dt,2);
+  return g.v0+(g.v1-g.v0)*u/g.dt;
+}
+function segAtSide(sc,t,side){ // side 'r' -> segment that starts at t if boundary
+  if(side==='r'){ for(const g of sc.segs){ if(t < g.t0+g.dt-1e-9) return g; } }
+  return segAt(sc,t);
+}
+function sAt(sc,t){
+  const g=segAt(sc,t); const u=t-g.t0;
+  if(g.type==='jerk') return g.s0+g.v0*u+(g.v1-g.v0)*u*u*u/(3*g.dt*g.dt);
+  const a=(g.v1-g.v0)/g.dt; return g.s0+g.v0*u+0.5*a*u*u;
+}
+function knikTimes(sc){ const ts=[0]; sc.segs.forEach(g=>ts.push(g.t0+g.dt)); return ts; }
+function shapeOf(g, kind){
+  if(kind==='s'){
+    if(g.type==='acc'||g.type==='jerk') return 'steiler';
+    if(g.type==='dec') return 'minder';
+    return 'recht';
+  } else {
+    if(g.type==='jerk') return 'steiler';
+    return 'recht';
+  }
+}
+
+/* ================= DIAGRAM-TEKENAAR ================= */
+const DW=460, DH=300, ML=56, MR=16, MT=34, MB=44;
+function niceStep(range, ticks=6, no25){
+  const raw=range/ticks; const mag=Math.pow(10,Math.floor(Math.log10(raw)));
+  for(const m of (no25?[1,2,5,10]:[1,2,2.5,5,10])) if(m*mag>=raw-1e-12) return m*mag;
+  return 10*mag;
+}
+function makeAxis(maxVal, ticks=6, no25){
+  if(maxVal<=0) maxVal=1;
+  const step=niceStep(maxVal*1.08, ticks, no25);
+  const max=Math.ceil(maxVal*1.08/step-1e-9)*step;
+  return {max, step};
+}
+function svgEl(tag, attrs, parent){
+  const e=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  if(parent) parent.appendChild(e); return e;
+}
+/* opts: {tAx:{max,step}, yAx:{max,step}, yLabel, color, numbers:true, guides:[t], w,h} */
+function drawFrame(svg, o){
+  const w=o.w||DW, h=o.h||DH, ml=o.ml||ML, mb=o.mb||MB;
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  svg.innerHTML='';
+  const X=t=>ml+(t/o.tAx.max)*(w-ml-MR);
+  const Y=y=>h-mb-(y/o.yAx.max)*(h-mb-MT);
+  const g=svgEl('g',{},svg);
+  if(o.tAx && o.numbers!==false){
+    for(let t=0;t<=o.tAx.max+1e-9;t+=o.tAx.step){
+      svgEl('line',{x1:X(t),x2:X(t),y1:MT,y2:h-mb,stroke:'#22304f','stroke-width':1},g);
+      if(!o.small){ const tx=svgEl('text',{x:X(t),y:h-mb+16,'text-anchor':'middle',fill:'#9fb0cc','font-size':11},g); tx.textContent=fmt(t,2); }
+    }
+    for(let y=0;y<=o.yAx.max+1e-9;y+=o.yAx.step){
+      svgEl('line',{x1:ml,x2:w-MR,y1:Y(y),y2:Y(y),stroke:'#22304f','stroke-width':1},g);
+      if(!o.small){ const ty=svgEl('text',{x:ml-6,y:Y(y)+4,'text-anchor':'end',fill:'#9fb0cc','font-size':11},g); ty.textContent=fmt(y,2); }
+    }
+  }
+  (o.guides||[]).forEach(t=>svgEl('line',{x1:X(t),x2:X(t),y1:MT,y2:h-mb,stroke:'#38bdf8','stroke-width':1,'stroke-dasharray':'4 4',opacity:.55},g));
+  svgEl('line',{x1:ml,x2:w-MR,y1:h-mb,y2:h-mb,stroke:'#cbd5e1','stroke-width':1.5},g);
+  svgEl('line',{x1:ml,x2:ml,y1:MT,y2:h-mb,stroke:'#cbd5e1','stroke-width':1.5},g);
+  if(!o.small){
+    drawUnitLabel(g, w-MR, h-10, o.xLabel||'t (s)', 'end');
+    drawUnitLabel(g, ml-8, 16, o.yLabel||'', 'start');
+  }
+  return {X,Y,w,h,ml,mb};
+}
+function curvePath(X,Y,t0,y0,t1,y1,shape){
+  if(!shape||shape==='recht'||shape==='') return `M${X(t0)},${Y(y0)} L${X(t1)},${Y(y1)}`;
+  let d=''; const n=30;
+  for(let i=0;i<=n;i++){
+    const u=i/n; let f;
+    if(shape==='steiler') f=0.5*u+0.5*u*u; else f=1.5*u-0.5*u*u;
+    const t=t0+(t1-t0)*u, y=y0+(y1-y0)*f;
+    d+=(i?'L':'M')+X(t).toFixed(1)+','+Y(y).toFixed(1)+' ';
+  }
+  return d;
+}
+function funcPath(X,Y,f,t0,t1,n=120){
+  let d='';
+  for(let i=0;i<=n;i++){ const t=t0+(t1-t0)*i/n; d+=(i?'L':'M')+X(t).toFixed(1)+','+Y(f(t)).toFixed(1)+' '; }
+  return d;
+}
+/* Tekent de exacte beweging van een scenario */
+function drawScenario(svg, sc, kind, o){
+  const color = kind==='s' ? '#60a5fa' : '#f59e0b';
+  const fr=drawFrame(svg,o);
+  if(kind==='s'){
+    svgEl('path',{d:funcPath(fr.X,fr.Y,t=>sAt(sc,t),0,sc.T,200),fill:'none',stroke:color,'stroke-width':o.small?2.2:2.8},svg);
+  } else {
+    sc.segs.forEach(g=>{
+      svgEl('path',{d:funcPath(fr.X,fr.Y,t=>vAt(sc,Math.min(t,g.t0+g.dt-1e-9),'r'),g.t0,g.t0+g.dt,60),fill:'none',stroke:color,'stroke-width':o.small?2.2:2.8},svg);
+    });
+  }
+  if(o.labels){
+    sc.segs.forEach((g,i)=>{
+      const tm=g.t0+g.dt/2; const x=fr.X(tm);
+      svgEl('line',{x1:fr.X(g.t0+g.dt),x2:fr.X(g.t0+g.dt),y1:MT,y2:fr.h-fr.mb,stroke:'#475569','stroke-width':1,'stroke-dasharray':'3 4'},svg);
+      svgEl('circle',{cx:x,cy:MT+12,r:10,fill:'#1c2a48',stroke:'#64748b'},svg);
+      const tx=svgEl('text',{x,y:MT+16,'text-anchor':'middle',fill:'#e5ecf7','font-size':11,'font-weight':700},svg); tx.textContent=i+1;
+    });
+  }
+  return fr;
+}
+
+/* ================= TAB 3: DIAGRAM BOUWEN ================= */
+const B = { sc:null, story:'', rows:[], shapes:{s:{},v:{}}, axes:{s:null,v:null}, marks:null, uid:0, drag:null, inhoud:'versneld', diag:'beide', niveau:2 };
+const ACT = [
+  {wie:'fietst', vs:[4,6,8], acc:[2,4], dec:[2,4,6]},
+  {wie:'rent', vs:[2,4,6], acc:[2,4], dec:[2,4]},
+  {wie:'rijdt op een scooter', vs:[6,8,10,12], acc:[2,4,6], dec:[2,4]},
+  {wie:'rijdt in een kart', vs:[8,10,12], acc:[2,4], dec:[2,4]}
+];
+function genScenarioVersneld(){
+  const a=pick(ACT); const n=pick(NAMEN);
+  const v1=pick(a.vs); let v2; do{ v2=pick(a.vs);}while(v2===v1);
+  const patterns=[
+    ()=>[{type:'acc',v0:0,v1:v1,dt:pick(a.acc)},{type:'const',v0:v1,v1:v1,dt:pick([6,8,10,12])},{type:'dec',v0:v1,v1:0,dt:pick(a.dec)}],
+    ()=>[{type:'acc',v0:0,v1:v1,dt:pick(a.acc)},{type:'const',v0:v1,v1:v1,dt:pick([4,6,8])},{type:'dec',v0:v1,v1:0,dt:pick(a.dec)},{type:'stil',v0:0,v1:0,dt:pick([4,6])}],
+    ()=>{ const lo=Math.min(v1,v2), hi=Math.max(v1,v2); return [{type:'acc',v0:0,v1:lo,dt:pick(a.acc)},{type:'const',v0:lo,v1:lo,dt:pick([4,6,8])},{type:'acc',v0:lo,v1:hi,dt:pick([2,4])},{type:'const',v0:hi,v1:hi,dt:pick([4,6])},{type:'dec',v0:hi,v1:0,dt:pick(a.dec)}]; },
+    ()=>{ const lo=Math.min(v1,v2), hi=Math.max(v1,v2); return [{type:'acc',v0:0,v1:hi,dt:pick(a.acc)},{type:'const',v0:hi,v1:hi,dt:pick([4,6,8])},{type:'dec',v0:hi,v1:lo,dt:pick([2,4])},{type:'const',v0:lo,v1:lo,dt:pick([6,8,10])}]; },
+    ()=>[{type:'stil',v0:0,v1:0,dt:pick([2,4])},{type:'acc',v0:0,v1:v1,dt:pick(a.acc)},{type:'const',v0:v1,v1:v1,dt:pick([6,8,10])},{type:'dec',v0:v1,v1:0,dt:pick(a.dec)}]
+  ];
+  const segs=pick(patterns)();
+  const sc=buildScenario(segs);
+  // verhaal
+  const zin=[]; const N=n;
+  zin.push(`${N} ${a.wie} over een rechte weg.`);
+  segs.forEach((g,i)=>{
+    const eerst = i===0 ? '' : pick(['Daarna ','Vervolgens ','Dan ']);
+    const W = s => eerst ? eerst + s.charAt(0).toLowerCase()+s.slice(1) : s;
+    if(g.type==='stil') zin.push(i===0 ? `${N} staat eerst ${g.dt} s stil.` : `${eerst}staat ${N} ${g.dt} s stil.`);
+    else if(g.type==='acc') zin.push(g.v0===0 ? `${eerst||''}${eerst? 'trekt '+N : N+' trekt'} vanuit stilstand in ${g.dt} s gelijkmatig op tot ${g.v1} m/s.` : `${eerst}versnelt ${N} in ${g.dt} s gelijkmatig van ${g.v0} m/s naar ${g.v1} m/s.`);
+    else if(g.type==='dec') zin.push(g.v1===0 ? `${eerst}remt ${N} in ${g.dt} s gelijkmatig af tot stilstand.` : `${eerst}remt ${N} in ${g.dt} s gelijkmatig af tot ${g.v1} m/s.`);
+    else if(g.type==='const') zin.push(pick([`${eerst}houdt ${N} die snelheid ${g.dt} s vast.`,`${eerst}gaat ${N} ${g.dt} s lang met constante snelheid verder.`]));
+  });
+  const fixed = zin.map(z=>z.charAt(0).toUpperCase()+z.slice(1));
+  return {sc, story:fixed};
+}
+function genScenarioEenparig(){
+  const n=pick(NAMEN); const a=pick(ACT);
+  const k=pick([3,3,4]); const segs=[]; let prevStil=false;
+  for(let i=0;i<k;i++){
+    let stil = !prevStil && i>0 && Math.random()<0.4;
+    if(stil){ segs.push({type:'stil',v0:0,v1:0,dt:pick([5,10,15,20])}); prevStil=true; }
+    else { const v=pick([2,3,4,5,6,8,10]); segs.push({type:'const',v0:v,v1:v,dt:pick([10,15,20,25,30])}); prevStil=false; }
+  }
+  if(segs.every(g=>g.type==='stil')) segs[0]={type:'const',v0:4,v1:4,dt:20};
+  // voorkom twee opeenvolgende stukken met dezelfde snelheid
+  for(let i=1;i<segs.length;i++){ if(segs[i].type==='const'&&segs[i-1].type==='const'&&segs[i].v0===segs[i-1].v0){ segs[i].v0=segs[i].v1=segs[i].v0+2; } }
+  const sc=buildScenario(segs);
+  const zin=[`${n} ${a.wie} over een rechte weg.`, `Neem aan dat ${n} steeds in één keer van snelheid wisselt. De tijd en de afstand van het optrekken en afremmen mag je dus verwaarlozen (niet meetellen).`];
+  segs.forEach((g,i)=>{
+    const eerst = i===0 ? 'Eerst ' : pick(['Daarna ','Vervolgens ','Dan ']);
+    if(g.type==='stil') zin.push(`${eerst}staat ${n} ${g.dt} s stil.`);
+    else if(Math.random()<0.5) zin.push(`${eerst}legt ${n} met constante snelheid in ${g.dt} s ${fmt(g.ds)} m af.`);
+    else zin.push(`${eerst}beweegt ${n} ${g.dt} s lang met een constante snelheid van ${g.v0} m/s.`);
+  });
+  return {sc, story:zin};
+}
+const EX_SC = buildScenario([{type:'acc',v0:0,v1:6,dt:4},{type:'const',v0:6,v1:6,dt:10},{type:'dec',v0:6,v1:0,dt:6}]);
+function drawExample(){
+  const tAx={max:22,step:2};
+  const fS=drawScenario($('#exS'),EX_SC,'s',{tAx,yAx:{max:100,step:10},yLabel:'s (m)'});
+  const fV=drawScenario($('#exV'),EX_SC,'v',{tAx,yAx:{max:7,step:1},yLabel:'v (m/s)'});
+  knikTimes(EX_SC).forEach(t=>{
+    svgEl('circle',{cx:fS.X(t),cy:fS.Y(sAt(EX_SC,t)),r:4.5,fill:'#60a5fa',stroke:'#0b1324','stroke-width':1.5},$('#exS'));
+    svgEl('circle',{cx:fV.X(t),cy:fV.Y(vAt(EX_SC,t)),r:4.5,fill:'#f59e0b',stroke:'#0b1324','stroke-width':1.5},$('#exV'));
+  });
+}
+function kindsActive(){ if(B.inhoud==='eenparig') return ['s']; return B.diag==='beide'?['s','v']:[B.diag]; }
+function snapFor(maxV, targets){
+  const cands=[]; for(let e=-1;e<=4;e++) for(const m of [1,2,5]) cands.push(m*Math.pow(10,e));
+  cands.sort((a,b)=>b-a);
+  for(const c of cands){ if(c>maxV/25) continue; if(targets.every(x=>Math.abs(x/c-Math.round(x/c))<1e-6)) return c; }
+  return 0.5;
+}
+function autoAxes(kind){
+  const sc=B.sc; const tAx=makeAxis(sc.T,8,true);
+  const yMax = kind==='s' ? sc.S : Math.max(...sc.segs.map(g=>Math.max(g.v0,g.v1)));
+  const yAx=makeAxis(yMax,7);
+  return finishAxes(tAx,yAx,kind);
+}
+function finishAxes(tAx,yAx,kind){
+  const sc=B.sc; const kt=knikTimes(sc);
+  const ty = kind==='s' ? kt.map(t=>sAt(sc,t)) : kt.map(t=>vAt(sc,t,'r'));
+  let snapT=snapFor(tAx.max,kt); if(snapT<1 && kt.every(t=>Number.isInteger(t))) snapT=1;
+  return {tAx,yAx,snapT,snapY:snapFor(yAx.max,ty)};
+}
+function bNew(){
+  B.inhoud=$('#bInhoud').value; B.diag=$('#bDiag').value; B.niveau=+$('#bNiveau').value;
+  let r; do{ r = B.inhoud==='eenparig' ? genScenarioEenparig() : genScenarioVersneld(); }
+  while(B.inhoud!=='eenparig' && r.sc.segs.length===3 && r.sc.segs[0].v1===6 && r.sc.segs[0].dt===4 && r.sc.segs[1].dt===10);
+  B.sc=r.sc; B.story=r.story;
+  bReset();
+}
+function bReset(){
+  B.rows=[]; B.shapes={s:{},v:{}}; B.marks=null;
+  if(B.niveau===1){ knikTimes(B.sc).forEach(t=>B.rows.push({id:++B.uid,t,s:null,v:null,locked:true})); }
+  B.axes={s:null,v:null};
+  if(B.niveau<3){ B.axes.s=autoAxes('s'); B.axes.v=autoAxes('v'); }
+  $('#bFb').innerHTML='';
+  bRenderAll();
+}
+function bRenderAll(){
+  $('#bStory').innerHTML=B.story.map(z=>`<span class="frag">${esc(z)}</span>`).join('');
+  const ks=kindsActive();
+  $('#cardS').classList.toggle('hidden',!ks.includes('s'));
+  $('#cardV').classList.toggle('hidden',!ks.includes('v'));
+  $('#bDiagrams').style.gridTemplateColumns = ks.length===2 ? '' : '1fr';
+  $('#bDiagNote').textContent = B.inhoud==='eenparig' ? 'Bij alleen eenparige bewegingen bouw je alleen het (s,t)-diagram: de snelheid springt dan in één keer naar een andere waarde.' : '';
+  bRenderDiag('s'); bRenderDiag('v'); bRenderTable();
+}
+const hasT=r=>r.t!==null && r.t!==undefined && !isNaN(r.t);
+function rowsWith(k){ return B.rows.filter(r=>hasT(r) && r[k]!==null && r[k]!==undefined && !isNaN(r[k])).sort((a,b)=>a.t-b.t); }
+const segKey=(a,b)=>`${a.t}|${b.t}`;
+function bRenderDiag(k){
+  const svg = k==='s'?$('#svgS'):$('#svgV');
+  const color = k==='s'?'#60a5fa':'#f59e0b';
+  const ax = B.axes[k];
+  // assenpaneel (niveau 3)
+  const axDiv = k==='s'?$('#axS'):$('#axV');
+  if(B.niveau===3 && !ax){ axDiv.innerHTML=axPanelHtml(k); bindAxPanel(k); }
+  else if(B.niveau===3 && ax){ axDiv.innerHTML=`<div class="legend">Assen ingesteld. <a href="#" style="color:var(--accent)" data-k="${k}" class="axreset">Assen opnieuw instellen</a></div>`; axDiv.querySelector('.axreset').onclick=e=>{e.preventDefault(); B.axes[k]=null; bRenderDiag(k);} ; }
+  else axDiv.innerHTML='';
+  if(!ax){
+    drawFrame(svg,{tAx:{max:10,step:1},yAx:{max:10,step:1},numbers:false,yLabel:'?',xLabel:'?'});
+    (k==='s'?$('#shapesS'):$('#shapesV')).innerHTML='<span class="muted">Stel eerst de assen in.</span>';
+    return;
+  }
+  const guides = B.niveau===1 ? B.rows.filter(r=>r.locked).map(r=>r.t) : [];
+  const fr=drawFrame(svg,{tAx:ax.tAx,yAx:ax.yAx,yLabel:k==='s'?'s (m)':'v (m/s)',guides});
+  const pts=rowsWith(k);
+  for(let i=0;i<pts.length-1;i++){
+    const a=pts[i], b=pts[i+1]; const sh=B.shapes[k][segKey(a,b)]||'';
+    let stroke=color, dash='';
+    if(!sh){ stroke='#94a3b8'; dash='5 5'; }
+    const mk = B.marks && B.marks[k] && B.marks[k].seg[segKey(a,b)];
+    if(mk==='ok') stroke='#34d399'; else if(mk==='bad') stroke='#f87171';
+    svgEl('path',{d:curvePath(fr.X,fr.Y,a.t,a[k],b.t,b[k],sh),fill:'none',stroke,'stroke-width':2.6,'stroke-dasharray':dash},svg);
+  }
+  pts.forEach(r=>{
+    let fill=color; const mk=B.marks && B.marks[k] && B.marks[k].pt[r.id];
+    if(mk==='ok') fill='#34d399'; else if(mk==='bad') fill='#f87171';
+    const c=svgEl('circle',{cx:fr.X(r.t),cy:fr.Y(r[k]),r:6,fill,stroke:'#0b1324','stroke-width':2},svg);
+    c.dataset.id=r.id;
+  });
+  // vormkeuze
+  const shDiv = k==='s'?$('#shapesS'):$('#shapesV');
+  if(pts.length<2){ shDiv.innerHTML='<span class="muted">Zet minstens twee punten; daarna kies je per stuk de vorm.</span>'; return; }
+  let html='<div class="muted" style="font-size:.85rem">Vorm per stuk:</div>';
+  for(let i=0;i<pts.length-1;i++){
+    const a=pts[i], b=pts[i+1], key=segKey(a,b), sh=B.shapes[k][key]||'';
+    const mk = B.marks && B.marks[k] && B.marks[k].seg[key];
+    html+=`<div class="srow"><span class="lbl">Stuk ${i+1}: ${fmt(a.t)} s → ${fmt(b.t)} s</span>
+      <select data-key="${key}" class="${mk||''}"><option value="" ${!sh?'selected':''}>— kies —</option>
+      <option value="recht" ${sh==='recht'?'selected':''}>recht</option>
+      <option value="steiler" ${sh==='steiler'?'selected':''}>gekromd, steeds steiler</option>
+      <option value="minder" ${sh==='minder'?'selected':''}>gekromd, steeds minder steil</option></select></div>`;
+  }
+  shDiv.innerHTML=html;
+  shDiv.querySelectorAll('select').forEach(sel=>sel.onchange=()=>{ B.shapes[k][sel.dataset.key]=sel.value; B.marks=null; bRenderDiag(k); });
+}
+function axPanelHtml(k){
+  const gr=['','t','s','v','a'].map(x=>`<option value="${x}">${x||'grootheid'}</option>`).join('');
+  const en=['','s','m','m/s','km/u','m/s²'].map(x=>`<option value="${x}">${x||'eenheid'}</option>`).join('');
+  return `<div class="axpanel"><b>Maak de assen</b>
+    <div class="axrow"><span class="t">Horizontale as</span><select class="hg">${gr}</select>${unitPick('he')} loopt tot <input class="num hm" style="width:70px"></div>
+    <div class="axrow"><span class="t">Verticale as</span><select class="vg">${gr}</select>${unitPick('ve')} loopt tot <input class="num vm" style="width:70px"></div>
+    <button class="btn" style="margin-top:6px">Assen instellen</button><div class="fb"></div></div>`;
+}
+function bindAxPanel(k){
+  const p=(k==='s'?$('#axS'):$('#axV')).querySelector('.axpanel');
+  p.querySelector('button').onclick=()=>{
+    const hg=p.querySelector('.hg').value, he=p.querySelector('.he').dataset.val, vg=p.querySelector('.vg').value, ve=p.querySelector('.ve').dataset.val;
+    const hm=parseNum(p.querySelector('.hm').value), vm=parseNum(p.querySelector('.vm').value);
+    const errs=[];
+    const yMaxT = k==='s'?B.sc.S:Math.max(...B.sc.segs.map(g=>Math.max(g.v0,g.v1)));
+    if(hg!=='t') errs.push('Welke grootheid hoort op de horizontale as? Bij een bewegingsdiagram staat daar altijd hetzelfde.');
+    else if(he!=='s') errs.push('Kies de eenheid die in het verhaal bij de tijd hoort.');
+    if(vg!==k) errs.push(`Welke grootheid hoort op de verticale as van dit diagram?`);
+    else if(ve!==(k==='s'?'m':'m/s')) errs.push('Kies de eenheid die in het verhaal bij deze grootheid hoort.');
+    if(isNaN(hm)||hm<B.sc.T) errs.push('De horizontale as is te kort: de hele beweging moet erin passen.');
+    else if(hm>2.5*B.sc.T) errs.push('De horizontale as is veel te lang: de grafiek wordt dan klein en slecht afleesbaar.');
+    if(isNaN(vm)||vm<yMaxT-1e-9) errs.push('De verticale as is te kort: de grootste waarde moet erop passen.');
+    else if(vm>2.5*yMaxT) errs.push('De verticale as is veel te lang: de grafiek wordt dan plat en slecht afleesbaar.');
+    if(errs.length){ p.querySelector('.fb').innerHTML='<span class="wrong">'+errs.join('<br>')+'</span>'; return; }
+    const tAx={max:hm,step:niceStep(hm,8,true)}, yAx={max:vm,step:niceStep(vm,7)};
+    B.axes[k]=finishAxes(tAx,yAx,k); B.marks=null; bRenderDiag(k);
+  };
+}
+function bRenderTable(){
+  const ks=kindsActive();
+  const rows=B.rows.slice().sort((a,b)=>(hasT(a)?a.t:1e12)-(hasT(b)?b.t:1e12));
+  let h='<table class="kt"><tr><th>t (s)</th>'+(ks.includes('s')?'<th>s (m)</th>':'')+(ks.includes('v')?'<th>v (m/s)</th>':'')+'<th></th></tr>';
+  rows.forEach(r=>{
+    const mk=k=>B.marks&&B.marks[k]&&B.marks[k].pt[r.id]?B.marks[k].pt[r.id]:'';
+    h+=`<tr data-id="${r.id}"><td><input class="num" data-f="t" value="${hasT(r)?fmt(r.t,2):''}" ${r.locked?'readonly':''}></td>`+
+      (ks.includes('s')?`<td><input class="num ${mk('s')}" data-f="s" value="${r.s==null?'':fmt(r.s,2)}"></td>`:'')+
+      (ks.includes('v')?`<td><input class="num ${mk('v')}" data-f="v" value="${r.v==null?'':fmt(r.v,2)}"></td>`:'')+
+      `<td>${r.locked?'':'<button class="btn ghost del" title="Rij verwijderen">×</button>'}</td></tr>`;
+  });
+  h+='</table>';
+  if(!rows.length) h='<p class="muted">Nog geen knikpunten. Klik in een diagram of voeg een rij toe.</p>';
+  $('#bTable').innerHTML=h;
+  $('#bTable').querySelectorAll('input').forEach(inp=>inp.onchange=()=>{
+    const r=B.rows.find(x=>x.id==inp.closest('tr').dataset.id); const f=inp.dataset.f; const val=parseNum(inp.value);
+    if(f==='t'){ if(isNaN(val)||val<0){ r.t=null; } else if(B.rows.some(x=>x!==r&&hasT(x)&&Math.abs(x.t-val)<1e-9)){ $('#bFb').innerHTML='<span class="wrong">Er is al een knikpunt op dat tijdstip.</span>'; inp.value=hasT(r)?fmt(r.t,2):''; return; } else r.t=val; }
+    else r[f]= isNaN(val)?null:val;
+    B.marks=null; bRenderDiag('s'); bRenderDiag('v'); bRenderTable();
+  });
+  $('#bTable').querySelectorAll('.del').forEach(b=>b.onclick=()=>{ const id=b.closest('tr').dataset.id; B.rows=B.rows.filter(x=>x.id!=id); B.marks=null; bRenderAll(); });
+}
+function svgPoint(svg,e){
+  const r=svg.getBoundingClientRect(); const vb=svg.viewBox.baseVal;
+  return {x:(e.clientX-r.left)*vb.width/r.width, y:(e.clientY-r.top)*vb.height/r.height};
+}
+const snapV=(x,s)=>+((Math.round(x/s)*s).toFixed(6));
+function toData(k,p){
+  const ax=B.axes[k];
+  const t=(p.x-ML)/(DW-ML-MR)*ax.tAx.max, y=(DH-MB-p.y)/(DH-MB-MT)*ax.yAx.max;
+  return {t:Math.max(0,Math.min(ax.tAx.max,snapV(t,ax.snapT))), y:Math.max(0,Math.min(ax.yAx.max,snapV(y,ax.snapY)))};
+}
+function nearestLockedT(t){ let best=null,d=1e9; B.rows.filter(r=>r.locked).forEach(r=>{ if(Math.abs(r.t-t)<d){d=Math.abs(r.t-t);best=r.t;} }); return best; }
+function bindDiag(k){
+  const svg = k==='s'?$('#svgS'):$('#svgV');
+  svg.addEventListener('pointerdown',e=>{
+    if(!B.axes[k]) return;
+    if(e.target.tagName==='circle' && e.target.dataset.id){
+      B.drag={k,id:+e.target.dataset.id}; svg.setPointerCapture(e.pointerId); return;
+    }
+    const d=toData(k,svgPoint(svg,e)); let t=d.t;
+    if(B.niveau===1){ t=nearestLockedT(t); if(t===null) return; }
+    let r=B.rows.find(x=>hasT(x)&&Math.abs(x.t-t)<1e-9);
+    if(!r){ r={id:++B.uid,t,s:null,v:null,locked:false}; B.rows.push(r); }
+    r[k]=d.y; B.marks=null;
+    B.drag={k,id:r.id}; svg.setPointerCapture(e.pointerId);
+    bRenderDiag('s'); bRenderDiag('v'); bRenderTable();
+  });
+  svg.addEventListener('pointermove',e=>{
+    if(!B.drag||B.drag.k!==k) return;
+    const r=B.rows.find(x=>x.id===B.drag.id); if(!r) return;
+    const d=toData(k,svgPoint(svg,e));
+    let changed=false;
+    if(r[k]!==d.y){ r[k]=d.y; changed=true; }
+    if(!r.locked && B.niveau!==1 && Math.abs(d.t-r.t)>1e-9 && !B.rows.some(x=>x!==r&&hasT(x)&&Math.abs(x.t-d.t)<1e-9)){
+      const old=r.t; r.t=d.t; changed=true;
+      ['s','v'].forEach(kk=>{ for(const key of Object.keys(B.shapes[kk])){ const [a,b]=key.split('|').map(Number); if(a===old||b===old){ const nk=`${a===old?d.t:a}|${b===old?d.t:b}`; B.shapes[kk][nk]=B.shapes[kk][key]; delete B.shapes[kk][key]; } } });
+    }
+    if(changed){ B.marks=null; bRenderDiag('s'); bRenderDiag('v'); bRenderTable(); }
+  });
+  const end=()=>{ B.drag=null; };
+  svg.addEventListener('pointerup',end); svg.addEventListener('pointercancel',end);
+  svg.addEventListener('dblclick',e=>{
+    if(e.target.tagName!=='circle') return;
+    const r=B.rows.find(x=>x.id==e.target.dataset.id); if(!r) return;
+    r[k]=null; if(!r.locked && r.s==null && r.v==null) B.rows=B.rows.filter(x=>x!==r);
+    B.marks=null; bRenderAll();
+  });
+}
+function bCheck(){
+  const sc=B.sc; const kt=knikTimes(sc); const ks=kindsActive();
+  B.marks={s:{pt:{},seg:{}},v:{pt:{},seg:{}}};
+  const out=[]; let allGood=true;
+  for(const k of ks){
+    const naam = k==='s'?'(s,t)-diagram':'(v,t)-diagram';
+    if(!B.axes[k]){ out.push(`<b>${naam}</b>: stel eerst de assen in.`); allGood=false; continue; }
+    const pts=rowsWith(k); const lines=[];
+    const tol = B.axes[k].snapY*0.5+1e-9;
+    let nGoed=0, nFout=0, nExtraOk=0;
+    pts.forEach(r=>{
+      const target = k==='s' ? sAt(sc,r.t) : (kt.some(t=>Math.abs(t-r.t)<1e-9)? null : vAt(sc,r.t,'r'));
+      let ok;
+      if(k==='v' && target===null){ // knikpunt: links of rechts mag (sprong bij eenparig komt hier niet voor)
+        ok = Math.abs(r.v-vAt(sc,r.t,'l'))<=tol || Math.abs(r.v-vAt(sc,r.t,'r'))<=tol;
+      } else ok = Math.abs(r[k]-target)<=tol;
+      if(r.t>sc.T+1e-9) ok=false;
+      B.marks[k].pt[r.id]= ok?'ok':'bad';
+      if(ok){ if(kt.some(t=>Math.abs(t-r.t)<1e-9)) nGoed++; else nExtraOk++; } else nFout++;
+    });
+    const missing = kt.filter(t=>!pts.some(r=>Math.abs(r.t-t)<1e-9)).length;
+    // vormen
+    let vGoed=0, vFout=0, vLeeg=0, spanMsg=false, misS=false, misV=false;
+    for(let i=0;i<pts.length-1;i++){
+      const a=pts[i], b=pts[i+1], key=segKey(a,b), sh=B.shapes[k][key]||'';
+      const inside=sc.segs.filter(g=>g.t0 < b.t-1e-9 && g.t0+g.dt > a.t+1e-9);
+      if(!sh){ vLeeg++; B.marks[k].seg[key]='bad'; continue; }
+      if(inside.length!==1){ vFout++; B.marks[k].seg[key]='bad'; spanMsg=true; continue; }
+      const exp=shapeOf(inside[0],k);
+      if(sh===exp){ vGoed++; B.marks[k].seg[key]='ok'; }
+      else { vFout++; B.marks[k].seg[key]='bad';
+        if(k==='s' && sh==='recht' && exp!=='recht') misS=true;
+        if(k==='v' && exp==='recht' && sh!=='recht') misV=true; }
+    }
+    const nSeg=Math.max(0,pts.length-1);
+    lines.push(`Knikpunten: ${nGoed} van de ${kt.length} goed${nFout?`, <span class="wrong">${nFout} niet goed (rood)</span>`:''}${missing?`, <span class="wrong">er ${missing===1?'ontbreekt er 1':'ontbreken er '+missing}</span>`:''}.`);
+    if(nExtraOk) lines.push(`${nExtraOk} punt${nExtraOk>1?'en liggen':' ligt'} wel op de grafiek, maar ${nExtraOk>1?'zijn':'is'} geen knikpunt: daar verandert de beweging niet.`);
+    if(nSeg) lines.push(`Vormen: ${vGoed} van de ${nSeg} goed${vLeeg?`, ${vLeeg} nog niet gekozen`:''}.`);
+    if(spanMsg) lines.push('<span class="wrong">Bij minstens één stuk verandert de beweging halverwege: daar mist een knikpunt.</span>');
+    if(misS) lines.push('<span class="wrong">Tip: tijdens optrekken of afremmen verandert de snelheid. Wat betekent dat voor de steilheid van het (s,t)-diagram?</span>');
+    if(misV) lines.push('<span class="wrong">Tip: bij gelijkmatig optrekken neemt de snelheid elke seconde evenveel toe. Welke vorm hoort daarbij in het (v,t)-diagram?</span>');
+    const good = nFout===0 && missing===0 && vFout===0 && vLeeg===0;
+    if(!good) allGood=false;
+    out.push(`<b>${naam}</b>${good?' <span class="good">– helemaal goed!</span>':''}<br>`+lines.join('<br>'));
+  }
+  $('#bFb').innerHTML = (allGood?'<p class="good" style="font-weight:700">Alles klopt! Probeer een nieuw verhaal of een hoger niveau.</p>':'') + out.join('<br><br>');
+  bRenderDiag('s'); bRenderDiag('v'); bRenderTable();
+}
+
+/* ================= TAB 4: AFLEZEN ================= */
+const FRAGS = {
+  stil:'staat stil',
+  const:'beweegt met constante snelheid',
+  acc:'versnelt gelijkmatig (snelheid neemt elke seconde evenveel toe)',
+  dec:'vertraagt gelijkmatig (snelheid neemt elke seconde evenveel af)',
+  jerk:'versnelt steeds sterker (de versnelling neemt toe)',
+  terug:'beweegt terug, richting het beginpunt'
+};
+function genAflezenScenario(){
+  const v1=pick([4,6,8]), v2=pick([2,4,6].filter(x=>x!==v1));
+  const segsPool=[
+    [{type:'acc',v0:0,v1:v1,dt:pick([2,4])},{type:'const',v0:v1,v1:v1,dt:pick([6,8])},{type:'dec',v0:v1,v1:0,dt:pick([2,4])},{type:'stil',v0:0,v1:0,dt:4}],
+    [{type:'stil',v0:0,v1:0,dt:pick([2,4])},{type:'acc',v0:0,v1:v1,dt:4},{type:'const',v0:v1,v1:v1,dt:6},{type:'dec',v0:v1,v1:Math.min(v1,v2)===v1?0:v2,dt:2}],
+    [{type:'jerk',v0:0,v1:v1,dt:6},{type:'const',v0:v1,v1:v1,dt:pick([4,6])},{type:'dec',v0:v1,v1:0,dt:4}],
+    [{type:'acc',v0:0,v1:v1,dt:4},{type:'const',v0:v1,v1:v1,dt:4},{type:'jerk',v0:v1,v1:v1+4,dt:6},{type:'dec',v0:v1+4,v1:0,dt:4}]
+  ];
+  const segs=pick(segsPool).map(g=>Object.assign({},g));
+  // fix voor patroon 2: dec naar v2 alleen als v2 < v1
+  segs.forEach((g,i)=>{ if(g.type==='dec' && g.v1>=g.v0) g.v1=0; if(i>0) g.v0=segs[i-1].v1; if(g.type==='const'||g.type==='stil') g.v1=g.v0; });
+  return buildScenario(segs);
+}
+function aflezenAxes(sc){
+  return {tAx:makeAxis(sc.T,8,true), sAx:makeAxis(sc.S,7), vAx:makeAxis(Math.max(...sc.segs.map(g=>Math.max(g.v0,g.v1))),7)};
+}
+function aVerhaal(){
+  const sc=genAflezenScenario(); const ax=aflezenAxes(sc); const n=pick(NAMEN);
+  const body=$('#aBody');
+  body.innerHTML=`<div class="card"><h2>Diagram → verhaal</h2><p>Hieronder staan het (s,t)-diagram en het (v,t)-diagram van de beweging van ${n}. De stukken zijn genummerd.</p>
+    <div class="grid2"><div><svg class="diag" id="aS"></svg></div><div><svg class="diag" id="aV"></svg></div></div></div>
+    <div class="card"><h2>1. Wat doet ${n} in elk stuk?</h2><div id="aFr"></div><div class="btnrow"><button class="btn" id="aFrChk">Controleer</button></div><div class="fb" id="aFrFb"></div></div>
+    <div class="card"><h2>2. Aflezen en berekenen</h2><div id="aNum"></div></div>`;
+  drawScenario($('#aS'),sc,'s',{tAx:ax.tAx,yAx:ax.sAx,yLabel:'s (m)',labels:true});
+  drawScenario($('#aV'),sc,'v',{tAx:ax.tAx,yAx:ax.vAx,yLabel:'v (m/s)',labels:true});
+  const opts=Object.keys(FRAGS);
+  $('#aFr').innerHTML=sc.segs.map((g,i)=>`<div class="ansrow"><span style="min-width:70px">Stuk ${i+1}:</span> ${n} <select data-i="${i}"><option value="">— kies —</option>${opts.map(o=>`<option value="${o}">${FRAGS[o]}</option>`).join('')}</select></div>`).join('');
+  $('#aFrChk').onclick=()=>{
+    let goed=0;
+    $('#aFr').querySelectorAll('select').forEach(sel=>{ const ok = sel.value===sc.segs[+sel.dataset.i].type; sel.className= ok?'ok':'bad'; if(ok) goed++; });
+    const hasJerk=sc.segs.some(g=>g.type==='jerk');
+    $('#aFrFb').innerHTML = goed===sc.segs.length ? '<span class="good">Alles goed!</span>' :
+      `<span class="wrong">${goed} van de ${sc.segs.length} goed.</span> Kijk per stuk naar beide diagrammen: is de snelheid constant, neemt ze gelijkmatig toe of af, of verandert ook de versnelling?${hasJerk?' Let goed op het verschil tussen een rechte en een gekromde lijn in het (v,t)-diagram.':''}`;
+  };
+  // getallen
+  const num=$('#aNum');
+  const ci=sc.segs.findIndex(g=>g.type==='const');
+  const gi=sc.segs.findIndex(g=>g.type==='acc'||g.type==='dec');
+  if(ci>=0){ const g=sc.segs[ci];
+    numQ(num,{html:`Bepaal met het <b>(s,t)-diagram</b> de snelheid van ${n} in stuk ${ci+1}.`,label:'v =',unit:'m/s',answer:g.v0,
+      uitw:`<div class="eq">Lees af: van t = ${fmt(g.t0)} s tot t = ${fmt(g.t0+g.dt)} s gaat s van ${fmt(g.s0)} m naar ${fmt(g.s0+g.ds)} m.</div><div class="eq">v = ${frac('Δs','Δt')} = ${frac(fmt(g.ds)+' m',fmt(g.dt)+' s')} = ${fmt(g.v0)} m/s</div><p class="muted">Controle met het (v,t)-diagram: daar is de lijn in stuk ${ci+1} horizontaal op ${fmt(g.v0)} m/s.</p>`,
+      hints:[{val:(g.s0+g.ds)/(g.t0+g.dt),msg:'Je hebt de afgelezen waarden van één punt gedeeld. Gebruik de verandering: Δs en Δt van dit stuk.'}]});
+  }
+  if(gi>=0){ const g=sc.segs[gi]; const a=(g.v1-g.v0)/g.dt;
+    numQ(num,{html:`Bepaal met het <b>(v,t)-diagram</b> de versnelling in stuk ${gi+1}.`,label:'a =',unit:'m/s²',answer:a,
+      uitw:`<div class="eq">Lees af: v gaat van ${fmt(g.v0)} m/s naar ${fmt(g.v1)} m/s in ${fmt(g.dt)} s.</div><div class="eq">a = ${frac('Δv','Δt')} = ${frac(`${fmt(g.v1)} m/s − ${fmt(g.v0)} m/s`,fmt(g.dt)+' s')} = ${fmt(a)} m/s²</div>`,
+      hints:[{val:-a,msg:'Let op het teken: neemt de snelheid toe of af?'}]});
+  }
+  numQ(num,{html:`<span class="tag">★ Uitdaging</span><br>Bereken de gemiddelde snelheid van ${n} over de hele beweging.`,label:'v<sub>gem</sub> =',unit:'m/s',answer:sc.S/sc.T,
+    uitw:`<div class="eq">Lees af in het (s,t)-diagram: s<sub>totaal</sub> = ${fmt(sc.S)} m en t<sub>totaal</sub> = ${fmt(sc.T)} s.</div><div class="eq">v<sub>gem</sub> = ${frac('s<sub>totaal</sub>','t<sub>totaal</sub>')} = ${frac(fmt(sc.S)+' m',fmt(sc.T)+' s')} = ${fmt(sc.S/sc.T)} m/s</div>`,
+    hints:[{val:Math.max(...sc.segs.map(g=>g.v1))/2,msg:'Dit is het gemiddelde van de hoogste en laagste snelheid. Gebruik de totale afstand en de totale tijd.'}]});
+}
+function samplesV(sc,n=60){ const a=[]; for(let i=0;i<=n;i++) a.push(vAt(sc,sc.T*i/n,'r')); return a; }
+function aKoppel(){
+  let sc; do{ sc=genAflezenScenario(); }while(sc.segs.some(g=>g.type==='jerk')); const ax=aflezenAxes(sc);
+  const richting=pick(['sv','vs']);
+  const body=$('#aBody');
+  const vMax=ax.vAx.max, sMax=ax.sAx.max;
+  // opties als functies
+  const opts=[];
+  if(richting==='sv'){
+    opts.push({ok:true, f:t=>vAt(sc,t,'r'), uitleg:''});
+    opts.push({ok:false, f:t=>sAt(sc,t)/sc.S*vMax*0.85, uitleg:'Dit (v,t)-diagram heeft dezelfde vorm als het (s,t)-diagram. Maar een (v,t)-diagram laat de snelheid zien, niet de afstand: waar s constant blijft (stilstaan) moet v nul zijn.'});
+    // gekromde v,t waar s,t krom is
+    opts.push({ok:false, f:t=>{ const g=segAtSide(sc,t,'r'); const u=Math.min(1,(t-g.t0)/g.dt); if(g.type==='acc'||g.type==='dec') return g.v0+(g.v1-g.v0)*u*u; return vAt(sc,t,'r'); }, uitleg:'Hier is de kromming van het (s,t)-diagram overgenomen. Bij gelijkmatig versnellen neemt v elke seconde evenveel toe: in het (v,t)-diagram hoort dan een rechte lijn.'});
+    // gespiegeld in de tijd
+    opts.push({ok:false, f:t=>vAt(sc,sc.T-t,'r'), uitleg:'Dit diagram is in de tijd omgedraaid: de stukken staan in de verkeerde volgorde.'});
+  } else {
+    opts.push({ok:true, f:t=>sAt(sc,t), uitleg:''});
+    opts.push({ok:false, f:t=>vAt(sc,t,'r')/ax.vAx.max*sc.S*0.95, uitleg:'Dit (s,t)-diagram heeft dezelfde vorm als het (v,t)-diagram. Maar zolang v groter dan nul is, blijft s toenemen: s kan niet dalen.'});
+    const kt=knikTimes(sc);
+    opts.push({ok:false, f:t=>{ for(let i=0;i<kt.length-1;i++){ if(t<=kt[i+1]+1e-9){ const u=(t-kt[i])/(kt[i+1]-kt[i]); return sAt(sc,kt[i])+(sAt(sc,kt[i+1])-sAt(sc,kt[i]))*u; } } return sc.S; }, uitleg:'Hier zijn alle stukken recht. Maar tijdens optrekken en afremmen verandert de snelheid, dus de steilheid van het (s,t)-diagram ook.'});
+    opts.push({ok:false, f:t=>{ const g=segAt(sc,t); const u=(t-g.t0)/g.dt; const s0=g.s0, s1=g.s0+g.ds; if(g.type==='acc'||g.type==='dec'||g.type==='jerk'){ const lin=s0+(s1-s0)*u; const real=sAt(sc,t); return lin-(real-lin); } return sAt(sc,t); }, uitleg:'Hier is de kromming omgedraaid: bij versnellen wordt het (s,t)-diagram juist steeds steiler, bij vertragen steeds minder steil.'});
+  }
+  const order=shuffle(opts);
+  body.innerHTML=`<div class="card"><h2>Koppel ${richting==='sv'?'het (s,t)-diagram aan het juiste (v,t)-diagram':'het (v,t)-diagram aan het juiste (s,t)-diagram'}</h2>
+    <p>Welk diagram hoort bij dezelfde beweging?</p>
+    <div style="max-width:560px"><svg class="diag" id="kSrc"></svg></div>
+    <h3>Kies:</h3><div class="opts4" id="kOpts"></div><div class="fb" id="kFb"></div></div>`;
+  if(richting==='sv') drawScenario($('#kSrc'),sc,'s',{tAx:ax.tAx,yAx:ax.sAx,yLabel:'s (m)'});
+  else drawScenario($('#kSrc'),sc,'v',{tAx:ax.tAx,yAx:ax.vAx,yLabel:'v (m/s)'});
+  const box=$('#kOpts');
+  order.forEach((o,i)=>{
+    const d=document.createElement('div'); d.className='optcard';
+    d.innerHTML=`<div class="ol">${'ABCD'[i]}</div><svg class="diag" viewBox="0 0 460 300"></svg>`;
+    box.appendChild(d);
+    const svg=d.querySelector('svg');
+    const yAx = richting==='sv'?ax.vAx:ax.sAx;
+    const fr=drawFrame(svg,{tAx:ax.tAx,yAx,yLabel:richting==='sv'?'v (m/s)':'s (m)'});
+    svgEl('path',{d:funcPath(fr.X,fr.Y,t=>Math.max(0,o.f(Math.min(t,sc.T-1e-9))),0,sc.T,200),fill:'none',stroke:richting==='sv'?'#f59e0b':'#60a5fa','stroke-width':2.8},svg);
+    d.onclick=()=>{
+      box.querySelectorAll('.optcard').forEach(x=>x.classList.remove('ok','bad'));
+      d.classList.add(o.ok?'ok':'bad');
+      $('#kFb').innerHTML = o.ok ? '<span class="good">Goed!</span> Controleer voor jezelf per stuk: klopt de snelheid (steilheid in het (s,t)-diagram) met de hoogte in het (v,t)-diagram?' : `<span class="wrong">Niet goed.</span> ${o.uitleg}`;
+    };
+  });
+}
+function aTwee(){
+  const [nA,nB]=shuffle(NAMEN).slice(0,2);
+  const va=pick([2,3,4,5]); const d=pick([1,2,3]); const vb=va+d;
+  const ks=[]; for(let k=2;vb*k<=36;k+=2) if(vb*k>=12) ks.push(k);
+  const k=ks.length?pick(ks):2;
+  const tm=vb*k, t0=d*k; const tEnd=tm+pick([4,6,8]);
+  const tAx={max:Math.ceil((tEnd+2)/2)*2,step:2}, sAx=makeAxis(vb*(tEnd-t0),7);
+  const body=$('#aBody');
+  body.innerHTML=`<div class="card"><h2><span class="tag">★ Uitdaging</span> Twee personen</h2>
+    <p>${nA} en ${nB} rennen over dezelfde rechte weg en vertrekken vanaf dezelfde plek. In het diagram staat de afgelegde afstand van allebei.</p>
+    <div style="max-width:620px"><svg class="diag" id="tSvg"></svg></div>
+    <div class="legend"><span class="dot" style="background:#60a5fa"></span> ${nA} &nbsp;&nbsp; <span class="dot" style="background:#f472b6"></span> ${nB}</div>
+    <div id="tQ"></div></div>`;
+  const svg=$('#tSvg'); const fr=drawFrame(svg,{tAx,yAx:sAx,yLabel:'s (m)'});
+  svgEl('path',{d:funcPath(fr.X,fr.Y,t=>va*t,0,tEnd,2),fill:'none',stroke:'#60a5fa','stroke-width':2.8},svg);
+  svgEl('path',{d:`M${fr.X(0)},${fr.Y(0)} L${fr.X(t0)},${fr.Y(0)} `+funcPath(fr.X,fr.Y,t=>vb*(t-t0),t0,tEnd,2).replace('M','L'),fill:'none',stroke:'#f472b6','stroke-width':2.8},svg);
+  const q=$('#tQ');
+  numQ(q,{html:`Hoeveel seconden later dan ${nA} vertrekt ${nB}?`,label:'Δt =',unit:'s',answer:t0,
+    uitw:`<p>Lees af waar de lijn van ${nB} begint te stijgen: bij t = ${t0} s. ${nA} vertrekt bij t = 0 s, dus ${nB} vertrekt ${t0} s later.</p>`});
+  numQ(q,{html:`Bepaal de snelheid van ${nB} vanaf het moment dat ${nB} begint te rennen.`,label:'v =',unit:'m/s',answer:vb,
+    uitw:`<div class="eq">Lees twee punten op de lijn van ${nB} af, bijvoorbeeld t = ${t0} s (s = 0 m) en t = ${tm} s (s = ${vb*(tm-t0)} m).</div><div class="eq">v = ${frac('Δs','Δt')} = ${frac(vb*(tm-t0)+' m',(tm-t0)+' s')} = ${vb} m/s</div>`,
+    hints:[{val:vb*(tm-t0)/tm,msg:`Je hebt de tijd vanaf t = 0 s genomen. In die tijd staat ${nB} een deel stil.`}]});
+  numQ(q,{html:`Op welk tijdstip haalt ${nB} ${nA} in?`,label:'t =',unit:'s',answer:tm,
+    uitw:`<p>${nB} haalt ${nA} in als ze op hetzelfde moment dezelfde afstand hebben afgelegd: daar komen de twee lijnen samen. Lees af: t = ${tm} s.</p><p class="muted">Controle: ${nA} heeft dan ${va} m/s · ${tm} s = ${va*tm} m afgelegd en ${nB} ${vb} m/s · ${tm-t0} s = ${vb*(tm-t0)} m.</p>`});
+}
+
+/* ================= INIT ================= */
+exerciseBlock('#ex-eenheden', genEenheden, chalEenheden);
+exerciseBlock('#ex-eenparig', genEenparig, chalEenparig);
+exerciseBlock('#ex-versnelling', genVersnelling, chalVersnelling);
+exerciseBlock('#ex-kracht', genKracht, chalKracht);
+initMC();
+drawExample();
+bindDiag('s'); bindDiag('v');
+$('#bNieuw').onclick=bNew;
+$('#bWis').onclick=bReset;
+$('#bCheck').onclick=bCheck;
+['#bInhoud','#bDiag','#bNiveau'].forEach(s=>$(s).onchange=bNew);
+$('#bAddRow').onclick=()=>{
+  if(B.niveau===1){ $('#bFb').innerHTML='<span class="muted">Op niveau 1 liggen de tijdstippen vast.</span>'; return; }
+  B.rows.push({id:++B.uid,t:null,s:null,v:null,locked:false}); bRenderTable();
+  const ins=$('#bTable').querySelectorAll('input[data-f="t"]'); if(ins.length) ins[ins.length-1].focus();
+};
+const A_RUN={verhaal:aVerhaal,koppel:aKoppel,twee:aTwee};
+$('#aNieuw').onclick=()=>A_RUN[$('#aType').value]();
+$('#aType').onchange=()=>A_RUN[$('#aType').value]();
+unitFracs(document.body);
+bNew(); aVerhaal();
+let startTab='t-eenheden'; try{ startTab=localStorage.getItem('beweging3v_tab')||startTab; }catch(e){}
+if(!document.getElementById(startTab)) startTab='t-eenheden';
+showTab(startTab);
+</script>
+</body>
+</html>
