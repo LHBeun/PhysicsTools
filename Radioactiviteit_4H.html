@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radioactiviteit</title>
+<style>
+:root{
+  --papier:#f3efe6; --vel:#fffdf8; --rand:#e3dccb; --rand2:#d6cdb8;
+  --inkt:#2b2a27; --inkt2:#3e3b35; --grijs:#7a756b; --goud:#a0701f; --goud2:#e2a84b;
+  --nacht:#24323f; --nacht2:#33475a; --nachttekst:#cfd9e2;
+  --goed:#3f8f63; --goedbg:#e5f2ea; --fout:#b4473a; --foutbg:#f8e6e2; --hint:#fbf1da;
+  --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+  --sans: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --mono: ui-monospace, 'SF Mono', Consolas, 'Liberation Mono', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--sans);background:var(--papier);color:var(--inkt);font-size:15px;line-height:1.6}
+sub,sup{font-size:.72em;line-height:0}
+button{font-family:inherit}
+.app{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}
+
+/* ---------- zijbalk ---------- */
+aside{background:var(--nacht);color:var(--nachttekst);padding:26px 18px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+aside h1{font-family:var(--serif);font-size:23px;color:#fff;font-weight:600;line-height:1.2}
+aside .sub{font-size:12.5px;color:#8aa0b3;margin:4px 0 26px}
+aside nav a{display:flex;gap:12px;align-items:center;padding:10px 10px;border-radius:9px;font-size:14.5px;margin-bottom:4px;color:#b9c7d3;cursor:pointer;user-select:none;line-height:1.3}
+aside nav a:hover{background:#2c3d4d}
+aside nav a i{font-style:normal;flex:none;width:27px;height:27px;border-radius:50%;display:grid;place-items:center;border:1.5px solid #5d7387;font-size:12.5px;font-weight:700}
+aside nav a.on{background:var(--nacht2);color:#fff}
+aside nav a.on i{background:var(--goud2);border-color:var(--goud2);color:var(--nacht)}
+aside nav a.klaar i{background:#5aa37c;border-color:#5aa37c;color:#fff}
+aside nav a small{display:block;font-size:11.5px;color:#8aa0b3}
+aside .voet{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+aside .voet button{background:transparent;border:1px solid #4b6074;color:#cfd9e2;border-radius:8px;padding:8px 10px;font-size:13px;cursor:pointer;text-align:left}
+aside .voet button:hover{background:#2c3d4d}
+aside .voet .klein{font-size:11.5px;color:#6f859a}
+
+/* ---------- werkplaats ---------- */
+.wp{display:grid;grid-template-columns:minmax(380px,1fr) minmax(540px,640px);min-height:100vh}
+.tekst{padding:34px 38px 60px;max-width:760px}
+.kicker{font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--goud);font-weight:700}
+.tekst h2{font-family:var(--serif);font-size:31px;margin:3px 0 14px;font-weight:600;line-height:1.2}
+.tekst h3{font-family:var(--serif);font-size:19px;margin:22px 0 6px;font-weight:600}
+.tekst p{margin-bottom:10px;color:var(--inkt2)}
+.tekst ul{margin:0 0 10px 20px;color:var(--inkt2)}
+.tekst li{margin-bottom:3px}
+.kader{background:var(--vel);border:1px solid var(--rand);border-left:4px solid var(--goud2);border-radius:8px;padding:10px 14px;margin:10px 0 12px;color:var(--inkt2)}
+.kader.binas{border-left-color:#5d7387}
+.f{white-space:nowrap}
+.tabs{display:flex;gap:4px;margin:20px 0 14px;border-bottom:1px solid var(--rand2)}
+.tabs button{background:none;border:0;padding:9px 14px;font-size:14px;font-weight:600;color:var(--grijs);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
+.tabs button.on{color:var(--inkt);border-bottom-color:var(--goud2)}
+.tabs button .tel{font-weight:500;font-size:12px;color:var(--grijs);margin-left:4px}
+
+/* voorbeeld */
+.vb{background:var(--vel);border:1px solid var(--rand);border-radius:12px;padding:16px 18px;margin:4px 0 14px}
+.vb .vbkop{font-size:12px;letter-spacing:1.3px;text-transform:uppercase;font-weight:700;color:var(--goud);margin-bottom:4px}
+.vb .vbvraag{font-weight:600;margin-bottom:8px}
+.vbstap{display:flex;gap:12px;padding:8px 0;border-top:1px dashed var(--rand2)}
+.vbstap .n{flex:none;width:24px;height:24px;border-radius:50%;background:var(--inkt);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;margin-top:1px}
+.vbstap .b{color:var(--inkt2)}
+.vb .verder{margin-top:8px}
+
+/* opdrachten */
+.oknop{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.oknop .dot{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--rand2);background:var(--vel);display:grid;place-items:center;font-size:12.5px;font-weight:700;color:var(--grijs);cursor:pointer}
+.oknop .dot.on{border-color:var(--inkt);color:var(--inkt);box-shadow:0 0 0 2px var(--inkt) inset}
+.oknop .dot.goed{background:var(--goed);border-color:var(--goed);color:#fff}
+.oknop .dot.ster{border-style:dashed}
+.oknop .rechts{margin-left:auto;font-size:13px;color:var(--grijs)}
+.opdkop{font-size:12px;letter-spacing:1.3px;text-transform:uppercase;font-weight:700;color:var(--grijs);margin-bottom:4px}
+.opdkop .st{color:var(--goud)}
+.opdvraag{font-size:16px;margin-bottom:12px;color:var(--inkt)}
+.stap{display:flex;gap:12px;padding:13px 15px;background:var(--vel);border:1px solid var(--rand);border-radius:11px;margin-bottom:10px}
+.stap>.n{flex:none;width:25px;height:25px;border-radius:50%;background:var(--inkt);color:#fff;display:grid;place-items:center;font-size:12.5px;font-weight:700;margin-top:1px}
+.stap.dicht{opacity:.42;pointer-events:none}
+.stap.dicht .inv{display:none}
+.stap.goed{border-color:#bcdcc8;background:#fbfefc}
+.stap.goed>.n{background:var(--goed)}
+.stap .inh{flex:1;min-width:0}
+.stap .vr{margin-bottom:8px}
+.rij{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input.in{font-family:var(--mono);font-size:15px;border:1px solid var(--rand2);border-radius:8px;padding:8px 10px;background:#fff;min-width:0;flex:1 1 100%}
+input.in:focus{outline:2px solid var(--goud2);outline-offset:0;border-color:var(--goud2)}
+.voorbeeldweergave{font-size:13px;color:var(--grijs);min-height:20px;margin-top:4px}
+.voorbeeldweergave b{color:var(--inkt);font-weight:600;font-size:15px}
+select.sel{border:1px solid var(--rand2);border-radius:8px;padding:7px 9px;font-size:14px;background:#fff;color:var(--inkt);font-family:inherit}
+.btn{border:0;border-radius:8px;padding:8px 15px;font-weight:600;font-size:14px;cursor:pointer;background:var(--inkt);color:#fff}
+.btn:hover{background:#45433e}
+.btn.g{background:#ebe4d4;color:var(--inkt)}
+.btn.g:hover{background:#e0d7c3}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.klein{padding:5px 11px;font-size:13px}
+.fb{margin-top:8px;padding:8px 11px;border-radius:8px;font-size:14px;display:none}
+.fb.toon{display:block}
+.fb.goed{background:var(--goedbg);color:#255c3d}
+.fb.fout{background:var(--foutbg);color:#7c2c22}
+.fb.hint{background:var(--hint);color:#6b4d12}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1.5px solid var(--rand2);background:#fff;border-radius:999px;padding:4px 12px;font-size:14px;cursor:pointer;user-select:none;color:var(--inkt)}
+.chip:hover{border-color:#b9ad93}
+.chip.aan{background:var(--nacht);border-color:var(--nacht);color:#fff}
+.opties{display:flex;flex-direction:column;gap:6px}
+.optie{border:1.5px solid var(--rand2);background:#fff;border-radius:9px;padding:8px 12px;font-size:14.5px;cursor:pointer;text-align:left;color:var(--inkt)}
+.optie:hover{border-color:#b9ad93}
+.optie.aan{border-color:var(--nacht);background:#eef2f6}
+.typtip{font-size:12.5px;color:var(--grijs);margin-top:14px;line-height:1.5}
+.typtip code{font-family:var(--mono);background:#ebe4d4;border-radius:4px;padding:0 4px;font-size:12px}
+.klaarbanner{background:var(--goedbg);border:1px solid #bcdcc8;color:#255c3d;border-radius:11px;padding:12px 15px;margin:4px 0 12px}
+
+/* ---------- simulatiekolom ---------- */
+.simkol{background:var(--vel);border-left:1px solid var(--rand);padding:22px 22px 30px;display:flex;flex-direction:column;gap:12px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.simkol>*{flex-shrink:0}
+.simkop{display:flex;justify-content:space-between;align-items:baseline}
+.simkop b{font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--goud)}
+.simkop span{font-size:12.5px;color:var(--grijs)}
+.ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ctrl label{font-size:13.5px;color:var(--inkt2);display:flex;gap:6px;align-items:center}
+.doek{border:1px solid var(--rand);border-radius:12px;background:#fbf8f1;position:relative;overflow:hidden}
+.doek canvas{display:block;width:100%;height:auto}
+.waarneming{font-size:14px;color:var(--inkt2);min-height:22px}
+.waarneming b{color:var(--inkt)}
+.vgl{font-family:var(--serif);font-size:19px;text-align:center;min-height:30px;color:var(--inkt)}
+.tabelkop{font-size:12px;font-weight:700;letter-spacing:1.2px;color:var(--goud);margin-bottom:6px;text-transform:uppercase}
+table.b45{border-collapse:collapse;font-size:13px;background:#fff;color:var(--inkt)}
+table.b45 th,table.b45 td{border:1px solid #6d6a62;padding:2px 0;text-align:center;width:38px}
+table.b45 th{font-weight:600;background:#fff}
+table.b45 th.hoek{width:46px;font-size:10px;font-weight:400;color:var(--grijs)}
+table.b45 td.licht{background:#f6e3bf;font-weight:700}
+table.b45 tr.licht th, table.b45 th.licht{background:#f3ead6}
+.legenda{font-size:12px;color:var(--grijs);margin-top:6px;line-height:1.45}
+.balk{display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+.balk .lijn{display:flex;align-items:center;gap:8px}
+.balk .lijn span.lab{width:120px;color:var(--inkt2)}
+.balk .vak{display:flex;gap:3px;flex-wrap:wrap}
+.balk .q{width:18px;height:18px;border-radius:4px;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff}
+.balk .q.p{background:#c4822b}.balk .q.m{background:#3b6fa8}
+.uitkomst{background:#fff;border:1px solid var(--rand);border-radius:10px;padding:10px 14px;font-size:14.5px}
+.uitkomst .groot{font-family:var(--serif);font-size:22px}
+.buislog{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:12px}
+.buislog div{background:#fff;border:1px solid var(--rand);border-radius:8px;padding:5px 7px;line-height:1.35}
+.buislog div b{display:block;font-size:12.5px}
+
+/* niveau */
+.niveau{display:flex;gap:4px;margin:-14px 0 22px}
+.niveau button{flex:1;background:transparent;border:1px solid #4b6074;color:#b9c7d3;border-radius:7px;padding:5px;font-weight:700;font-size:13px;cursor:pointer}
+.niveau button.aan{background:var(--goud2);border-color:var(--goud2);color:var(--nacht)}
+/* moleculen */
+svg.mol{display:block;max-width:100%;height:auto}
+.molkader{background:#fff;border:1px solid var(--rand);border-radius:10px;padding:8px 10px;margin:8px 0;overflow-x:auto}
+.molrij{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.molrij .plus{font-size:22px;color:var(--grijs)}
+.molnaam{font-size:12.5px;color:var(--grijs);text-align:center;margin-top:2px}
+/* tekenveld */
+.tv{background:#fff;border:1px solid var(--rand2);border-radius:10px;overflow:hidden}
+.tvbalk{display:flex;flex-wrap:wrap;gap:4px;padding:7px;background:#f7f2e6;border-bottom:1px solid var(--rand)}
+.tvk{border:1px solid var(--rand2);background:#fff;border-radius:7px;padding:4px 10px;font-family:Georgia,serif;font-size:15px;cursor:pointer;min-width:34px;color:var(--inkt)}
+.tvk[data-a],.tvk[data-t="gum"]{font-family:var(--sans);font-size:13px}
+.tvk.aan{background:var(--nacht);border-color:var(--nacht);color:#fff}
+.tvsep{width:1px;background:var(--rand2);margin:0 4px}
+.tvdoek{overflow:auto;max-height:340px}
+.tvsvg{display:block;touch-action:none;cursor:crosshair;background:#fffdf8}
+.tvuitleg{font-size:12px;color:var(--grijs);padding:5px 9px;border-top:1px solid var(--rand)}
+input.getal{max-width:200px;flex:0 1 200px}
+.eenheid{font-size:15px;color:var(--inkt2)}
+.formule{font-family:var(--serif);font-size:17px;margin:6px 0}
+.breuk{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 3px;font-size:.95em}
+.breuk>span:first-child{border-bottom:1.3px solid currentColor;padding:0 4px}
+.breuk>span:last-child{padding:0 4px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 14px;font-size:14.5px}
+.kv b{font-family:var(--serif);font-size:18px;font-weight:600}
+table.data{border-collapse:collapse;font-size:14px;background:#fff;margin:6px 0}
+table.data th,table.data td{border:1px solid var(--rand2);padding:3px 10px;text-align:right}
+table.data th{background:#f7f2e6;font-weight:600}
+.fitvak{margin-top:10px;padding:10px 12px;border:1px dashed #D9822B;border-radius:10px;background:#fdf6ec}
+.fitkop{font-size:12px;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;color:#b8641a;margin-bottom:4px}
+.fitvak .inp{font:inherit;font-size:14px;padding:4px 7px;border:1px solid #d8cfbd;border-radius:6px;background:#fff}
+.reeksen{display:flex;flex-direction:column;gap:4px;font-size:13.5px}
+.reeksen label{display:flex;gap:8px;align-items:center}
+.reeksen i{display:inline-block;width:14px;height:4px;border-radius:2px}
+.info{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:13.5px;background:#fff;border:1px solid var(--rand);border-radius:10px;padding:9px 12px}
+.info b{font-weight:600}
+.schuif{display:flex;align-items:center;gap:8px;font-size:13.5px}
+.schuif input{width:150px}
+/* beamerstand */
+body.beamer{font-size:18px}
+body.beamer .tekst h2{font-size:36px}
+body.beamer .opdvraag{font-size:19px}
+body.beamer input.in{font-size:18px}
+body.beamer .optie, body.beamer .chip{font-size:17px}
+body.beamer table.b45{font-size:15px}
+
+@media (max-width:1180px){
+  .wp{grid-template-columns:1fr}
+  .simkol{position:static;height:auto;border-left:0;border-top:1px solid var(--rand)}
+}
+@media (max-width:760px){
+  .app{grid-template-columns:1fr}
+  aside{position:static;height:auto}
+}
+@media print{aside,.simkol{display:none}.wp{display:block}}
+
+
+.leerdoelen{background:var(--vel);border:1px solid var(--rand);border-radius:12px;padding:12px 16px 6px;margin:4px 0 6px}
+.leerdoelen b{display:block;font-size:12px;letter-spacing:1.3px;text-transform:uppercase;color:var(--goud);margin-bottom:4px}
+.leerdoelen ul{list-style:none;margin:0!important;padding:0}
+.leerdoelen li{padding:4px 0 4px 26px;position:relative;color:var(--inkt2)}
+.leerdoelen li::before{content:"";position:absolute;left:2px;top:9px;width:13px;height:13px;border:1.5px solid var(--goud2);border-radius:3px}
+.leerdoelen li.ster::before{content:"★";border:0;color:var(--goud);top:3px;left:1px;font-size:14px}
+.kl{font-size:12.5px;color:var(--grijs);line-height:1.45}
+#simhouder{display:flex;flex-direction:column;gap:10px}
+#simhouder .simkop{margin-bottom:2px}
+:root{
+  --papier:#0f3459; --vel:#13406b; --rand:#2f6293; --rand2:#4677a8;
+  --inkt:#eef5fc; --inkt2:#c9dcef; --grijs:#8fb0d0; --goud:#ffd166; --goud2:#ffd166;
+  --nacht:#0a2742; --nacht2:#16426e; --nachttekst:#c9dcef;
+  --goed:#6fd3a0; --goedbg:rgba(111,211,160,.13); --fout:#ff8f7a; --foutbg:rgba(255,143,122,.13); --hint:rgba(255,209,102,.12);
+  --serif:'Bahnschrift','DIN Alternate','Segoe UI',system-ui,sans-serif;
+}
+body{background-color:var(--papier);background-image:linear-gradient(rgba(200,225,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(200,225,255,.05) 1px,transparent 1px),linear-gradient(rgba(200,225,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(200,225,255,.09) 1px,transparent 1px);background-size:14px 14px,14px 14px,70px 70px,70px 70px}
+aside{border-right:1px solid #2f6293}
+aside h1{font-family:var(--serif);letter-spacing:.5px;text-transform:uppercase;font-size:21px;font-weight:600}
+aside .sub{color:#8fb0d0}
+aside nav a{color:#c9dcef;border:1px solid transparent}
+aside nav a:hover{background:#12385d}
+aside nav a.on{background:#12385d;border:1px dashed #4677a8}
+aside nav a i{border-color:#4677a8;border-radius:3px}
+aside nav a.on i{background:var(--goud);border-color:var(--goud);color:#0a2742}
+aside nav a.klaar i{background:#6fd3a0;border-color:#6fd3a0;color:#0a2742}
+aside nav a small{color:#8fb0d0;font-family:var(--mono);font-size:11px;letter-spacing:.3px}
+aside .voet button{border-color:#2f6293;color:#c9dcef}
+aside .voet button:hover{background:#12385d}
+aside .voet .klein{color:#6f95ba}
+.tekst h2{text-transform:uppercase;letter-spacing:1px;font-size:28px}
+.tekst h3{text-transform:uppercase;letter-spacing:.8px;font-size:16px;color:var(--goud)}
+.kicker{font-family:var(--mono);letter-spacing:1.4px}
+.tabs{border-bottom-color:#2f6293}
+.tabs button{color:#8fb0d0}
+.tabs button.on{color:var(--inkt);border-bottom-color:var(--goud)}
+.kader{background:rgba(10,39,66,.55);border-color:#2f6293;border-left-color:var(--goud)}
+.vb,.stap,.leerdoelen{background:rgba(10,39,66,.55);border-color:#2f6293}
+.vbstap{border-top-color:#2f6293}
+.vbstap .n,.stap>.n{background:var(--inkt);color:#0a2742;border-radius:3px}
+.stap.goed{border-color:#3f8f6b;background:rgba(111,211,160,.07)}
+.stap.goed>.n{background:var(--goed)}
+.oknop .dot{background:transparent;border-color:#4677a8;color:#c9dcef;border-radius:4px}
+.oknop .dot.on{border-color:var(--inkt);box-shadow:0 0 0 2px var(--inkt) inset;color:var(--inkt)}
+.oknop .dot.goed{background:var(--goed);border-color:var(--goed);color:#0a2742}
+.oknop .dot.ster.ok{color:#0a2742}
+input.in,select.sel{background:#0a2742;color:var(--inkt);border-color:#4677a8}
+input.in::placeholder{color:#6f95ba}
+.btn{background:var(--goud);color:#0a2742}
+.btn:hover{background:#ffdd8a}
+.btn.g{background:transparent;color:var(--inkt);border:1px solid #4677a8}
+.btn.g:hover{background:#12385d}
+.fb.goed{color:#c4f3da}.fb.fout{color:#ffd6cd}.fb.hint{color:#ffe7ad}
+.chip,.optie{background:transparent;color:var(--inkt);border-color:#4677a8}
+.chip:hover,.optie:hover{border-color:var(--goud)}
+.optie.aan,.chip.aan{background:rgba(255,209,102,.12);border-color:var(--goud);color:var(--inkt)}
+.typtip code{background:#0a2742;color:var(--inkt)}
+.klaarbanner{background:rgba(111,211,160,.12);border-color:#3f8f6b;color:#c4f3da}
+table.data{background:transparent;color:var(--inkt)}
+table.data th,table.data td{border:1px solid #2f6293;padding:4px 10px}
+table.data th{background:rgba(10,39,66,.7)}
+.reken{font-size:16px;margin:8px 0;padding:8px 14px;border:1px dashed #4677a8;display:inline-block;border-radius:4px}
+.nuc{display:inline-flex;align-items:center;white-space:nowrap}
+.nuc>span{display:inline-flex;flex-direction:column;align-items:flex-end;line-height:1;font-size:.7em;margin-right:1px}
+.nuc>span sup,.nuc>span sub{font-size:1em;line-height:1.05;vertical-align:baseline;position:static}
+.simkol{background:rgba(9,36,62,.92);border-left:1px solid #2f6293}
+/* bouwtekening */
+#simhouder{display:flex;flex-direction:column;gap:10px}
+.bp-kop{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #4677a8;padding-bottom:6px}
+.bp-kop b{font-family:var(--mono);font-size:12px;letter-spacing:1.4px;color:var(--goud);margin-right:10px}
+.bp-kop span{font-family:var(--mono);font-size:12px;color:#c9dcef;text-transform:uppercase;letter-spacing:1px}
+.bp-kop .bp-schaal{color:#8fb0d0;text-transform:none}
+.ruimte{display:flex;flex-direction:column;gap:10px}
+.bp-doek{width:100%;display:block;border:1px solid #4677a8;border-radius:3px;background:#0f3459}
+.bp-doek.klik{cursor:crosshair}
+.bp-rij{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13.5px;color:#c9dcef}
+.bp-rij label{display:flex;gap:6px;align-items:center}
+.bp-sel{background:#0a2742;color:var(--inkt);border:1px solid #4677a8;border-radius:3px;padding:5px 8px;font-family:inherit;font-size:13.5px}
+.bp-knop{background:var(--goud);color:#0a2742;border:0;border-radius:3px;padding:6px 12px;font-weight:600;font-size:13.5px;cursor:pointer;font-family:var(--mono)}
+.bp-knop:hover{background:#ffdd8a}
+.bp-knop.g{background:transparent;color:var(--inkt);border:1px solid #4677a8}
+.bp-knop.g:hover{background:#12385d}
+.bp-knop.klein{padding:3px 9px;font-size:12px}
+.bp-schuif input{width:180px;accent-color:var(--goud)}
+.bp-schuif b{font-family:var(--mono);min-width:60px}
+.bp-chk input{accent-color:var(--goud)}
+.bp-noot{font-size:13px;color:#a9c4de}
+.bp-noot b{color:var(--inkt)}
+.bp-teller{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid #4677a8;border-radius:3px;padding:8px 12px;background:#0a2742}
+.bp-teller small{display:block;font-family:var(--mono);font-size:11px;letter-spacing:1.4px;color:#8fb0d0}
+.bp-teller b{font-family:var(--mono);font-size:30px;color:var(--groen,#7ee0a8);letter-spacing:2px;margin-right:8px}
+.bp-teller span{font-family:var(--mono);color:#8fb0d0}
+.bp-knoppen{display:flex;gap:6px}
+.bp-log table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;color:#c9dcef}
+.bp-log th,.bp-log td{border-bottom:1px dashed #2f6293;padding:3px 6px;text-align:left}
+.bp-log th{color:#8fb0d0;font-weight:500}
+.bp-kaarten{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.bp-kaart{background:transparent;border:1px solid #4677a8;border-radius:3px;padding:6px 8px;color:#c9dcef;text-align:left;cursor:pointer;font-family:var(--mono);font-size:12px;display:flex;flex-direction:column}
+.bp-kaart b{color:var(--inkt);font-size:14px}
+.bp-kaart.aan{border-color:var(--goud);background:rgba(255,209,102,.1)}
+.bp-tabs{display:flex;gap:6px}
+.bp-stempel{display:grid;grid-template-columns:2fr 1fr 1fr;border:1px solid #4677a8;font-family:var(--mono);font-size:10.5px;color:#8fb0d0;letter-spacing:.8px;margin-top:4px}
+.bp-stempel span{padding:5px 8px;border-right:1px solid #4677a8}
+.bp-stempel span:last-child{border-right:0}
+
+.bp-w{font-family:var(--mono);color:var(--inkt);font-weight:600}
+.bp-stempel{grid-template-columns:1.6fr 1fr 1.1fr}
+.bp-stempel span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <h1>Radioactiviteit</h1>
+    <div class="sub">4 havo · ioniserende straling en medische beeldvorming</div>
+    <nav id="nav"></nav>
+    <div class="voet">
+      <button id="beamerknop">Beamerstand</button>
+      <button id="resetknop">Voortgang wissen</button>
+      <div class="klein">Een model: tellingen, halveringsdiktes en dosistempo zijn modelwaarden. Gebruik voor opgaven je Binas.</div>
+    </div>
+  </aside>
+  <main id="main"></main>
+</div>
+<div id="parkeer" style="display:none"><div id="simhouder">
+  <div class="bp-kop"><div><b id="bp-blad">BLAD 01</b><span id="bp-ruimte">bronkamer</span></div><span class="bp-schaal" id="bp-schaal">schaal 1 : 5</span></div>
+
+  <!-- B-01 bronkamer -->
+  <div class="ruimte" data-r="bron">
+    <canvas id="cv-bron" class="bp-doek" style="height:230px"></canvas>
+    <div class="bp-rij">
+      <label>bron <select id="br-bron" class="bp-sel"></select></label>
+      <label>absorber <select id="br-abs" class="bp-sel"><option value="geen">geen</option><option value="papier">papier</option><option value="alu">aluminium, 3 mm</option><option value="lood">lood, 2 cm</option></select></label>
+    </div>
+    <div class="bp-rij"><label class="bp-schuif">afstand bron – teller <input type="range" id="br-d" min="1" max="20" step="1" value="5"> <b id="br-dv">5 cm</b></label></div>
+    <div class="bp-teller"><div><small>TELLER</small><b id="br-tik">0000</b><span id="br-tijd">0 s</span></div>
+      <div class="bp-knoppen"><button class="bp-knop" id="br-m10">Meet 10 s</button><button class="bp-knop" id="br-m60">Meet 60 s</button></div></div>
+    <div class="bp-log" id="br-log"></div>
+  </div>
+
+  <!-- R-02 reactorhal -->
+  <div class="ruimte" data-r="verval">
+    <canvas id="cv-verval" class="bp-doek" style="height:250px"></canvas>
+    <div class="bp-rij" id="vv-vrij"><label>isotoop <select id="vv-iso" class="bp-sel"></select></label><button class="bp-knop" id="vv-go">Laat vervallen</button></div>
+    <div class="bp-noot" id="vv-noot"></div>
+  </div>
+
+  <!-- O-03 opslag -->
+  <div class="ruimte" data-r="half">
+    <canvas id="cv-kernen" class="bp-doek" style="height:150px"></canvas>
+    <div class="bp-rij">
+      <button class="bp-knop" id="hf-start">▶ Start</button><button class="bp-knop g" id="hf-reset">↺ Opnieuw</button>
+      <label>snelheid <select id="hf-snel" class="bp-sel"><option value="0.25">langzaam</option><option value="0.6" selected>normaal</option><option value="1.5">snel</option></select></label>
+      <span class="bp-noot" id="hf-tijd"></span>
+    </div>
+    <canvas id="cv-half" class="bp-doek klik" style="height:250px"></canvas>
+    <div class="bp-noot" id="hf-lees">Beweeg over de grafiek om af te lezen. Klik twee punten aan om een raaklijn te tekenen.</div>
+    <div class="bp-rij"><span class="bp-noot" id="hf-raak"></span><button class="bp-knop g klein" id="hf-wis">wis raaklijn</button></div>
+  </div>
+
+  <!-- A-04 afscherming -->
+  <div class="ruimte" data-r="afs">
+    <canvas id="cv-afs" class="bp-doek" style="height:190px"></canvas>
+    <div class="bp-rij">
+      <label>materiaal <select id="af-mat" class="bp-sel"><option value="lood">lood</option><option value="aluminium">aluminium</option><option value="beton">beton</option><option value="water">water</option></select></label>
+      <label>γ-energie <select id="af-E" class="bp-sel"><option value="1">1,0 MeV</option><option value="0.5">0,5 MeV</option></select></label>
+    </div>
+    <div class="bp-rij"><label class="bp-schuif">dikte <input type="range" id="af-d" min="0" max="5" step="0.1" value="0"> <b id="af-dv">0,0 cm</b></label><button class="bp-knop" id="af-meet">Meet</button></div>
+    <div class="bp-noot" id="af-uit"></div>
+    <canvas id="cv-afg" class="bp-doek" style="height:220px"></canvas>
+    <div class="bp-noot" id="af-lees">Elke meting komt als punt in de doorlaatkromme.</div>
+  </div>
+
+  <!-- S-05 stralingsdienst -->
+  <div class="ruimte" data-r="dosis">
+    <canvas id="cv-dosis" class="bp-doek" style="height:240px"></canvas>
+    <div class="bp-rij"><label class="bp-schuif">afstand <input type="range" id="ds-r" min="0.5" max="6" step="0.5" value="1"> <b id="ds-rv">1,0 m</b></label></div>
+    <div class="bp-rij"><label class="bp-schuif">werktijd <input type="range" id="ds-t" min="5" max="120" step="5" value="30"> <b id="ds-tv">30 min</b></label></div>
+    <div class="bp-rij"><label class="bp-chk"><input type="checkbox" id="ds-scherm"> loden scherm tussen bron en medewerker</label></div>
+    <div class="bp-teller"><div><small>DOSIMETER</small><b id="ds-H">0,0</b><span>µSv</span></div><div class="bp-noot" id="ds-tempo"></div></div>
+  </div>
+
+  <!-- I-06 isotopenfabriek -->
+  <div class="ruimte" data-r="tracer">
+    <div class="bp-kaarten" id="tr-kaarten"></div>
+    <canvas id="cv-tracer" class="bp-doek" style="height:240px"></canvas>
+    <div class="bp-noot" id="tr-lees">Beweeg over de grafiek om af te lezen.</div>
+  </div>
+
+  <!-- Z-07 ziekenhuisvleugel -->
+  <div class="ruimte" data-r="beeld">
+    <div class="bp-tabs"><button class="bp-knop" data-m="rontgen">Röntgen</button><button class="bp-knop g" data-m="echo">Echografie</button></div>
+    <canvas id="cv-beeld" class="bp-doek" style="height:300px"></canvas>
+    <canvas id="cv-scoop" class="bp-doek" style="height:150px"></canvas>
+    <div class="bp-noot" id="bd-lees"></div>
+  </div>
+
+  <div class="bp-stempel"><span>ISOTOPENREACTOR · BOUWTEKENING</span><span id="bp-nr">TEK. NR. RS-01</span><span>4 havo · natuurkunde</span></div>
+</div>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const rnd = (a, b) => a + Math.random() * (b - a);
+const kies = arr => arr[Math.floor(Math.random() * arr.length)];
+function schud(arr){ const a = arr.slice(); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+function laad(){ try { return JSON.parse(localStorage.getItem('radioactiviteit-4h-v1')) || {}; } catch (e){ return {}; } }
+function bewaar(o){ try { localStorage.setItem('radioactiviteit-4h-v1', JSON.stringify(o)); } catch (e){} }
+const nl = (x, d = 2) => Number(x).toLocaleString('nl-NL', { maximumFractionDigits: d, minimumFractionDigits: d });
+const sig = (x, n = 3) => { if (!x) return '0'; const d = Math.max(0, n - 1 - Math.floor(Math.log10(Math.abs(x)))); return nl(x, d); };
+
+/* Getalvelden met decimale komma. Een type="number"-veld leest een komma niet
+   (in Chrome wordt "0,5" dan 5). Daarom worden alle getalvelden tekstvelden die
+   een komma tonen en accepteren; de code leest ze nog steeds als 0.5. */
+(function () {
+  const d = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+  const naarKomma = x => String(x).replace(/(\d)\.(\d)/g, '$1,$2');
+  function zet(el) {
+    if (el.dataset.komma) return;
+    const v = d.get.call(el);
+    el.dataset.komma = '1';
+    el.type = 'text';
+    el.setAttribute('inputmode', 'decimal');
+    el.setAttribute('autocomplete', 'off');
+    Object.defineProperty(el, 'value', {
+      configurable: true,
+      get() { return d.get.call(this).trim().replace(/\s/g, '').replace(',', '.'); },
+      set(x) { d.set.call(this, naarKomma(x)); }
+    });
+    if (v !== '') el.value = v;
+    if (el.placeholder) el.placeholder = naarKomma(el.placeholder);
+  }
+  // stijlregels voor getalvelden ook laten gelden voor de omgezette velden
+  try {
+    for (const sh of document.styleSheets) {
+      let regels; try { regels = sh.cssRules; } catch (e) { continue; }
+      for (const r of [...regels]) {
+        if (r.selectorText && /type=["']?number/.test(r.selectorText)) {
+          const sel = r.selectorText.replace(/\[type=["']?number["']?\]/g, '[data-komma]');
+          sh.insertRule(sel + '{' + r.style.cssText + '}', sh.cssRules.length);
+        }
+      }
+    }
+  } catch (e) {}
+  const alles = root => { if (root.matches && root.matches('input[type="number"]')) zet(root); if (root.querySelectorAll) root.querySelectorAll('input[type="number"]').forEach(zet); };
+  alles(document);
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) alles(n); })))
+    .observe(document.documentElement, { childList: true, subtree: true });
+})();
+
+
+(function(){ const C = CanvasRenderingContext2D.prototype, ft = C.fillText, dec = t => String(t).replace(/(\d)\.(\d)/g, '$1,$2');
+  C.fillText = function(t, x, y, m){ return m === undefined ? ft.call(this, dec(t), x, y) : ft.call(this, dec(t), x, y, m); }; })();
+
+(function(){ const SKIP = {SCRIPT:1, STYLE:1, TEXTAREA:1, INPUT:1}; const dec = s => String(s).replace(/(\d)\.(\d)/g, '$1,$2');
+  const fix = root => { const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null); let n;
+    while ((n = w.nextNode())){ if (n.parentNode && SKIP[n.parentNode.nodeName]) continue; const d = dec(n.nodeValue); if (d !== n.nodeValue) n.nodeValue = d; } };
+  new MutationObserver(ms => ms.forEach(m => { if (m.type === 'characterData'){ const p = m.target.parentNode; if (p && !SKIP[p.nodeName]){ const d = dec(m.target.nodeValue); if (d !== m.target.nodeValue) m.target.nodeValue = d; } }
+    else m.addedNodes.forEach(a => { if (a.nodeType === 3){ if (a.parentNode && !SKIP[a.parentNode.nodeName]){ const d = dec(a.nodeValue); if (d !== a.nodeValue) a.nodeValue = d; } } else if (a.nodeType === 1 && !SKIP[a.nodeName]) fix(a); }); }))
+    .observe(document.body, { childList:true, subtree:true, characterData:true });
+  fix(document.body); })();
+
+/* =====================================================================
+   Radioactiviteit — bouwtekening van een isotopenreactor
+   Zeven ruimtes; elke werkplaats toont één ruimte.
+   ===================================================================== */
+const BP = { lijn:'#e6f0fa', zwak:'#86abd0', fijn:'rgba(200,225,255,.10)', geel:'#ffd166', rood:'#ff8f7a', groen:'#7ee0a8', vlak:'rgba(230,240,250,.07)', diep:'#0b2a48' };
+const MONO = 'ui-monospace, Consolas, "Liberation Mono", monospace';
+const kom = (x, d = 1) => x.toFixed(d).replace('.', ',');
+const SUP = { '-':'⁻', '0':'⁰', '1':'¹', '2':'²', '3':'³', '4':'⁴', '5':'⁵', '6':'⁶', '7':'⁷', '8':'⁸', '9':'⁹' };
+const sup = s => String(s).split('').map(ch => SUP[ch] || ch).join('');
+function wet(x, sig = 2){            /* 8,0·10¹² */
+  if (x === 0) return '0';
+  const e = Math.floor(Math.log10(Math.abs(x))), m = x / 10 ** e;
+  if (e >= -2 && e <= 3) return kom(x, Math.max(0, sig - 1 - e));
+  return kom(m, sig - 1) + '·10' + sup(e);
+}
+function doek(id){
+  const cv = document.getElementById(id); if (!cv) return null;
+  const w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return null;
+  const dpr = window.devicePixelRatio || 1;
+  if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)){ cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
+  c.strokeStyle = BP.fijn; c.lineWidth = 1; c.beginPath();
+  for (let x = 0.5; x < w; x += 14){ c.moveTo(x, 0); c.lineTo(x, h); }
+  for (let y = 0.5; y < h; y += 14){ c.moveTo(0, y); c.lineTo(w, y); }
+  c.stroke();
+  return { c, W: w, H: h };
+}
+function txt(c, t, x, y, o = {}){
+  c.font = (o.w || '') + ' ' + (o.s || 12) + 'px ' + (o.f || MONO); c.fillStyle = o.k || BP.lijn;
+  c.textAlign = o.al || 'left'; c.textBaseline = o.bl || 'alphabetic'; c.fillText(t, x, y);
+}
+function maat(c, x1, x2, y, label){       /* maatlijn zoals op een bouwtekening */
+  c.strokeStyle = BP.zwak; c.lineWidth = 1; c.beginPath();
+  c.moveTo(x1, y - 5); c.lineTo(x1, y + 5); c.moveTo(x2, y - 5); c.lineTo(x2, y + 5); c.moveTo(x1, y); c.lineTo(x2, y); c.stroke();
+  [[x1, 1], [x2, -1]].forEach(([x, r]) => { c.beginPath(); c.moveTo(x, y); c.lineTo(x + 6 * r, y - 3); c.lineTo(x + 6 * r, y + 3); c.closePath(); c.fillStyle = BP.zwak; c.fill(); });
+  txt(c, label, (x1 + x2) / 2, y - 6, { al:'center', k: BP.zwak, s: 11 });
+}
+function arcering(c, x, y, w, h, kleur = BP.lijn, stap = 6){
+  c.save(); c.beginPath(); c.rect(x, y, w, h); c.clip(); c.strokeStyle = kleur; c.globalAlpha = .55; c.lineWidth = 1; c.beginPath();
+  for (let i = -h; i < w; i += stap){ c.moveTo(x + i, y + h); c.lineTo(x + i + h, y); } c.stroke(); c.restore();
+  c.strokeStyle = kleur; c.lineWidth = 1.4; c.strokeRect(x, y, w, h);
+}
+function poisson(l){
+  if (l > 40){ const u = 1 - Math.random(), v = Math.random(); return Math.max(0, Math.round(l + Math.sqrt(l) * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v))); }
+  const L = Math.exp(-l); let k = 0, p = 1; do { k++; p *= Math.random(); } while (p > L); return k - 1;
+}
+/* assenstelsel; geeft omrekenfuncties terug */
+function assen(c, box, o){
+  const { x, y, w, h } = box;
+  c.strokeStyle = BP.fijn; c.lineWidth = 1; c.beginPath();
+  o.xt.forEach(v => { const px = x + v / o.xmax * w; c.moveTo(px, y); c.lineTo(px, y + h); });
+  o.yt.forEach(v => { const py = y + h - v / o.ymax * h; c.moveTo(x, py); c.lineTo(x + w, py); });
+  c.stroke();
+  c.strokeStyle = BP.lijn; c.lineWidth = 1.4; c.beginPath(); c.moveTo(x, y - 4); c.lineTo(x, y + h); c.lineTo(x + w + 4, y + h); c.stroke();
+  o.xt.forEach(v => txt(c, o.xf ? o.xf(v) : String(v), x + v / o.xmax * w, y + h + 15, { al:'center', k: BP.zwak, s: 11 }));
+  o.yt.forEach(v => txt(c, o.yf ? o.yf(v) : String(v), x - 6, y + h - v / o.ymax * h + 4, { al:'right', k: BP.zwak, s: 11 }));
+  txt(c, o.xl, x + w, y + h + 30, { al:'right', k: BP.lijn, s: 11.5 });
+  txt(c, o.yl, x - 4, y - 9, { k: BP.lijn, s: 11.5 });
+  return { px: v => x + v / o.xmax * w, py: v => y + h - v / o.ymax * h, vx: px => (px - x) / w * o.xmax, vy: py => (y + h - py) / h * o.ymax, box };
+}
+const nette = (max, n = 5) => { const r = max / n, m = 10 ** Math.floor(Math.log10(r)), s = [1, 2, 2.5, 5, 10].map(f => f * m).find(f => f >= r); const out = []; for (let v = 0; v <= max + 1e-9; v += s) out.push(+v.toFixed(10)); return out; };
+const $i = id => document.getElementById(id);
+
+/* =====================================================================
+   B-01 · Bronkamer: soorten straling
+   ===================================================================== */
+const SOORT = {
+  a: { naam:'α', ref:60, dracht:4.5, abs:{ geen:1, papier:0, alu:0, lood:0 } },
+  b: { naam:'β⁻', ref:40, dracht:99, abs:{ geen:1, papier:0.85, alu:0.03, lood:0 } },
+  g: { naam:'γ', ref:22, dracht:999, abs:{ geen:1, papier:1, alu:0.93, lood:0.3 } }
+};
+const ACHTERGROND = 0.4;               /* tikken per seconde */
+const BRON = { bron:'geen', abs:'geen', d:5, meting:null, log:[], toegestaan:null, flits:0,
+  bronnen: (() => { const s = ['a', 'b', 'g'].sort(() => Math.random() - .5); return { geen:{}, P:{ [s[0]]:1 }, Q:{ [s[1]]:1 }, R:{ [s[2]]:1 }, S:{ a:0.8, g:0.9 } }; })() };
+function bronTempo(){
+  const b = BRON.bronnen[BRON.bron]; let r = ACHTERGROND;
+  Object.entries(b).forEach(([s, f]) => { const S = SOORT[s]; if (BRON.d > S.dracht) return; r += f * S.ref * (2 / BRON.d) ** 2 * S.abs[BRON.abs]; });
+  return r;
+}
+function bronLijst(){
+  const sel = $i('br-bron'), lijst = BRON.toegestaan || ['geen', 'P', 'Q', 'R'];
+  sel.innerHTML = lijst.map(k => `<option value="${k}">${k === 'geen' ? 'geen bron' : 'bron ' + k}</option>`).join('');
+  if (!lijst.includes(BRON.bron)) BRON.bron = lijst[0];
+  sel.value = BRON.bron;
+}
+function bronMeet(duur){
+  if (BRON.meting) return;
+  const totaal = poisson(bronTempo() * duur), tijden = Array.from({ length: totaal }, () => Math.random() * duur).sort((a, b) => a - b);
+  BRON.meting = { duur, t:0, tijden, k:0, bron:BRON.bron, abs:BRON.abs, d:BRON.d };
+}
+function bronLog(){
+  $i('br-log').innerHTML = BRON.log.length ? `<table><tr><th>#</th><th>bron</th><th>absorber</th><th>afstand</th><th>tijd</th><th>tikken</th></tr>${BRON.log.slice(-8).map((m, i, a) => `<tr><td>${BRON.log.length - a.length + i + 1}</td><td>${m.bron === 'geen' ? '—' : m.bron}</td><td>${{ geen:'geen', papier:'papier', alu:'aluminium', lood:'lood' }[m.abs]}</td><td>${m.d} cm</td><td>${m.duur} s</td><td><b>${m.tikken}</b></td></tr>`).join('')}</table>` : '<span class="bp-noot">Nog geen metingen.</span>';
+}
+const BRONMOD = {
+  init(){
+    bronLijst();
+    $i('br-bron').onchange = e => { BRON.bron = e.target.value; };
+    $i('br-abs').onchange = e => { BRON.abs = e.target.value; };
+    $i('br-d').oninput = e => { BRON.d = +e.target.value; $i('br-dv').textContent = BRON.d + ' cm'; };
+    $i('br-m10').onclick = () => bronMeet(10); $i('br-m60').onclick = () => bronMeet(60);
+    $i('br-abs').value = BRON.abs; $i('br-d').value = BRON.d; $i('br-dv').textContent = BRON.d + ' cm';
+    bronLog();
+  },
+  update(dt){
+    const m = BRON.meting; if (!m) return;
+    m.t = Math.min(m.duur, m.t + dt * (m.duur / 2.5));
+    let nieuw = 0; while (m.k < m.tijden.length && m.tijden[m.k] <= m.t){ m.k++; nieuw++; }
+    if (nieuw) BRON.flits = 1;
+    $i('br-tik').textContent = String(m.k).padStart(4, '0'); $i('br-tijd').textContent = Math.floor(m.t) + ' s';
+    if (m.t >= m.duur){ BRON.log.push({ bron:m.bron, abs:m.abs, d:m.d, duur:m.duur, tikken:m.k }); BRON.meting = null; bronLog(); }
+  },
+  draw(){
+    const D = doek('cv-bron'); if (!D) return; const { c, W, H } = D;
+    const x0 = 70, schaal = (W - 150) / 20, y = H / 2 + 6;
+    /* rail met cm-schaal */
+    c.strokeStyle = BP.zwak; c.lineWidth = 1; c.beginPath(); c.moveTo(x0, y + 46); c.lineTo(x0 + 20 * schaal, y + 46); c.stroke();
+    for (let i = 0; i <= 20; i++){ c.beginPath(); c.moveTo(x0 + i * schaal, y + 46); c.lineTo(x0 + i * schaal, y + (i % 5 ? 41 : 37)); c.stroke(); if (i % 5 === 0) txt(c, i + ' cm', x0 + i * schaal, y + 60, { al:'center', k: BP.zwak, s: 10.5 }); }
+    /* bron in loodblok */
+    arcering(c, x0 - 52, y - 30, 46, 60, BP.zwak, 5);
+    c.fillStyle = BP.diep; c.fillRect(x0 - 16, y - 8, 16, 16); c.strokeStyle = BP.lijn; c.lineWidth = 1.4; c.strokeRect(x0 - 16, y - 8, 16, 16);
+    if (BRON.bron !== 'geen'){ c.beginPath(); c.arc(x0 - 8, y, 4, 0, 7); c.fillStyle = BP.geel; c.fill(); }
+    txt(c, BRON.bron === 'geen' ? 'geen bron' : 'bron ' + BRON.bron, x0 - 29, y - 40, { al:'center', s: 11.5 });
+    /* absorber */
+    if (BRON.abs !== 'geen'){
+      const bw = { papier:2, alu:4, lood:14 }[BRON.abs];
+      arcering(c, x0 + 6, y - 34, bw, 68, BRON.abs === 'lood' ? BP.lijn : BP.zwak, 4);
+      txt(c, { papier:'papier', alu:'Al', lood:'Pb' }[BRON.abs], x0 + 6 + bw / 2, y - 40, { al:'center', s: 11, k: BP.zwak });
+    }
+    /* GM-buis */
+    const xt = x0 + BRON.d * schaal;
+    c.strokeStyle = BP.lijn; c.lineWidth = 1.4; c.beginPath(); c.moveTo(xt, y - 9); c.lineTo(xt + 70, y - 9); c.lineTo(xt + 70, y + 9); c.lineTo(xt, y + 9); c.stroke();
+    c.beginPath(); c.moveTo(xt, y - 9); c.lineTo(xt, y + 9); c.strokeStyle = BP.flits > 0.05 ? BP.geel : BP.lijn; c.lineWidth = 2.5; c.stroke();
+    c.beginPath(); c.moveTo(xt + 70, y); c.lineTo(xt + 90, y); c.strokeStyle = BP.zwak; c.lineWidth = 1; c.stroke();
+    if (BRON.flits > 0.05){ c.globalAlpha = BRON.flits; c.beginPath(); c.arc(xt, y, 12, 0, 7); c.strokeStyle = BP.geel; c.stroke(); c.globalAlpha = 1; BRON.flits *= 0.8; }
+    txt(c, 'GM-buis', xt + 35, y - 16, { al:'center', s: 11 });
+    maat(c, x0, xt, y - 58, 'd = ' + BRON.d + ' cm');
+    txt(c, 'Straling neem je niet waar met je zintuigen: alleen de teller registreert haar.', 12, 18, { s: 11, k: BP.zwak });
+  }
+};
+
+/* =====================================================================
+   R-02 · Reactorhal: vervalvergelijkingen
+   ===================================================================== */
+const ELEM = { 1:'H', 2:'He', 6:'C', 7:'N', 15:'P', 16:'S', 27:'Co', 28:'Ni', 38:'Sr', 39:'Y', 43:'Tc', 53:'I', 54:'Xe', 55:'Cs', 56:'Ba', 82:'Pb', 84:'Po', 86:'Rn', 88:'Ra', 90:'Th', 91:'Pa', 92:'U', 93:'Np', 95:'Am', 81:'Tl', 83:'Bi', 85:'At', 87:'Fr', 89:'Ac', 94:'Pu', 52:'Te', 37:'Rb', 40:'Zr', 26:'Fe', 29:'Cu', 5:'B', 8:'O', 14:'Si', 17:'Cl', 42:'Mo', 44:'Ru', 57:'La' };
+const ISO = [
+  { s:'Ra', A:226, Z:88, t:'a', naam:'radium-226' }, { s:'Po', A:210, Z:84, t:'a', naam:'polonium-210' },
+  { s:'Am', A:241, Z:95, t:'a', naam:'americium-241' }, { s:'Rn', A:222, Z:86, t:'a', naam:'radon-222' },
+  { s:'U', A:238, Z:92, t:'a', naam:'uraan-238' }, { s:'Sr', A:90, Z:38, t:'b', naam:'strontium-90' },
+  { s:'I', A:131, Z:53, t:'b', naam:'jood-131' }, { s:'C', A:14, Z:6, t:'b', naam:'koolstof-14' },
+  { s:'Co', A:60, Z:27, t:'b', naam:'kobalt-60' }, { s:'P', A:32, Z:15, t:'b', naam:'fosfor-32' },
+  { s:'Cs', A:137, Z:55, t:'b', naam:'cesium-137' }, { s:'H', A:3, Z:1, t:'b', naam:'waterstof-3' },
+  { s:'Tc', A:99, Z:43, t:'g', naam:'technetium-99m', m:true }
+];
+const dochter = k => k.t === 'a' ? { A:k.A - 4, Z:k.Z - 2 } : k.t === 'b' ? { A:k.A, Z:k.Z + 1 } : { A:k.A, Z:k.Z };
+const VERVAL = { kern: ISO[0], onthuld:false, anim:0, vrij:true };
+function notatie(c, x, y, A, Z, sym, k = BP.lijn, groot = 34, m = false){
+  txt(c, String(A) + (m ? 'm' : ''), x, y - groot * 0.55, { s: groot * 0.45, k, al:'right' });
+  txt(c, String(Z), x, y + groot * 0.08, { s: groot * 0.45, k, al:'right' });
+  txt(c, sym, x + 3, y, { s: groot, k, f:'Georgia, serif' });
+}
+const VERVALMOD = {
+  init(){
+    const sel = $i('vv-iso'); sel.innerHTML = ISO.map((k, i) => `<option value="${i}">${k.naam}</option>`).join('');
+    sel.value = ISO.indexOf(VERVAL.kern); sel.onchange = e => { VERVAL.kern = ISO[+e.target.value]; VERVAL.onthuld = false; VERVAL.anim = 0; };
+    $i('vv-go').onclick = () => { VERVAL.onthuld = true; VERVAL.anim = 0; };
+    $i('vv-vrij').style.display = VERVAL.vrij ? '' : 'none';
+    $i('vv-noot').innerHTML = VERVAL.vrij ? 'Kies een isotoop en laat hem vervallen. In de opdrachten zoek je de soort straling zelf op in Binas tabel 25A.' : 'De dochterkern verschijnt als je de vervalvergelijking goed hebt.';
+  },
+  update(dt){ if (VERVAL.onthuld) VERVAL.anim = Math.min(1, VERVAL.anim + dt * 0.7); },
+  draw(){
+    const D = doek('cv-verval'); if (!D) return; const { c, W, H } = D;
+    const k = VERVAL.kern, d = dochter(k), cx = 110, cy = 95;
+    /* moederkern als bolletjes */
+    const N = k.A - k.Z, tot = Math.min(k.A, 60), r = 6;
+    for (let i = 0; i < tot; i++){
+      const a = i * 2.39996, rr = 4.2 * Math.sqrt(i);
+      c.beginPath(); c.arc(cx + rr * Math.cos(a), cy + rr * Math.sin(a), r, 0, 7);
+      const proton = i % Math.round(k.A / k.Z) === 0;
+      c.fillStyle = proton ? 'rgba(255,209,102,.25)' : 'rgba(230,240,250,.12)'; c.fill(); c.strokeStyle = proton ? BP.geel : BP.zwak; c.lineWidth = 1; c.stroke();
+    }
+    txt(c, k.Z + ' protonen · ' + N + ' neutronen', cx + 150, cy + 4, { al:'center', s: 11, k: BP.zwak });
+    if (k.A > 60) txt(c, '(getekend: 60 van de ' + k.A + ' kerndeeltjes)', cx + 150, cy + 20, { al:'center', s: 10, k: BP.zwak });
+    /* uitgezonden deeltje */
+    if (VERVAL.onthuld){
+      const p = VERVAL.anim, px = cx + 40 + p * 140, py = cy - 40 - p * 30;
+      c.globalAlpha = 1 - p * 0.3;
+      if (k.t === 'g'){ c.strokeStyle = BP.geel; c.lineWidth = 2; c.beginPath(); for (let s = 0; s < 60; s++){ const xx = cx + 40 + s * 2.3 * (0.3 + p), yy = cy - 40 - s * 0.5 + Math.sin(s * 0.8) * 5; s ? c.lineTo(xx, yy) : c.moveTo(xx, yy); } c.stroke(); }
+      else { c.beginPath(); c.arc(px, py, k.t === 'a' ? 9 : 4, 0, 7); c.fillStyle = BP.geel; c.fill(); }
+      c.globalAlpha = 1;
+      txt(c, { a:'α-deeltje', b:'β⁻-deeltje (elektron)', g:'γ-foton' }[k.t], cx + 190, cy - 82, { s: 11.5, k: BP.geel, al:'center' });
+    }
+    /* vergelijking */
+    const y = H - 30, x1 = 60;
+    notatie(c, x1, y, k.A, k.Z, k.s, BP.lijn, 34, k.m);
+    txt(c, '→', x1 + 70, y - 4, { s: 26 });
+    if (VERVAL.onthuld){
+      notatie(c, x1 + 140, y, d.A, d.Z, ELEM[d.Z] || '?', BP.groen);
+      txt(c, '+', x1 + 210, y - 4, { s: 26 });
+      if (k.t === 'a') notatie(c, x1 + 270, y, 4, 2, 'He', BP.geel);
+      else if (k.t === 'b') notatie(c, x1 + 260, y, 0, -1, 'e', BP.geel);
+      else txt(c, 'γ', x1 + 250, y, { s: 34, k: BP.geel, f:'Georgia, serif' });
+    } else {
+      [x1 + 108, x1 + 230].forEach(x => { c.setLineDash([4, 4]); c.strokeStyle = BP.zwak; c.strokeRect(x, y - 40, 76, 50); c.setLineDash([]); txt(c, '?', x + 38, y - 6, { s: 26, k: BP.zwak, al:'center' }); });
+      txt(c, '+', x1 + 210, y - 4, { s: 26 });
+    }
+    txt(c, 'BOUWBLAD: VERVAL VAN ' + k.naam.toUpperCase(), 12, 18, { s: 11, k: BP.zwak });
+  }
+};
+
+/* =====================================================================
+   O-03 · Opslag: halveringstijd en activiteit
+   ===================================================================== */
+const NKERN = 400;
+const HALF = { th:6, eenheid:'h', naam:'isotoop X', schaal:2e10, verborgen:true, t:0, loopt:false, snel:0.6, vervalt:[], mark:212, runs:[], raak:[], muis:null, tmax:30, klaar:false };
+function halfNieuw(){
+  HALF.vervalt = Array.from({ length: NKERN }, () => -HALF.th / Math.LN2 * Math.log(1 - Math.random()));
+  HALF.t = 0; HALF.loopt = false; HALF.klaar = false; HALF.tmax = 5 * HALF.th; HALF.raak = [];
+  HALF.runs.push({ mark: HALF.vervalt[HALF.mark], klaar:false });
+  $i('hf-start').textContent = '▶ Start'; halfRaak();
+}
+const halfN = t => HALF.vervalt.reduce((n, v) => n + (v > t), 0);
+function halfRaak(){
+  const r = HALF.raak.map((p, i) => `punt ${i + 1}: t = ${kom(p[0], 1)} ${HALF.eenheid}, N = ${wet(p[1], 2)}`).join(' · ');
+  $i('hf-raak').textContent = r || '';
+}
+const HALFMOD = {
+  init(){
+    if (!HALF.vervalt.length) halfNieuw();
+    $i('hf-start').onclick = () => { if (HALF.klaar) halfNieuw(); HALF.loopt = !HALF.loopt; $i('hf-start').textContent = HALF.loopt ? '❚❚ Pauze' : '▶ Start'; };
+    $i('hf-reset').onclick = () => halfNieuw();
+    $i('hf-snel').onchange = e => HALF.snel = +e.target.value;
+    $i('hf-wis').onclick = () => { HALF.raak = []; halfRaak(); };
+    const cv = $i('cv-half');
+    cv.onmousemove = e => { const r = cv.getBoundingClientRect(); HALF.muis = [e.clientX - r.left, e.clientY - r.top]; };
+    cv.onmouseleave = () => { HALF.muis = null; $i('hf-lees').textContent = 'Beweeg over de grafiek om af te lezen. Klik twee punten aan om een raaklijn te tekenen.'; };
+    cv.onclick = e => { if (!HALF.ax) return; const r = cv.getBoundingClientRect(), t = HALF.ax.vx(e.clientX - r.left), N = HALF.ax.vy(e.clientY - r.top) * HALF.eenhY;
+      if (t < 0 || N < 0) return; if (HALF.raak.length >= 2) HALF.raak = []; HALF.raak.push([t, N]); halfRaak(); };
+    halfRaak();
+  },
+  update(dt){
+    if (!HALF.loopt) return;
+    HALF.t = Math.min(HALF.tmax, HALF.t + dt * HALF.snel * HALF.th);
+    const run = HALF.runs[HALF.runs.length - 1]; if (run && HALF.t >= run.mark) run.gezien = true;
+    if (HALF.t >= HALF.tmax){ HALF.loopt = false; HALF.klaar = true; run.klaar = true; $i('hf-start').textContent = '▶ Opnieuw'; }
+  },
+  draw(){
+    $i('hf-tijd').textContent = 't = ' + kom(HALF.t, 1) + ' ' + HALF.eenheid + ' · ' + halfN(HALF.t) + ' van de ' + NKERN + ' stippen over';
+    let D = doek('cv-kernen');
+    if (D){
+      const { c, W, H } = D, kol = 40, rij = 10, sx = (W - 30) / kol, sy = (H - 34) / rij;
+      for (let i = 0; i < NKERN; i++){
+        const x = 15 + (i % kol + 0.5) * sx, y = 24 + (Math.floor(i / kol) + 0.5) * sy, heel = HALF.vervalt[i] > HALF.t;
+        c.beginPath(); c.arc(x, y, Math.min(sx, sy) * 0.32, 0, 7);
+        if (heel){ c.fillStyle = 'rgba(255,209,102,.85)'; c.fill(); } else { c.strokeStyle = 'rgba(134,171,208,.5)'; c.lineWidth = 1; c.stroke(); }
+        if (i === HALF.mark){ c.beginPath(); c.arc(x, y, Math.min(sx, sy) * 0.55, 0, 7); c.strokeStyle = BP.rood; c.lineWidth = 2; c.stroke(); }
+      }
+      txt(c, 'elke stip = ' + wet(HALF.schaal, 2) + ' kernen ' + (HALF.verborgen ? 'van ' + HALF.naam : HALF.naam) + ' · rood omcirkeld: de gemarkeerde kern', 12, 14, { s: 10.5, k: BP.zwak });
+    }
+    D = doek('cv-half'); if (!D) return; const { c, W, H } = D;
+    const N0 = NKERN * HALF.schaal, ex = Math.floor(Math.log10(N0)); HALF.eenhY = 10 ** ex;
+    const ymax = Math.ceil(N0 / HALF.eenhY * 1.1);
+    const ax = assen(c, { x: 54, y: 24, w: W - 74, h: H - 64 }, { xmax: HALF.tmax, ymax, xt: nette(HALF.tmax, 6), yt: nette(ymax, 5),
+      xf: v => kom(v, v % 1 ? 1 : 0), yf: v => kom(v, v % 1 ? 1 : 0), xl: 't (' + HALF.eenheid + ')', yl: 'N (×10' + sup(ex) + ')' });
+    HALF.ax = ax;
+    /* gemeten verloop */
+    c.strokeStyle = BP.geel; c.lineWidth = 2; c.beginPath();
+    const stap = HALF.tmax / 300;
+    for (let t = 0; t <= HALF.t + 1e-9; t += stap){ const x = ax.px(t), y = ax.py(halfN(t) * HALF.schaal / HALF.eenhY); t ? c.lineTo(x, y) : c.moveTo(x, y); }
+    c.stroke();
+    /* raaklijn */
+    HALF.raak.forEach(p => { c.beginPath(); c.arc(ax.px(p[0]), ax.py(p[1] / HALF.eenhY), 4, 0, 7); c.fillStyle = BP.rood; c.fill(); });
+    if (HALF.raak.length === 2){
+      const [a, b] = HALF.raak, s = (b[1] - a[1]) / (b[0] - a[0]);
+      const t1 = 0, t2 = HALF.tmax, y1 = a[1] + s * (t1 - a[0]), y2 = a[1] + s * (t2 - a[0]);
+      c.save(); c.beginPath(); c.rect(ax.box.x, ax.box.y, ax.box.w, ax.box.h); c.clip();
+      c.strokeStyle = BP.rood; c.lineWidth = 1.5; c.beginPath(); c.moveTo(ax.px(t1), ax.py(y1 / HALF.eenhY)); c.lineTo(ax.px(t2), ax.py(y2 / HALF.eenhY)); c.stroke(); c.restore();
+    }
+    if (HALF.muis){
+      const [mx, my] = HALF.muis, t = ax.vx(mx), n = ax.vy(my);
+      if (t >= 0 && t <= HALF.tmax && n >= 0 && n <= ymax){
+        c.strokeStyle = 'rgba(255,209,102,.5)'; c.setLineDash([3, 3]); c.lineWidth = 1; c.beginPath(); c.moveTo(mx, ax.box.y); c.lineTo(mx, ax.box.y + ax.box.h); c.moveTo(ax.box.x, my); c.lineTo(ax.box.x + ax.box.w, my); c.stroke(); c.setLineDash([]);
+        $i('hf-lees').innerHTML = `t = <b>${kom(t, 1)} ${HALF.eenheid}</b> · N = <b>${wet(n * HALF.eenhY, 2)}</b>`;
+      }
+    }
+  }
+};
+
+/* =====================================================================
+   A-04 · Afscherming: halveringsdikte
+   ===================================================================== */
+const DHALF = { 1: { lood:0.9, aluminium:4.2, beton:4.6, water:9.8 }, 0.5: { lood:0.4, aluminium:3.0, beton:3.4, water:7.2 } };
+const AFS = { mat:'lood', E:1, d:0, log:[], laatste:null, muis:null };
+const afsMax = () => Math.max(1, Math.round(DHALF[AFS.E][AFS.mat] * 5 * 10) / 10);
+function afsSchuif(){
+  const s = $i('af-d'), max = afsMax(); s.max = max; s.step = max <= 6 ? 0.1 : 0.5;
+  if (AFS.d > max) AFS.d = max; s.value = AFS.d; $i('af-dv').textContent = kom(AFS.d, 1) + ' cm';
+}
+function afsMeet(){
+  const I0 = 2000, f = 0.5 ** (AFS.d / DHALF[AFS.E][AFS.mat]), n = poisson(I0 * f), p = n / I0 * 100;
+  AFS.laatste = { mat: AFS.mat, E: AFS.E, d: AFS.d, n, p };
+  AFS.log.push(AFS.laatste);
+  $i('af-uit').innerHTML = `Teller (10 s): <b>${n}</b> tikken · zonder absorber gemiddeld ${I0} tikken · doorgelaten: <b>${kom(p, 1)} %</b>`;
+}
+const AFSMOD = {
+  init(){
+    $i('af-mat').value = AFS.mat; $i('af-E').value = String(AFS.E);
+    $i('af-mat').onchange = e => { AFS.mat = e.target.value; afsSchuif(); };
+    $i('af-E').onchange = e => { AFS.E = +e.target.value; afsSchuif(); };
+    $i('af-d').oninput = e => { AFS.d = +e.target.value; $i('af-dv').textContent = kom(AFS.d, 1) + ' cm'; };
+    $i('af-meet').onclick = afsMeet;
+    const cv = $i('cv-afg'); cv.onmousemove = e => { const r = cv.getBoundingClientRect(); AFS.muis = [e.clientX - r.left, e.clientY - r.top]; };
+    cv.onmouseleave = () => { AFS.muis = null; $i('af-lees').textContent = 'Elke meting komt als punt in de doorlaatkromme.'; };
+    afsSchuif();
+  },
+  update(){},
+  draw(){
+    let D = doek('cv-afs');
+    if (D){
+      const { c, W, H } = D, y = H / 2, x0 = 70, x1 = W - 70, max = afsMax(), bw = Math.max(0, AFS.d / max * (W - 260));
+      arcering(c, 14, y - 30, 44, 60, BP.zwak, 5);
+      c.beginPath(); c.arc(x0 - 20, y, 5, 0, 7); c.fillStyle = BP.geel; c.fill();
+      txt(c, 'γ-bron', 36, y - 38, { al:'center', s: 11 });
+      c.setLineDash([6, 5]); c.strokeStyle = BP.geel; c.lineWidth = 1.2; c.beginPath(); c.moveTo(x0, y); c.lineTo(x1, y); c.stroke(); c.setLineDash([]);
+      const xa = (W - bw) / 2;
+      if (bw > 0){ arcering(c, xa, y - 50, bw, 100, BP.lijn, 5); txt(c, AFS.mat, xa + bw / 2, y - 58, { al:'center', s: 11 }); maat(c, xa, xa + bw, y + 68, 'd = ' + kom(AFS.d, 1) + ' cm'); }
+      c.strokeStyle = BP.lijn; c.lineWidth = 1.4; c.strokeRect(x1, y - 14, 50, 28); txt(c, 'teller', x1 + 25, y - 20, { al:'center', s: 11 });
+      txt(c, 'DOORSNEDE AFSCHERMING · γ-energie ' + kom(AFS.E, 1) + ' MeV', 12, 18, { s: 11, k: BP.zwak });
+    }
+    D = doek('cv-afg'); if (!D) return; const { c, W, H } = D;
+    const max = afsMax(), pts = AFS.log.filter(m => m.mat === AFS.mat && m.E === AFS.E);
+    const ax = assen(c, { x: 50, y: 22, w: W - 70, h: H - 60 }, { xmax: max, ymax: 110, xt: nette(max, 5), yt: [0, 20, 40, 60, 80, 100],
+      xf: v => kom(v, v % 1 ? 1 : 0), xl: 'd (cm)', yl: 'doorgelaten (%)' });
+    pts.forEach(m => { c.beginPath(); c.arc(ax.px(m.d), ax.py(m.p), 4, 0, 7); c.fillStyle = BP.geel; c.fill(); });
+    txt(c, AFS.mat + ' · ' + kom(AFS.E, 1) + ' MeV · ' + pts.length + ' metingen', W - 16, 16, { al:'right', s: 11, k: BP.zwak });
+    if (AFS.muis){
+      const [mx, my] = AFS.muis, d = ax.vx(mx), p = ax.vy(my);
+      if (d >= 0 && d <= max && p >= 0 && p <= 110){
+        c.strokeStyle = 'rgba(255,209,102,.5)'; c.setLineDash([3, 3]); c.beginPath(); c.moveTo(mx, ax.box.y); c.lineTo(mx, ax.box.y + ax.box.h); c.moveTo(ax.box.x, my); c.lineTo(ax.box.x + ax.box.w, my); c.stroke(); c.setLineDash([]);
+        $i('af-lees').innerHTML = `d = <b>${kom(d, 2)} cm</b> · doorgelaten = <b>${kom(p, 0)} %</b>`;
+      }
+    }
+  }
+};
+
+/* =====================================================================
+   S-05 · Stralingsdienst: dosis en bescherming
+   ===================================================================== */
+const DOS = { r:1, tmin:30, scherm:false, tempo1m:40 };
+const dosTempo = () => DOS.tempo1m / DOS.r ** 2 * (DOS.scherm ? 0.125 : 1);
+const dosH = () => dosTempo() * DOS.tmin / 60;
+const DOSMOD = {
+  init(){
+    
+    $i('ds-r').oninput = e => DOS.r = +e.target.value; $i('ds-t').oninput = e => DOS.tmin = +e.target.value;
+    $i('ds-scherm').onchange = e => DOS.scherm = e.target.checked;
+  },
+  update(){},
+  draw(){
+    if (+$i('ds-r').value !== DOS.r) $i('ds-r').value = DOS.r; if (+$i('ds-t').value !== DOS.tmin) $i('ds-t').value = DOS.tmin; $i('ds-scherm').checked = DOS.scherm;
+    $i('ds-rv').textContent = kom(DOS.r, 1) + ' m'; $i('ds-tv').textContent = DOS.tmin + ' min';
+    $i('ds-H').textContent = kom(dosH(), 2); $i('ds-tempo').innerHTML = `dosistempo op deze plek: <span class="bp-w">${kom(dosTempo(), 2)}</span> <span class="breuk"><span>µSv</span><span>h</span></span>`;
+    const D = doek('cv-dosis'); if (!D) return; const { c, W, H } = D;
+    const x0 = 60, sch = (W - 120) / 6, y = H / 2 + 10;
+    c.strokeStyle = BP.lijn; c.lineWidth = 3; c.strokeRect(14, 30, W - 28, H - 50);       /* muren */
+    c.lineWidth = 1; c.strokeStyle = BP.zwak; c.beginPath(); c.moveTo(W - 120, H - 20); c.arc(W - 120, H - 20, 40, Math.PI, 1.5 * Math.PI); c.stroke(); /* deur */
+    /* bron met stralingssymbool */
+    c.fillStyle = BP.diep; c.beginPath(); c.arc(x0, y, 16, 0, 7); c.fill(); c.strokeStyle = BP.geel; c.lineWidth = 1.5; c.stroke();
+    for (let i = 0; i < 3; i++){ const a = i * 2.094 - 1.571; c.beginPath(); c.moveTo(x0, y); c.arc(x0, y, 13, a - 0.5, a + 0.5); c.closePath(); c.fillStyle = BP.geel; c.fill(); }
+    c.beginPath(); c.arc(x0, y, 3.5, 0, 7); c.fillStyle = BP.diep; c.fill();
+    txt(c, 'γ-bron', x0, y + 32, { al:'center', s: 11 });
+    const xp = x0 + DOS.r * sch;
+    if (DOS.scherm){ const xs = x0 + Math.min(0.4, DOS.r / 2) * sch; arcering(c, xs - 4, y - 40, 8, 80, BP.lijn, 4); txt(c, 'Pb', xs, y - 46, { al:'center', s: 11 }); }
+    /* medewerker van bovenaf */
+    c.beginPath(); c.ellipse(xp, y, 9, 15, 0, 0, 7); c.strokeStyle = BP.lijn; c.lineWidth = 1.5; c.stroke();
+    c.beginPath(); c.arc(xp, y, 6, 0, 7); c.fillStyle = BP.vlak; c.fill(); c.stroke();
+    c.fillStyle = BP.groen; c.fillRect(xp + 6, y - 4, 5, 8);
+    txt(c, 'medewerker', xp, y + 32, { al:'center', s: 11 });
+    maat(c, x0, xp, y - 52, 'r = ' + kom(DOS.r, 1) + ' m');
+    txt(c, 'PLATTEGROND STRALINGSRUIMTE · groen: dosimeter', 20, 22, { s: 11, k: BP.zwak });
+  }
+};
+
+/* =====================================================================
+   I-06 · Isotopenfabriek: nucleaire diagnostiek
+   ===================================================================== */
+const TRACERS = [
+  { n:'Tc-99m', s:'γ', th:6.0, u:'h' }, { n:'I-131', s:'β⁻ en γ', th:8.0, u:'d' }, { n:'Kr-81m', s:'γ', th:13, u:'s' },
+  { n:'Co-60', s:'β⁻ en γ', th:5.3, u:'j' }, { n:'Am-241', s:'α', th:432, u:'j' }, { n:'Sr-90', s:'β⁻', th:28.8, u:'j' }
+];
+const INUREN = { s: 1 / 3600, h: 1, d: 24, j: 24 * 365 };
+const TR = { kies:0, muis:null };
+const TRMOD = {
+  init(){
+    $i('tr-kaarten').innerHTML = TRACERS.map((t, i) => `<button class="bp-kaart ${i === TR.kies ? 'aan' : ''}" data-i="${i}"><b>${t.n}</b><span>${t.s}</span><span>t½ = ${kom(t.th, t.th < 10 ? 1 : 0)} ${{ s:'s', h:'h', d:'d', j:'jaar' }[t.u]}</span></button>`).join('');
+    $$('#tr-kaarten .bp-kaart').forEach(b => b.onclick = () => { TR.kies = +b.dataset.i; TRMOD.init(); });
+    const cv = $i('cv-tracer'); cv.onmousemove = e => { const r = cv.getBoundingClientRect(); TR.muis = [e.clientX - r.left, e.clientY - r.top]; };
+    cv.onmouseleave = () => { TR.muis = null; $i('tr-lees').textContent = 'Beweeg over de grafiek om af te lezen.'; };
+  },
+  update(){},
+  draw(){
+    const D = doek('cv-tracer'); if (!D) return; const { c, W, H } = D, t = TRACERS[TR.kies], th = t.th * INUREN[t.u];
+    const ax = assen(c, { x: 54, y: 26, w: W - 74, h: H - 66 }, { xmax: 48, ymax: 440, xt: [0, 6, 12, 18, 24, 30, 36, 42, 48], yt: [0, 100, 200, 300, 400], xl: 't (h)', yl: 'A (MBq)' });
+    c.fillStyle = 'rgba(126,224,168,.12)'; c.fillRect(ax.px(0), ax.box.y, ax.px(2) - ax.px(0), ax.box.h);
+    txt(c, 'onderzoek', ax.px(1), ax.box.y + 12, { al:'center', s: 10, k: BP.groen });
+    c.strokeStyle = BP.geel; c.lineWidth = 2; c.beginPath();
+    for (let i = 0; i <= 480; i++){ const tt = i / 10, A = 400 * 0.5 ** (tt / th); i ? c.lineTo(ax.px(tt), ax.py(A)) : c.moveTo(ax.px(tt), ax.py(A)); }
+    c.stroke();
+    txt(c, t.n + ' · beginactiviteit 400 MBq', W - 16, 16, { al:'right', s: 11, k: BP.zwak });
+    if (TR.muis){ const tt = ax.vx(TR.muis[0]); if (tt >= 0 && tt <= 48){ const A = 400 * 0.5 ** (tt / th);
+      c.beginPath(); c.arc(ax.px(tt), ax.py(A), 4, 0, 7); c.fillStyle = BP.rood; c.fill();
+      $i('tr-lees').innerHTML = `t = <b>${kom(tt, 1)} h</b> · A = <b>${wet(A, 2)} MBq</b>`; } }
+  }
+};
+
+/* =====================================================================
+   Z-07 · Ziekenhuisvleugel: röntgen en echografie
+   ===================================================================== */
+const BEELD = { modus:'rontgen', dw:2.0, db:1.0, armW:6, botD:2, lagen:[1.0, 4.0], v:1540, muis:null };
+function padLengtes(xcm){       /* door een arm (ellips 6 cm breed, 6 cm hoog) met bot (cirkel 2 cm) in het midden */
+  const a = BEELD.armW / 2, rb = BEELD.botD / 2;
+  if (Math.abs(xcm) >= a) return { w:0, b:0 };
+  const tot = 2 * a * Math.sqrt(1 - (xcm / a) ** 2), b = Math.abs(xcm) < rb ? 2 * Math.sqrt(rb * rb - xcm * xcm) : 0;
+  return { w: tot - b, b };
+}
+const doorlaat = x => { const p = padLengtes(x); return 0.5 ** (p.w / BEELD.dw + p.b / BEELD.db); };
+const echoT = () => { let z = 0; return BEELD.lagen.map(l => { z += l; return 2 * z / 100 / BEELD.v * 1e6; }); };
+const BEELDMOD = {
+  init(){
+    $$('#simhouder .bp-tabs .bp-knop').forEach(b => { b.classList.toggle('g', b.dataset.m !== BEELD.modus); b.onclick = () => { BEELD.modus = b.dataset.m; BEELDMOD.init(); }; });
+    $i('cv-scoop').style.display = BEELD.modus === 'echo' ? '' : 'none';
+    const cv = BEELD.modus === 'echo' ? $i('cv-scoop') : $i('cv-beeld');
+    $i('cv-beeld').onmousemove = $i('cv-scoop').onmousemove = null;
+    cv.onmousemove = e => { const r = cv.getBoundingClientRect(); BEELD.muis = [e.clientX - r.left, e.clientY - r.top]; };
+    cv.onmouseleave = () => BEELD.muis = null;
+    $i('bd-lees').textContent = BEELD.modus === 'echo' ? 'Beweeg over het scoopbeeld om de tijd af te lezen.' : 'Beweeg over de detector om af te lezen hoeveel straling er doorkomt.';
+  },
+  update(){},
+  draw(){
+    const D = doek('cv-beeld'); if (!D) return; const { c, W, H } = D;
+    if (BEELD.modus === 'rontgen'){
+      const cx = W / 2, sch = 22, yb = 128, yd = H - 74;
+      /* buis */
+      c.strokeStyle = BP.lijn; c.lineWidth = 1.4; c.strokeRect(cx - 40, 16, 80, 26); txt(c, 'röntgenbuis', cx, 34, { al:'center', s: 11 });
+      c.strokeStyle = 'rgba(255,209,102,.35)'; c.setLineDash([5, 5]); c.beginPath();
+      for (let x = -3.6; x <= 3.6; x += 0.9){ c.moveTo(cx + x * sch * 0.12, 42); c.lineTo(cx + x * sch, yd); } c.stroke(); c.setLineDash([]);
+      /* arm in doorsnede */
+      c.beginPath(); c.ellipse(cx, yb, BEELD.armW / 2 * sch, BEELD.armW / 2 * sch * 0.9, 0, 0, 7); c.fillStyle = BP.diep; c.fill(); c.strokeStyle = BP.lijn; c.stroke();
+      c.save(); c.beginPath(); c.arc(cx, yb, BEELD.botD / 2 * sch, 0, 7); c.clip(); arcering(c, cx - 30, yb - 30, 60, 60, BP.lijn, 4); c.restore();
+      c.beginPath(); c.arc(cx, yb, BEELD.botD / 2 * sch, 0, 7); c.strokeStyle = BP.lijn; c.stroke();
+      txt(c, 'zacht weefsel', cx + BEELD.armW / 2 * sch + 8, yb - 20, { s: 11 }); txt(c, 'bot', cx + BEELD.botD / 2 * sch + 6, yb + 4, { s: 11 });
+      maat(c, cx - BEELD.armW / 2 * sch, cx + BEELD.armW / 2 * sch, yb + BEELD.armW / 2 * sch + 18, BEELD.armW + ' cm');
+      /* detector: zwarting */
+      for (let px = cx - 4 * sch; px <= cx + 4 * sch; px += 2){
+        const f = doorlaat((px - cx) / sch), g = Math.round(30 + 200 * (1 - f));   /* veel straling = donker */
+        c.fillStyle = `rgb(${g},${g},${g})`; c.fillRect(px, yd, 2, 22);
+      }
+      c.strokeStyle = BP.lijn; c.strokeRect(cx - 4 * sch, yd, 8 * sch, 22); txt(c, 'röntgenfilm (veel straling = donker)', cx, yd + 36, { al:'center', s: 11, k: BP.zwak });
+      if (BEELD.muis){ const [mx, my] = BEELD.muis; const x = (mx - cx) / sch;
+        if (Math.abs(x) <= 4 && my > yd - 30){ const p = padLengtes(x);
+          c.strokeStyle = BP.rood; c.beginPath(); c.moveTo(mx, 42); c.lineTo(mx, yd + 22); c.stroke();
+          $i('bd-lees').innerHTML = `door ${kom(p.w, 1)} cm weefsel en ${kom(p.b, 1)} cm bot: doorgelaten <b>${kom(doorlaat(x) * 100, 1)} %</b>`; } }
+      txt(c, 'DOORSNEDE ONDERARM · neem aan: d½ weefsel = ' + kom(BEELD.dw, 1) + ' cm, d½ bot = ' + kom(BEELD.db, 1) + ' cm', 12, H - 8, { s: 10.5, k: BP.zwak });
+      return;
+    }
+    /* echografie: zijaanzicht van de lagen */
+    const x0 = 60, sch = 34, y0 = 50;
+    c.strokeStyle = BP.lijn; c.lineWidth = 1.4; c.strokeRect(x0 + 60, y0 - 34, 50, 34); txt(c, 'probe', x0 + 85, y0 - 40, { al:'center', s: 11 });
+    const namen = ['huid en vet', 'spier', 'bot'];
+    let z = 0;
+    BEELD.lagen.concat([2]).forEach((l, i) => {
+      const y = y0 + z * sch, h = l * sch;
+      if (i === 2) arcering(c, x0, y, W - 2 * x0, Math.min(h, H - y - 10), BP.lijn, 5);
+      else { c.fillStyle = i ? 'rgba(230,240,250,.06)' : 'rgba(255,209,102,.06)'; c.fillRect(x0, y, W - 2 * x0, h); c.strokeStyle = BP.zwak; c.strokeRect(x0, y, W - 2 * x0, h); }
+      txt(c, namen[i], W - x0 - 8, y + 16, { al:'right', s: 11 });
+      z += l;
+    });
+    c.strokeStyle = BP.geel; c.setLineDash([4, 4]); c.beginPath(); c.moveTo(x0 + 85, y0); c.lineTo(x0 + 85, y0 + z * sch - 2 * sch); c.stroke(); c.setLineDash([]);
+    txt(c, 'ZIJAANZICHT BOVENARM · geluidspuls naar beneden, echo terug naar de probe', 12, H - 8, { s: 10.5, k: BP.zwak });
+    /* scoop */
+    const S = doek('cv-scoop'); if (!S) return;
+    const ax = assen(S.c, { x: 44, y: 16, w: S.W - 64, h: S.H - 52 }, { xmax: 100, ymax: 1.1, xt: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100], yt: [], xl: 't (µs)', yl: 'signaal' });
+    const piek = [[0, 1], ...echoT().map((t, i) => [t, i ? 0.7 : 0.35])];
+    S.c.strokeStyle = BP.groen; S.c.lineWidth = 1.6; S.c.beginPath();
+    for (let i = 0; i <= 1000; i++){ const t = i / 10; let s = 0.02 * Math.sin(i * 1.7);
+      piek.forEach(([tp, a]) => { const d = t - tp; s += a * Math.exp(-d * d / 0.8) * Math.cos(d * 6); });
+      i ? S.c.lineTo(ax.px(t), ax.py(0.5 + s * 0.45)) : S.c.moveTo(ax.px(t), ax.py(0.5 + s * 0.45)); }
+    S.c.stroke();
+    if (BEELD.muis){ const t = ax.vx(BEELD.muis[0]); if (t >= 0 && t <= 100){ S.c.strokeStyle = BP.rood; S.c.beginPath(); S.c.moveTo(ax.px(t), ax.box.y); S.c.lineTo(ax.px(t), ax.box.y + ax.box.h); S.c.stroke(); $i('bd-lees').innerHTML = `t = <b>${kom(t, 1)} µs</b>`; } }
+  }
+};
+
+/* =====================================================================
+   Koppeling met de werkplaatsen
+   ===================================================================== */
+const MODS = { bron: BRONMOD, verval: VERVALMOD, half: HALFMOD, afs: AFSMOD, dosis: DOSMOD, tracer: TRMOD, beeld: BEELDMOD };
+const BLADEN = { bron:['01', 'bronkamer', '1 : 5'], verval:['02', 'reactorhal', '10¹³ : 1'], half:['03', 'opslag', '—'], afs:['04', 'afscherming', '1 : 10'], dosis:['05', 'stralingsdienst', '1 : 50'], tracer:['06', 'isotopenfabriek', '—'], beeld:['07', 'ziekenhuisvleugel', '1 : 2'] };
+const RAD = {
+  init(host){
+    const w = WPS[STAAT.wp]; host.appendChild($i('simhouder'));
+    $$('#simhouder .ruimte').forEach(r => r.style.display = r.dataset.r === w.ruimte ? '' : 'none');
+    const b = BLADEN[w.ruimte]; $i('bp-blad').textContent = 'BLAD ' + b[0]; $i('bp-ruimte').textContent = b[1]; $i('bp-schaal').textContent = 'schaal ' + b[2]; $i('bp-nr').textContent = 'TEK. NR. RS-' + b[0];
+    RAD.mod = MODS[w.ruimte]; RAD.mod.init();
+  },
+  opdracht(o){ const w = WPS[STAAT.wp]; if (w.zetSim) w.zetSim(o); RAD.mod.init(); },
+  stapGoed(o, k){ if (o && o.naGoed) o.naGoed(k); },
+  update(dt){ RAD.mod && RAD.mod.update(Math.min(dt, 0.1)); },
+  draw(){ RAD.mod && RAD.mod.draw(); }
+};
+
+/* =====================================================================
+   Algemene opbouw: zijbalk, werkplaats, voorbeeld, opdrachten in stappen
+   ===================================================================== */
+const WPS = [];
+const TEKENINGEN = {};
+const STAAT = { wp:0, tab:'uitleg', voortgang: laad(), niveau: '5V' };
+const PER_WP = {};             /* per werkplaats: { serie, idx, st:[{stap, goed:[], getoond, pogingen}] } */
+let SIM = null;
+
+function maakCanvas(host, w, h){
+  const c = document.createElement('canvas'), dpr = Math.max(1, window.devicePixelRatio || 1);
+  c.width = w * dpr; c.height = h * dpr; c.style.aspectRatio = w + ' / ' + h;
+  host.appendChild(c);
+  const ctx = c.getContext('2d'); ctx.scale(dpr, dpr); ctx.W = w; ctx.H = h; ctx.canvas_ = c;
+  return ctx;
+}
+
+function zichtbaar(w){ return !w.alleen6 || STAAT.niveau === '6V'; }
+function renderNav(){
+  $('#nav').innerHTML = WPS.map((w, i) => {
+    if (!zichtbaar(w)) return '';
+    const klaar = STAAT.voortgang[w.id] && STAAT.voortgang[w.id].klaar;
+    return `<a data-i="${i}" class="${i === STAAT.wp ? 'on' : ''} ${klaar ? 'klaar' : ''}"><i>${klaar ? '✓' : w.ster ? '★' : i + 1}</i><span>${w.titel}<small>${w.par}</small></span></a>`;
+  }).join('');
+  $$('#nav a').forEach(a => a.onclick = () => open(+a.dataset.i));
+}
+
+function open(i){
+  STAAT.wp = i; STAAT.tab = 'uitleg';
+  const w = WPS[i];
+  if (!PER_WP[w.id]) nieuweSerie(w);
+  parkeer();
+  $('#main').innerHTML = `<div class="wp"><section class="tekst" id="tekst"></section><section class="simkol" id="simkol"></section></div>`;
+  SIM = w.sim; SIM.init($('#simkol'));
+  renderTekst(); renderNav();
+  window.scrollTo(0, 0);
+}
+
+function nieuweSerie(w){
+  const serie = w.maakSerie();
+  PER_WP[w.id] = { serie, idx:0, serieNr: (PER_WP[w.id] ? PER_WP[w.id].serieNr + 1 : 0), st: serie.map(() => ({ stap:0, getoond:false, klaar:false, pogingen:{} })) };
+}
+
+function renderTekst(){
+  const w = WPS[STAAT.wp], p = PER_WP[w.id];
+  const nGoed = p.st.filter((s, k) => s.klaar && !s.getoond && !p.serie[k].ster).length, nTot = p.serie.filter(o => !o.ster).length;
+  let h = `<div class="kicker">${w.ster ? 'Werkplaats ★ · verdieping' : 'Werkplaats ' + (STAAT.wp + 1) + ' · ' + w.par}</div><h2>${w.titel}</h2>
+    <div class="tabs"><button data-t="uitleg" class="${STAAT.tab === 'uitleg' ? 'on' : ''}">Uitleg en voorbeeld</button>
+    <button data-t="opd" class="${STAAT.tab === 'opd' ? 'on' : ''}">Opdrachten<span class="tel">${nGoed}/${nTot}</span></button></div>`;
+  if (STAAT.tab === 'uitleg'){
+    h += w.uitleg() + renderVoorbeeld(w);
+  } else {
+    h += renderOpdracht(w, p);
+  }
+  $('#tekst').innerHTML = h;
+  $$('#tekst .tabs button').forEach(b => b.onclick = () => { STAAT.tab = b.dataset.t; renderTekst(); if (STAAT.tab === 'opd') zetOpdrachtInSim(); else SIM.opdracht && SIM.opdracht(null); });
+  if (STAAT.tab === 'uitleg') koppelVoorbeeld(w); else koppelOpdracht(w, p);
+}
+
+/* ---------- uitgewerkt voorbeeld, stap voor stap ---------- */
+function renderVoorbeeld(w){
+  const vb = w.voorbeeld; if (!vb) return '';
+  const n = w._vbStap || 0;
+  let h = `<div class="vb"><div class="vbkop">Voorbeeld</div><div class="vbvraag">${vb.vraag}</div>`;
+  for (let k = 0; k < n; k++) h += `<div class="vbstap"><span class="n">${k + 1}</span><div class="b">${vb.stappen[k]}</div></div>`;
+  h += n < vb.stappen.length ? `<div class="verder"><button class="btn g klein" id="vbverder">${n ? 'Volgende stap' : 'Toon de uitwerking'} ▸</button></div>`
+                             : `<div class="verder"><button class="btn klein" id="naaropd">Naar de opdrachten ▸</button></div>`;
+  return h + '</div>';
+}
+function koppelVoorbeeld(w){
+  const b = $('#vbverder'); if (b) b.onclick = () => { w._vbStap = (w._vbStap || 0) + 1; renderTekst(); w.voorbeeld.bijStap && w.voorbeeld.bijStap(w._vbStap); };
+  const o = $('#naaropd'); if (o) o.onclick = () => { STAAT.tab = 'opd'; renderTekst(); zetOpdrachtInSim(); window.scrollTo(0, 0); };
+}
+
+/* ---------- opdrachten ---------- */
+function renderOpdracht(w, p){
+  const o = p.serie[p.idx], s = p.st[p.idx];
+  const nTot = p.serie.filter(x => !x.ster).length;
+  let h = '';
+  if (STAAT.voortgang[w.id] && STAAT.voortgang[w.id].klaar && p.st.every((x, k) => p.serie[k].ster || (x.klaar && !x.getoond)))
+    h += `<div class="klaarbanner"><b>Werkplaats afgerond.</b> Probeer ook de ★-opdrachten, of oefen met een nieuwe serie.</div>`;
+  h += `<div class="oknop">` + p.serie.map((x, k) => {
+    const st = p.st[k];
+    return `<span class="dot ${k === p.idx ? 'on' : ''} ${st.klaar && !st.getoond ? 'goed' : ''} ${x.ster ? 'ster' : ''}" data-k="${k}" title="${x.titel}">${x.ster ? '★' : k + 1}</span>`;
+  }).join('') + `<span class="rechts"><button class="btn g klein" id="nieuweserie">Nieuwe serie</button></span></div>`;
+  h += `<div class="opdkop">${o.ster ? '<span class="st">★ </span>' : ''}Opdracht ${o.ster ? '★' : p.idx + 1}${o.ster ? '' : ' van ' + nTot} · ${o.titel}</div>`;
+  if (o.vraag) h += `<div class="opdvraag">${o.vraag}</div>`;
+  o.stappen.forEach((st, k) => {
+    const dicht = k > s.stap, goed = k < s.stap || s.klaar;
+    h += `<div class="stap ${dicht ? 'dicht' : ''} ${goed ? 'goed' : ''}" data-k="${k}">${o.stappen.length > 1 ? `<span class="n">${goed ? '✓' : k + 1}</span>` : ''}<div class="inh">
+      <div class="vr">${st.vr}</div>${goed ? `<div class="antw">${st.antwoord()}</div>` : `<div class="inv">${invoerHTML(st, k)}</div>`}
+      <div class="fb" id="fb${k}"></div></div></div>`;
+  });
+  if (s.klaar){
+    const volgende = p.idx < p.serie.length - 1;
+    h += `<div class="rij" style="margin-top:6px">${volgende ? `<button class="btn" id="volgende">Volgende opdracht ▸</button>` : ''}${o.naKlaar ? `<span class="waarneming">${o.naKlaar()}</span>` : ''}</div>`;
+  }
+  if (o.stappen.some(x => x.type === 'teken')) h += `<div class="typtip">${TEKENTIP}</div>`;
+  else if (o.stappen.some(x => x.type === 'getal')) h += `<div class="typtip">${GETALTIP}</div>`;
+  return h;
+}
+const TEKENTIP = 'Tekenen: kies een atoomsoort en klik op het raster. Sleep vanaf een atoom om een binding met een nieuw of bestaand atoom te maken. Klik op een binding voor een dubbele binding. <b>+H aanvullen</b> zet ontbrekende H-atomen, maar je mag ze ook zelf zetten. <b>~</b> is een open binding: de keten gaat verder.';
+const GETALTIP = 'Typ een getal met een komma, bijvoorbeeld <code>2,4</code>. Een macht van tien typ je zo: <code>1,9e8</code> of <code>1,9·10^8</code>.';
+const TYPTIP = 'Zo typ je (voorbeelden met titaan en chromaat): <code>Ti2(CrO4)3</code> · ion <code>Ti3+</code> of <code>CrO4 2-</code> · pijl <code>-></code> · toestand <code>(s)</code> <code>(aq)</code> <code>(l)</code> · coëfficiënt ervoor: <code>3 CrO4 2-(aq)</code>.';
+
+function invoerHTML(st, k){
+  const knoppen = `<button class="btn" data-ctl="${k}">Controleer</button><button class="btn g" data-hint="${k}">Hint</button><button class="btn g" data-toon="${k}" style="display:none">Toon antwoord</button>`;
+  if (st.type === 'sim') return `<div class="rij">${knoppen}</div>`;
+  if (st.type === 'tekst') return `<div class="rij"><input class="in" id="in${k}" autocomplete="off" spellcheck="false" placeholder="${st.ph || ''}">${knoppen}</div><div class="voorbeeldweergave" id="vw${k}"></div>`;
+  if (st.type === 'chips') return `<div class="chips" id="ch${k}">${st.opties.map((x, j) => `<span class="chip" data-j="${j}">${x.html}</span>`).join('')}</div><div class="rij" style="margin-top:9px">${knoppen}</div>`;
+  if (st.type === 'keuze') return `<div class="opties" id="op${k}">${st.opties.map((x, j) => `<button class="optie" data-j="${j}">${x.html}</button>`).join('')}</div><div class="rij" style="margin-top:9px">${knoppen}</div>`;
+  if (st.type === 'teken') return `<div id="tv${k}"></div><div class="rij" style="margin-top:9px">${knoppen}</div>`;
+  if (st.type === 'getal') return `<div class="rij"><input class="in getal" id="in${k}" autocomplete="off" spellcheck="false" placeholder="${st.ph || 'antwoord'}"><span class="eenheid">${st.eenheid || ''}</span></div><div class="rij" style="margin-top:9px">${knoppen}</div>`;
+  if (st.type === 'selects') return `<div class="rij">${st.selects.map((s, j) => `<label style="font-size:14px">${s.lab} <select class="sel" id="se${k}_${j}"><option value="">kies…</option>${s.opties.map(x => `<option value="${x.v}">${x.t}</option>`).join('')}</select></label>`).join('')}</div><div class="rij" style="margin-top:9px">${knoppen}</div>`;
+  return '';
+}
+
+function koppelOpdracht(w, p){
+  const o = p.serie[p.idx], s = p.st[p.idx];
+  $$('.oknop .dot').forEach(d => d.onclick = () => { p.idx = +d.dataset.k; renderTekst(); zetOpdrachtInSim(); });
+  $('#nieuweserie').onclick = () => { nieuweSerie(w); renderTekst(); zetOpdrachtInSim(); };
+  const v = $('#volgende'); if (v) v.onclick = () => { p.idx++; renderTekst(); zetOpdrachtInSim(); };
+  o.stappen.forEach((st, k) => {
+    if (k !== s.stap || s.klaar) return;
+    const inp = $('#in' + k);
+    if (st.type === 'teken'){
+      const sleutel = w.id + '|' + p.idx + '|' + k + '|' + p.serieNr;
+      const tv = new Tekenveld($('#tv' + k), { breedte: st.breedte || 32, hoogte: st.hoogte || 13 });
+      if (TEKENINGEN[sleutel]) tv.zet(TEKENINGEN[sleutel]);
+      const oud = tv.teken.bind(tv); tv.teken = () => { oud(); TEKENINGEN[sleutel] = tv.g; };
+      tv.melding = m => { const fb = $('#fb' + k); fb.className = 'fb toon hint'; fb.innerHTML = m; };
+      st._tv = tv;
+    }
+    if (inp && st.type === 'getal'){ inp.onkeydown = e => { if (e.key === 'Enter') controleer(w, p, k); }; setTimeout(() => inp.focus({ preventScroll:true }), 30); }
+    else if (inp){
+      inp.onkeydown = e => { if (e.key === 'Enter') controleer(w, p, k); };
+      setTimeout(() => inp.focus({ preventScroll:true }), 30);
+    }
+    $$(`#ch${k} .chip`).forEach(c => c.onclick = () => c.classList.toggle('aan'));
+    $$(`#op${k} .optie`).forEach(c => c.onclick = () => {
+      if (!st.meer) $$(`#op${k} .optie`).forEach(x => x !== c && x.classList.remove('aan'));
+      c.classList.toggle('aan');
+    });
+    $(`[data-ctl="${k}"]`).onclick = () => controleer(w, p, k);
+    $(`[data-hint="${k}"]`).onclick = () => { const fb = $('#fb' + k); fb.className = 'fb toon hint'; fb.innerHTML = st.hint; };
+    $(`[data-toon="${k}"]`).onclick = () => {
+      s.getoond = true; const fb = $('#fb' + k); fb.className = 'fb toon hint'; fb.innerHTML = 'Antwoord: ' + st.antwoord();
+      setTimeout(() => stapGoed(w, p, k), 1400);
+    };
+    if ((s.pogingen[k] || 0) >= 2) $(`[data-toon="${k}"]`).style.display = '';
+  });
+}
+function waardeVan(st, k){
+  if (st.type === 'tekst') return $('#in' + k).value;
+  if (st.type === 'chips') return $$(`#ch${k} .chip.aan`).map(c => +c.dataset.j);
+  if (st.type === 'keuze') return $$(`#op${k} .optie.aan`).map(c => +c.dataset.j);
+  if (st.type === 'selects') return st.selects.map((x, j) => $(`#se${k}_${j}`).value);
+  if (st.type === 'teken') return st._tv;
+  if (st.type === 'getal') return $('#in' + k).value;
+}
+function controleer(w, p, k){
+  const o = p.serie[p.idx], s = p.st[p.idx], st = o.stappen[k];
+  const r = st.check(waardeVan(st, k));
+  const fb = $('#fb' + k);
+  if (r.ok){ fb.className = 'fb toon goed'; fb.innerHTML = r.msg || 'Goed!'; setTimeout(() => stapGoed(w, p, k), 650); }
+  else {
+    s.pogingen[k] = (s.pogingen[k] || 0) + 1;
+    fb.className = 'fb toon fout'; fb.innerHTML = r.msg;
+    if (s.pogingen[k] >= 2) $(`[data-toon="${k}"]`).style.display = '';
+  }
+}
+function stapGoed(w, p, k){
+  const o = p.serie[p.idx], s = p.st[p.idx];
+  if (s.stap !== k) return;
+  s.stap = k + 1;
+  if (s.stap >= o.stappen.length) s.klaar = true;
+  SIM.stapGoed && SIM.stapGoed(o, k);
+  if (s.klaar){
+    const nietSter = p.serie.map((x, j) => [x, p.st[j]]).filter(([x]) => !x.ster);
+    if (nietSter.every(([, y]) => y.klaar && !y.getoond)){
+      STAAT.voortgang[w.id] = { klaar:true }; bewaar(STAAT.voortgang); renderNav();
+    }
+  }
+  renderTekst();
+}
+function zetOpdrachtInSim(){
+  const w = WPS[STAAT.wp], p = PER_WP[w.id];
+  SIM.opdracht && SIM.opdracht(STAAT.tab === 'opd' ? p.serie[p.idx] : null, STAAT.tab === 'opd' ? p.st[p.idx] : null);
+}
+
+/* lus */
+let tVorig = 0;
+function lus(t){
+  const dt = Math.min(0.05, (t - tVorig) / 1000 || 0); tVorig = t;
+  if (SIM){ SIM.update && SIM.update(dt); SIM.draw && SIM.draw(); }
+  requestAnimationFrame(lus);
+}
+
+
+function keuzeStap(vr, opties, o = {}){
+  const opts = o.vast ? opties : schud(opties);
+  return { type:'keuze', meer: !!o.meer, vr, opties: opts, hint: o.hint || '',
+    check: v => {
+      if (!v.length) return { ok:false, msg:'Kies een antwoord.' };
+      const sel = v.map(j => opts[j]), goed = opts.filter(x => x.g);
+      if (sel.length === goed.length && sel.every(x => x.g)) return { ok:true, msg: o.goedMsg };
+      const fb = sel.find(x => !x.g && x.fb); if (fb) return { ok:false, msg: fb.fb };
+      if (o.meer && sel.every(x => x.g)) return { ok:false, msg:'Je mist er nog een.' };
+      return { ok:false, msg: o.fout || 'Nog niet goed.' };
+    },
+    antwoord: () => opts.filter(x => x.g).map(x => x.html).join('<br>'), goed: () => opts.map((x, j) => x.g ? j : -1).filter(j => j >= 0) };
+}
+function leesGetal(s){
+  let t = String(s).trim().replace(/\s+/g, '').replace(/[×x*·]10\^?/i, 'e').replace(/10\^/, 'e');
+  t = t.replace(',', '.');
+  return /^-?\d*\.?\d+(e-?\d+)?$/i.test(t) ? parseFloat(t) : NaN;
+}
+function getalStap(vr, waarde, eenheid, uitleg, hint, tol){
+  return { type:'getal', vr, eenheid, hint, ph:'getal',
+    check: v => { const x = leesGetal(v); if (isNaN(x)) return { ok:false, msg:'Typ een getal, bijvoorbeeld <code>2,4</code>.' };
+      if (Math.abs(x - waarde) <= Math.abs(waarde) * tol) return { ok:true, msg:'Goed! ' + uitleg };
+      return { ok:false, msg:'Nog niet goed. ' + hint }; },
+    antwoord: () => uitleg, goed: () => String(+waarde.toPrecision(3)).replace('.', ',') };
+}
+
+function parkeer(){ const h = $('#simhouder'); if (h) $('#parkeer').appendChild(h); }
+function simStap(vr, test, hint, antwoord){ return { type:'sim', vr, hint, check: () => test() ? { ok:true } : { ok:false, msg: hint }, antwoord: () => antwoord }; }
+const leerdoelen = (...l) => `<div class="leerdoelen"><b>Leerdoelen</b><ul>${l.map(x => x.startsWith('★') ? `<li class="ster">${x.slice(1).trim()}</li>` : `<li>${x}</li>`).join('')}</ul></div>`;
+
+/* =====================================================================
+   Werkplaatsen
+   ===================================================================== */
+const BR = (t, n) => `<span class="breuk"><span>${t}</span><span>${n}</span></span>`;
+const MS = BR('m', 's');
+const nuc = (A, Z, S) => `<span class="nuc"><span><sup>${A}</sup><sub>${Z}</sub></span>${S}</span>`;
+const kiesUit = a => a[Math.floor(Math.random() * a.length)];
+const html10 = (x, sig = 2) => wet(x, sig).replace(/10([⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+)/, (m, e) => '10<sup>' + e.split('').map(ch => Object.keys(SUP).find(k => SUP[k] === ch)).join('').replace('-', '−') + '</sup>');
+function getalDyn(vr, fn, eenheid, uitleg, hint, tol, abs = false){
+  return { type:'getal', vr, eenheid, hint, ph:'getal',
+    check: v => { const x = leesGetal(v), w = fn(); if (isNaN(x)) return { ok:false, msg:'Typ een getal, bijvoorbeeld <code>2,4</code> of <code>1,8e8</code>.' };
+      if (w == null) return { ok:false, msg: hint };
+      if (abs ? Math.abs(x - w) <= tol : Math.abs(x - w) <= Math.abs(w) * tol) return { ok:true, msg:'Goed! ' + uitleg(w) };
+      return { ok:false, msg:'Nog niet goed. ' + hint }; },
+    antwoord: () => uitleg(fn()), goed: () => String(fn()).replace('.', ',') };
+}
+const laatste = f => { for (let i = BRON.log.length - 1; i >= 0; i--) if (f(BRON.log[i])) return BRON.log[i]; return null; };
+const SOORTOPT = sleutel => [{ html:'α-straling', g: sleutel === 'a' }, { html:'β<sup>−</sup>-straling', g: sleutel === 'b' }, { html:'γ-straling', g: sleutel === 'g' }, { html:'röntgenstraling' }];
+const vierAbs = (bron, d) => ['geen', 'papier', 'alu', 'lood'].every(a => BRON.log.some(m => m.bron === bron && m.abs === a && m.d === d));
+
+/* ================= 1. Bronkamer ================= */
+WPS.push({
+  id:'soorten', ruimte:'bron', titel:'Soorten straling', par:'B-01 · bronkamer', sim: RAD,
+  zetSim(o){ BRON.toegestaan = o && o.bronnen ? o.bronnen : null; },
+  uitleg: () => leerdoelen(
+      'Ik kan α-, β<sup>−</sup>- en γ-straling (en röntgenstraling) beschrijven: wat het is en waar het vandaan komt.',
+      'Ik kan uit metingen met absorbers het doordringend vermogen en de dracht afleiden.',
+      'Ik kan het verband uitleggen tussen ioniserend en doordringend vermogen.',
+      'Ik kan bij een meting rekening houden met de achtergrondstraling.') + `
+    <h3>Uitleg</h3>
+    <p>Een instabiele atoomkern kan straling uitzenden. Dat heet <b>radioactief verval</b>. Er zijn drie soorten:</p>
+    <ul><li><b>α-straling</b>: heliumkernen (2 protonen en 2 neutronen). Zwaar en tweevoudig positief geladen.</li>
+    <li><b>β<sup>−</sup>-straling</b>: elektronen, die in de kern ontstaan als een neutron overgaat in een proton.</li>
+    <li><b>γ-straling</b>: elektromagnetische straling met veel energie. Geen massa en geen lading. <b>Röntgenstraling</b> is ook elektromagnetisch, maar ontstaat in een röntgenbuis en niet in de kern.</li></ul>
+    <p>Straling die elektronen uit atomen kan slaan, is <b>ioniserende straling</b>. Elke ionisatie kost energie. α-straling ioniseert het sterkst, en is daardoor het snelst haar energie kwijt: haar <b>dracht</b> (de afstand die ze aflegt) is klein. Het <b>doordringend vermogen</b> is dus klein.</p>
+    <table class="data"><tr><th></th><th>ioniserend vermogen</th><th>dracht in lucht</th><th>wordt tegengehouden door</th></tr>
+    <tr><td>α</td><td>groot</td><td>enkele cm</td><td>een vel papier</td></tr><tr><td>β<sup>−</sup></td><td>middel</td><td>enkele m</td><td>enkele mm aluminium</td></tr><tr><td>γ</td><td>klein</td><td>zeer groot</td><td>lood en beton verzwakken het</td></tr></table>
+    <p>Een teller (zoals een GM-buis) registreert ook straling uit de omgeving: de <b>achtergrondstraling</b>, onder andere uit de bodem en de kosmos. Trek die af van je meting: dat geeft de <b>netto</b> telsnelheid.</p>
+    <div class="kader">Je neemt straling niet waar met je zintuigen. Rechts registreert alleen de teller de straling: je meet met het aantal tikken.</div>`,
+  voorbeeld: {
+    vraag: 'Een leerling meet op 3 cm van een onbekende bron, steeds 1 minuut. Zonder absorber: 812 tikken. Met papier: 805 tikken. Met 3 mm aluminium: 31 tikken. De achtergrond is 25 tikken per minuut. Welke straling zendt de bron uit?',
+    stappen: [
+      'Papier houdt bijna niets tegen (812 → 805): de bron zendt geen α-straling uit, of hoogstens heel weinig.',
+      'Aluminium houdt bijna alles tegen (805 → 31): dat past bij β<sup>−</sup>-straling.',
+      'Met aluminium blijft 31 − 25 = 6 tikken per minuut over: vrijwel alleen achtergrond. Er is dus geen γ-straling. De bron zendt β<sup>−</sup>-straling uit.'
+    ]
+  },
+  maakSerie: () => {
+    const X = kiesUit(['P', 'Q', 'R']);
+    return [
+      { titel:'De achtergrond', vraag:'Kies <b>geen bron</b> en meet 60 s.', bronnen:['geen', 'Q'], stappen:[
+        simStap('Meet de achtergrondstraling, 60 s zonder bron.', () => BRON.log.some(m => m.bron === 'geen' && m.duur === 60), 'Kies "geen bron" en klik op <b>Meet 60 s</b>.', 'achtergrond gemeten'),
+        getalDyn('Achtergrond in tikken per minuut =', () => (laatste(m => m.bron === 'geen' && m.duur === 60) || {}).tikken, '', w => `Je teller registreerde ${w} tikken in 60 s, dus ${w} tikken per minuut.`, 'Lees het aantal tikken van je laatste meting van 60 s zonder bron af.', 0.5, true),
+        simStap('Zet bron Q op 5 cm van de teller, zonder absorber, en meet 60 s.', () => BRON.log.some(m => m.bron === 'Q' && m.abs === 'geen' && m.d === 5 && m.duur === 60), 'Kies bron Q, absorber geen, afstand 5 cm, en klik op <b>Meet 60 s</b>.', 'bron Q gemeten'),
+        getalDyn('Netto telsnelheid van bron Q in tikken per minuut =', () => { const a = laatste(m => m.bron === 'geen' && m.duur === 60), q = laatste(m => m.bron === 'Q' && m.abs === 'geen' && m.d === 5 && m.duur === 60); return a && q ? q.tikken - a.tikken : null; }, '',
+          w => `Netto = gemeten − achtergrond = ${w} tikken per minuut.`, 'Trek de achtergrond af van je meting met bron Q.', 0.5, true)] },
+      { titel:'Een onbekende bron', vraag:`Bepaal welke straling bron ${X} uitzendt. Meet steeds 10 s op 3 cm afstand: zonder absorber, met papier, met aluminium en met lood.`, bronnen:['geen', X], stappen:[
+        simStap('Doe de vier metingen.', () => vierAbs(X, 3), `Kies bron ${X}, zet de afstand op 3 cm en meet met elke absorber 10 s.`, 'vier metingen gedaan'),
+        keuzeStap(`Welke straling zendt bron ${X} uit?`, SOORTOPT(Object.keys(BRON.bronnen[X])[0]), { vast:true, hint:'Welke absorber houdt de straling (bijna) helemaal tegen? Vergelijk met de achtergrond van ongeveer 4 tikken per 10 s.' })] },
+      { titel:'De dracht van α-straling', vraag:'Bron Am bevat americium-241, een α-straler. Meet zonder absorber, steeds 10 s, op 2 cm, 4 cm en 6 cm afstand.', bronnen:['geen', 'Am'], stappen:[
+        simStap('Doe de drie metingen.', () => [2, 4, 6].every(d => BRON.log.some(m => m.bron === 'Am' && m.abs === 'geen' && m.d === d)), 'Kies bron Am en meet op 2, 4 en 6 cm.', 'drie metingen gedaan'),
+        keuzeStap('Tussen welke afstanden ligt de dracht van deze α-straling in lucht?', [{ html:'tussen 0 en 2 cm' }, { html:'tussen 2 en 4 cm' }, { html:'tussen 4 en 6 cm', g:true }, { html:'tussen 6 en 8 cm' }, { html:'meer dan 8 cm' }], { vast:true, hint:'Op welke afstand meet je alleen nog achtergrond?' })] },
+      { titel:'Ioniseren en doordringen', vraag:'Vergelijk het ioniserend vermogen van α-, β<sup>−</sup>- en γ-straling.', stappen:[
+        keuzeStap('Welke straling heeft het grootste ioniserend vermogen?', [{ html:'α-straling', g:true }, { html:'β<sup>−</sup>-straling' }, { html:'γ-straling' }, { html:'Ze ioniseren alle drie even sterk.' }], { vast:true }),
+        keuzeStap('Welke uitspraak verklaart het verband tussen het ioniserend vermogen en de dracht?', [
+          { html:'Elke ionisatie kost energie. Straling die veel ioniseert, is haar energie na korte afstand kwijt.', g:true },
+          { html:'Straling die veel ioniseert, wordt door de lucht teruggekaatst.' },
+          { html:'Straling die veel ioniseert, heeft geen lading en gaat dus rechtdoor.' },
+          { html:'Het ioniserend vermogen en de dracht hebben niets met elkaar te maken.' }])] },
+      { titel:'Twee soorten tegelijk', ster:true, vraag:'Bron S zendt meer dan één soort straling uit. Meet steeds 10 s op 3 cm: zonder absorber, met papier, met aluminium en met lood.', bronnen:['geen', 'S'], stappen:[
+        simStap('Doe de vier metingen.', () => vierAbs('S', 3), 'Kies bron S, afstand 3 cm, en meet met elke absorber 10 s.', 'vier metingen gedaan'),
+        keuzeStap('Welke soorten straling zendt bron S uit? Kies alle juiste.', [{ html:'α-straling', g:true }, { html:'β<sup>−</sup>-straling' }, { html:'γ-straling', g:true }, { html:'röntgenstraling' }], { meer:true, vast:true, hint:'Wat houdt papier tegen? En wat komt zelfs door aluminium en een deel door lood heen?' })] }
+    ];
+  }
+});
+/* bron Am (alleen α) en de naam in de keuzelijst */
+BRON.bronnen.Am = { a:1 };
+{ const oud = bronLijst; window.bronLijst = function(){ oud(); $$('#br-bron option').forEach(o => { if (o.value === 'Am') o.textContent = 'bron Am (americium-241)'; }); }; }
+
+/* ================= 2. Reactorhal ================= */
+Object.assign(ELEM, { 4:'Be', 13:'Al', 25:'Mn', 36:'Kr', 51:'Sb', 96:'Cm', 97:'Bk', 92:'U', 93:'Np' });
+function vervalOpdracht(k){
+  const d = dochter(k);
+  const elems = [d.Z - 1, d.Z, d.Z + 1, k.t === 'a' ? d.Z + 2 : d.Z - 2].filter(z => ELEM[z]);
+  return { titel: k.naam, vraag:`${k.naam[0].toUpperCase() + k.naam.slice(1)} (${nuc(k.A, k.Z, k.s)}) is radioactief. Geef de vervalvergelijking. Zoek op in Binas tabel 25A welke straling deze isotoop uitzendt.`, kern:k,
+    naGoed: j => { if (j === 3) VERVAL.onthuld = true, VERVAL.anim = 0; },
+    stappen:[
+      keuzeStap(`Welke straling zendt ${k.naam} uit?`, [{ html:'α', g: k.t === 'a' }, { html:'β<sup>−</sup>', g: k.t === 'b' }, { html:'γ (alleen)' }, { html:'neutronen' }], { vast:true, hint:'Zoek de isotoop op in Binas tabel 25A.' }),
+      getalStap('Massagetal van de dochterkern =', d.A, '', `${k.t === 'a' ? 'Bij α-verval gaan er 4 kerndeeltjes af: ' + k.A + ' − 4 = ' + d.A : 'Bij β<sup>−</sup>-verval blijft het massagetal gelijk: ' + d.A}.`, 'Het massagetal is links en rechts van de pijl samen gelijk.', 0),
+      getalStap('Atoomnummer van de dochterkern =', d.Z, '', `${k.t === 'a' ? 'Het α-deeltje neemt 2 protonen mee: ' + k.Z + ' − 2 = ' + d.Z : 'Een neutron gaat over in een proton: ' + k.Z + ' + 1 = ' + d.Z}.`, 'De lading (het atoomnummer) is links en rechts van de pijl samen gelijk. Een β<sup>−</sup>-deeltje telt als −1.', 0),
+      keuzeStap('Welk element is de dochterkern?', elems.map(z => ({ html: ELEM[z], g: z === d.Z })), { hint:'Zoek het element met dit atoomnummer op in het periodiek systeem.', goedMsg:`${nuc(k.A, k.Z, k.s)} → ${nuc(d.A, d.Z, ELEM[d.Z])} + ${k.t === 'a' ? nuc(4, 2, 'He') : nuc(0, '−1', 'e')}` })] };
+}
+WPS.push({
+  id:'verval', ruimte:'verval', titel:'Vervalvergelijkingen', par:'R-02 · reactorhal', sim: RAD,
+  zetSim(o){ if (o && o.kern){ if (VERVAL.kern !== o.kern) VERVAL.onthuld = false; VERVAL.kern = o.kern; VERVAL.vrij = false; } else VERVAL.vrij = true; },
+  uitleg: () => leerdoelen(
+      'Ik kan de vervalvergelijking opstellen van α-, β<sup>−</sup>- en γ-verval.',
+      'Ik kan met Binas bepalen welke straling een isotoop uitzendt.') + `
+    <h3>Even herhalen: de kern</h3>
+    <p>Een atoomkern is opgebouwd uit protonen en neutronen. In de notatie ${nuc('A', 'Z', 'X')} is <b>Z</b> het atoomnummer (het aantal protonen) en <b>A</b> het massagetal (protonen + neutronen). Isotopen van een element hebben hetzelfde atoomnummer, maar een ander massagetal.</p>
+    <h3>Vervalvergelijkingen</h3>
+    <p>In een vervalvergelijking zijn <b>links en rechts van de pijl</b> het massagetal én de lading (het atoomnummer) samen gelijk.</p>
+    <ul><li>α-deeltje: ${nuc(4, 2, 'He')}. Het massagetal daalt met 4, het atoomnummer met 2.</li>
+    <li>β<sup>−</sup>-deeltje: ${nuc(0, '−1', 'e')}. Een neutron gaat over in een proton: het atoomnummer stijgt met 1, het massagetal blijft gelijk.</li>
+    <li>γ-straling: de kern verliest alleen energie. Een kern in een aangeslagen toestand (met een m, zoals Tc-99m) gaat over naar de grondtoestand.</li></ul>
+    <div class="kader">Welke straling een isotoop uitzendt, staat in Binas tabel 25A.</div>`,
+  voorbeeld: {
+    vraag: `Radium-226 (${nuc(226, 88, 'Ra')}) zendt α-straling uit. Geef de vervalvergelijking.`,
+    stappen: [
+      'Bij α-verval komt er een heliumkern vrij: ' + nuc(4, 2, 'He') + '.',
+      'Massagetal: 226 = A + 4, dus A = 222. Atoomnummer: 88 = Z + 2, dus Z = 86.',
+      'Atoomnummer 86 is radon: ' + nuc(226, 88, 'Ra') + ' → ' + nuc(222, 86, 'Rn') + ' + ' + nuc(4, 2, 'He') + '.'
+    ]
+  },
+  maakSerie: () => {
+    const pool = ISO.filter(k => k.naam !== 'radium-226' && k.s !== 'H' && k.t !== 'g').sort(() => Math.random() - .5);
+    const a = pool.filter(k => k.t === 'a').slice(0, 1), b = pool.filter(k => k.t === 'b').slice(0, 2);
+    const tc = ISO.find(k => k.s === 'Tc'), u = ISO.find(k => k.s === 'U');
+    return [...[a[0], b[0], b[1]].sort(() => Math.random() - .5).map(vervalOpdracht),
+      { titel:'γ-verval', vraag:`Technetium-99m (${nuc('99m', 43, 'Tc')}) zendt alleen γ-straling uit en gaat over in ${nuc(99, 43, 'Tc')}.`, kern: tc, naGoed: () => { VERVAL.onthuld = true; VERVAL.anim = 0; }, stappen:[
+        keuzeStap('Welke uitspraken over dit verval zijn juist? Kies alle juiste.', [
+          { html:'Het massagetal blijft gelijk.', g:true }, { html:'Het atoomnummer blijft gelijk.', g:true }, { html:'De kern verliest energie.', g:true },
+          { html:'Er ontstaat een ander element.' }, { html:'Er komt een elektron uit de kern.' }], { meer:true })] },
+      { titel:'Een vervalreeks', ster:true, vraag:`Uraan-238 (${nuc(238, 92, 'U')}) vervalt achtereenvolgens door α-, β<sup>−</sup>- en nog een β<sup>−</sup>-verval. Welke kern ontstaat er na deze drie stappen?`, kern: u, naGoed: () => {}, stappen:[
+        getalStap('Massagetal =', 234, '', '238 − 4 = 234; bij β<sup>−</sup>-verval blijft het massagetal gelijk.', 'Houd per stap bij wat er met het massagetal gebeurt.', 0),
+        getalStap('Atoomnummer =', 92, '', '92 − 2 + 1 + 1 = 92.', 'Houd per stap bij wat er met het atoomnummer gebeurt.', 0),
+        keuzeStap('Welk element is het?', [{ html:'Th' }, { html:'Pa' }, { html:'U', g:true }, { html:'Np' }], { vast:true, goedMsg:'Er ontstaat ' + nuc(234, 92, 'U') + ': een andere isotoop van hetzelfde element.' })] }];
+  }
+});
+
+/* ================= 3. Opslag ================= */
+const HALFISO = [{ naam:'jood-131', th:8.0, u:'d' }, { naam:'technetium-99m', th:6.0, u:'h' }, { naam:'natrium-24', th:15, u:'h' }, { naam:'goud-198', th:2.7, u:'d' }, { naam:'fosfor-32', th:14.3, u:'d' }];
+function zetHalf(cfg){
+  if (HALF.cfg === cfg) return; HALF.cfg = cfg;
+  HALF.th = cfg.th; HALF.eenheid = cfg.u; HALF.naam = cfg.naam; HALF.verborgen = !!cfg.verborgen; HALF.schaal = cfg.schaal || 2e10;
+  HALF.runs = []; HALF.vervalt = []; halfNieuw();
+}
+const HALFVRIJ = { naam:'jood-131', th:8.0, u:'d', schaal:2e10 };
+WPS.push({
+  id:'halvering', ruimte:'half', titel:'Halveringstijd en activiteit', par:'O-03 · opslag', sim: RAD,
+  zetSim(o){ zetHalf(o && o.half ? o.half : HALFVRIJ); },
+  uitleg: () => leerdoelen(
+      'Ik kan de halveringstijd aflezen uit een vervalkromme.',
+      'Ik kan rekenen met N = N<sub>0</sub> · (½)<sup>n</sup> bij een geheel aantal halveringstijden.',
+      'Ik kan de activiteit bepalen: gemiddeld, en op één moment met een raaklijn.',
+      'Ik kan uitleggen dat verval toevallig is.') + `
+    <h3>Uitleg</h3>
+    <p>Wanneer één bepaalde kern vervalt, is <b>toeval</b>: dat kun je niet voorspellen. Van een groot aantal kernen kun je wel voorspellen hoeveel er ongeveer overblijven. In de <b>halveringstijd</b> t<sub>½</sub> vervalt steeds de helft van de kernen die er nog zijn.</p>
+    <div class="reken">N = N<sub>0</sub> · (½)<sup>n</sup> &nbsp; met &nbsp; n = ${BR('t', 't<sub>½</sub>')}</div>
+    <p>De grafiek van N tegen t heet de <b>vervalkromme</b>. Na 2 halveringstijden is er niet niets over, maar een kwart.</p>
+    <p>De <b>activiteit</b> A is het aantal kernen dat per seconde vervalt, in becquerel (Bq):</p>
+    <div class="reken">A = ${BR('−ΔN', 'Δt')} &nbsp; met Δt in s</div>
+    <ul><li>De <b>gemiddelde activiteit</b> bereken je met twee punten van de vervalkromme.</li>
+    <li>De activiteit <b>op één moment</b> is de helling van de raaklijn (zonder minteken).</li>
+    <li>De activiteit halveert ook elke halveringstijd: A = A<sub>0</sub> · (½)<sup>n</sup>.</li></ul>`,
+  voorbeeld: {
+    vraag: 'Een monster bevat 2,4·10<sup>10</sup> kernen radon-222 (t<sub>½</sub> = 3,8 d). Bereken hoeveel kernen er na 11,4 d nog over zijn, en de gemiddelde activiteit in die periode.',
+    stappen: [
+      `n = ${BR('11,4 d', '3,8 d')} = 3 halveringstijden.`,
+      'N = 2,4·10<sup>10</sup> · (½)<sup>3</sup> = 3,0·10<sup>9</sup> kernen.',
+      `ΔN = 3,0·10<sup>9</sup> − 2,4·10<sup>10</sup> = −2,1·10<sup>10</sup> en Δt = 11,4 · 24 · 3600 s = 9,85·10<sup>5</sup> s. A<sub>gem</sub> = ${BR('2,1·10<sup>10</sup>', '9,85·10<sup>5</sup> s')} = 2,1·10<sup>4</sup> Bq.`
+    ]
+  },
+  maakSerie: () => {
+    const verb = kiesUit(HALFISO), ster = kiesUit(HALFISO.filter(x => x !== verb));
+    const reken = kiesUit(HALFISO), n = kiesUit([2, 3, 4]), N0 = kiesUit([3.2, 4.8, 6.4, 8.0]) * 1e13;
+    const hX = { naam:'isotoop X', th: verb.th, u: verb.u, verborgen:true }, hS = { naam:'isotoop Y', th: ster.th, u: ster.u, verborgen:true };
+    const hA = { naam:'technetium-99m', th:6.0, u:'h', schaal:2e10 };
+    const eu = { h:'h', d:'d' }, N0A = NKERN * 2e10, Agem = N0A / 2 / (6 * 3600), A0 = Math.LN2 * N0A / (6 * 3600);
+    return [
+      { titel:'Toeval', vraag:'Rechts staan 400 stippen: elke stip staat voor een groot aantal kernen van een isotoop. Eén kern is rood omcirkeld.', half:{ naam:'isotoop Z', th:5, u:'min', verborgen:true }, stappen:[
+        simStap('Laat de kernen vervallen tot de gemarkeerde kern vervallen is. Klik op ↺ Opnieuw en doe dat nog een keer.', () => HALF.runs.filter(r => r.gezien).length >= 2, 'Druk op ▶ Start. Wacht tot de rood omcirkelde stip leeg is. Klik daarna op ↺ Opnieuw en start nog een keer.', 'twee keer gedaan'),
+        keuzeStap('Wat neem je waar bij de gemarkeerde kern?', [{ html:'Hij vervalt elke keer op een ander moment.', g:true }, { html:'Hij vervalt elke keer na precies één halveringstijd.' }, { html:'Hij vervalt altijd als laatste.' }, { html:'Hij vervalt altijd als eerste.' }]),
+        keuzeStap('Wat kun je wél voorspellen?', [{ html:'Hoeveel kernen er na een halveringstijd ongeveer over zijn.', g:true }, { html:'Wanneer een bepaalde kern vervalt.' }, { html:'Welke kern als eerste vervalt.' }, { html:'Welke kern als laatste overblijft.' }])] },
+      { titel:'De halveringstijd aflezen', vraag:'Rechts staat isotoop X. Laat de kernen vervallen en bepaal de halveringstijd uit de vervalkromme.', half: hX, stappen:[
+        simStap('Laat de kernen vervallen.', () => HALF.cfg === hX && HALF.klaar, 'Druk op ▶ Start en wacht tot de meting klaar is.', 'meting klaar'),
+        getalStap('Halveringstijd van isotoop X =', verb.th, eu[verb.u], `De halveringstijd is ongeveer ${kom(verb.th, 1)} ${eu[verb.u]}: dan is N gedaald tot de helft van N<sub>0</sub>.`, 'Bij welke tijd is N gedaald tot de helft van de beginwaarde?', 0.12)] },
+      { titel:'Rekenen met de halveringstijd', vraag:`Een ziekenhuis ontvangt een bron met ${html10(N0)} kernen ${reken.naam} (t<sub>½</sub> = ${kom(reken.th, 1)} ${eu[reken.u]}). Bereken hoeveel kernen ${reken.naam} er na ${kom(n * reken.th, 1)} ${eu[reken.u]} nog over zijn.`, stappen:[
+        getalStap('n =', n, '', `n = ${BR(kom(n * reken.th, 1) + ' ' + eu[reken.u], kom(reken.th, 1) + ' ' + eu[reken.u])} = ${n}.`, 'Deel de tijd door de halveringstijd.', 0),
+        getalStap('N =', N0 / 2 ** n, '', `N = ${html10(N0)} · (½)<sup>${n}</sup> = ${html10(N0 / 2 ** n)} kernen.`, 'Gebruik N = N<sub>0</sub> · (½)<sup>n</sup>.', 0.02)] },
+      { titel:'Activiteit', vraag:'Rechts staat technetium-99m (t<sub>½</sub> = 6,0 h). Laat de kernen vervallen.', half: hA, stappen:[
+        simStap('Laat de kernen vervallen.', () => HALF.cfg === hA && HALF.klaar, 'Druk op ▶ Start en wacht tot de meting klaar is.', 'meting klaar'),
+        getalStap('Gemiddelde activiteit tussen t = 0 h en t = 6,0 h =', Agem, 'Bq', `Lees af: N<sub>0</sub> ≈ ${html10(N0A)} en bij 6,0 h de helft. A<sub>gem</sub> = ${BR(html10(N0A / 2), '6,0 · 3600 s')} = ${html10(Agem)} Bq.`, 'Lees N af bij t = 0 en bij t = 6,0 h. Reken Δt om naar seconden.', 0.15),
+        getalStap('Activiteit op t = 0 h (met een raaklijn) =', A0, 'Bq', `De raaklijn bij t = 0 is steiler dan de lijn tussen de twee punten: A<sub>0</sub> ≈ ${html10(A0)} Bq.`, 'Klik twee punten aan op de raaklijn bij t = 0. Bereken de helling: ΔN gedeeld door Δt in seconden.', 0.25)] },
+      { titel:'Een tussenwaarde', ster:true, vraag:'Rechts staat isotoop Y. Na hoeveel tijd is nog 30% van de kernen over?', half: hS, stappen:[
+        simStap('Laat de kernen vervallen.', () => HALF.cfg === hS && HALF.klaar, 'Druk op ▶ Start en wacht tot de meting klaar is.', 'meting klaar'),
+        getalStap('Tijd =', ster.th * Math.log2(1 / 0.3), eu[ster.u], `30% van N<sub>0</sub> is bereikt na ongeveer ${kom(ster.th * Math.log2(1 / 0.3), 1)} ${eu[ster.u]}: tussen 1 en 2 halveringstijden.`, 'Bereken eerst 30% van N<sub>0</sub> en lees de tijd af in de kromme.', 0.1)] }
+    ];
+  }
+});
+
+/* ================= 4. Afscherming ================= */
+WPS.push({
+  id:'afscherming', ruimte:'afs', titel:'Halveringsdikte', par:'A-04 · afscherming', sim: RAD,
+  zetSim(o){ if (o && o.afs){ AFS.mat = o.afs.mat; AFS.E = o.afs.E; } },
+  uitleg: () => leerdoelen(
+      'Ik kan de halveringsdikte aflezen uit een doorlaatkromme.',
+      'Ik kan rekenen met I = I<sub>0</sub> · (½)<sup>n</sup>.') + `
+    <h3>Uitleg</h3>
+    <p>γ-straling en röntgenstraling worden door materiaal verzwakt, niet helemaal tegengehouden. De <b>halveringsdikte</b> d<sub>½</sub> is de dikte die de helft van de straling doorlaat. Een volgende laag van dezelfde dikte laat weer de helft door.</p>
+    <div class="reken">I = I<sub>0</sub> · (½)<sup>n</sup> &nbsp; met &nbsp; n = ${BR('d', 'd<sub>½</sub>')}</div>
+    <p>Dat is dezelfde rekenregel als bij de halveringstijd, maar nu met dikte in plaats van tijd. De grafiek van de doorgelaten intensiteit tegen de dikte heet de <b>doorlaatkromme</b>.</p>
+    <ul><li>Hoe dichter het materiaal, hoe kleiner de halveringsdikte: lood schermt veel beter af dan water.</li>
+    <li>Hoe groter de energie van de straling, hoe groter de halveringsdikte.</li></ul>
+    <div class="kader">Halveringsdiktes per materiaal en energie staan in Binas tabel 28F. In de tool zijn het modelwaarden in de buurt van die tabel.</div>`,
+  voorbeeld: {
+    vraag: 'Voor γ-straling van 1,0 MeV is de halveringsdikte van aluminium 4,2 cm. Welk percentage van de straling komt door een aluminium plaat van 12,6 cm?',
+    stappen: [`n = ${BR('12,6 cm', '4,2 cm')} = 3.`, 'I = I<sub>0</sub> · (½)<sup>3</sup> = ⅛ · I<sub>0</sub>.', 'Er komt 12,5% van de straling door.']
+  },
+  maakSerie: () => {
+    const x = kiesUit([4.0, 5.0, 6.0]), n = kiesUit([2, 4, 5]), deel = kiesUit([8, 16, 32]);
+    return [
+      { titel:'Meten aan lood', vraag:'Meet de doorgelaten straling van γ-straling van 1,0 MeV door lood. Meet bij minstens vijf verschillende diktes, ook bij 0 cm.', afs:{ mat:'lood', E:1 }, stappen:[
+        simStap('Doe de metingen.', () => { const s = new Set(AFS.log.filter(m => m.mat === 'lood' && m.E === 1).map(m => m.d)); return s.size >= 5 && s.has(0); }, 'Kies lood en 1,0 MeV. Zet de dikte op verschillende waarden, ook 0 cm, en klik steeds op <b>Meet</b>.', 'vijf diktes gemeten'),
+        getalStap('Halveringsdikte van lood voor deze straling =', 0.9, 'cm', 'De halveringsdikte is ongeveer 0,9 cm: daar is de doorgelaten straling 50%.', 'Bij welke dikte is de doorgelaten straling 50%?', 0.15)] },
+      { titel:'Een betonnen wand', vraag:`Een betonnen wand van een bestralingsruimte is ${kom(n * x, 1)} cm dik. Neem aan dat de halveringsdikte van beton voor deze straling ${kom(x, 1)} cm is. Bereken welk percentage van de straling door de wand komt.`, stappen:[
+        getalStap('Doorgelaten =', 100 / 2 ** n, '%', `n = ${BR(kom(n * x, 1) + ' cm', kom(x, 1) + ' cm')} = ${n}, dus I = (½)<sup>${n}</sup> · I<sub>0</sub>: ${kom(100 / 2 ** n, 2)}%.`, 'Bereken eerst hoeveel halveringsdiktes de wand dik is.', 0.02)] },
+      { titel:'Hoe dik?', vraag:`Een loden plaat moet de intensiteit van γ-straling verlagen tot 1/${deel} van de oorspronkelijke waarde. Neem aan dat de halveringsdikte van lood voor deze straling 0,90 cm is. Bereken hoe dik de plaat moet zijn.`, stappen:[
+        getalStap('Dikte =', Math.log2(deel) * 0.9, 'cm', `1/${deel} = (½)<sup>${Math.log2(deel)}</sup>, dus ${Math.log2(deel)} halveringsdiktes: ${Math.log2(deel)} · 0,90 cm = ${kom(Math.log2(deel) * 0.9, 2)} cm.`, `Hoe vaak moet je halveren om op 1/${deel} uit te komen?`, 0.03)] },
+      { titel:'Een andere energie', ster:true, vraag:'Meet de halveringsdikte van lood ook voor γ-straling van 0,5 MeV, en vergelijk met 1,0 MeV.', afs:{ mat:'lood', E:0.5 }, stappen:[
+        simStap('Meet bij beide energieën bij minstens drie diktes.', () => [1, 0.5].every(E => new Set(AFS.log.filter(m => m.mat === 'lood' && m.E === E).map(m => m.d)).size >= 3), 'Kies 0,5 MeV en meet bij drie diktes. Doe hetzelfde bij 1,0 MeV.', 'beide energieën gemeten'),
+        keuzeStap('Welke conclusie past bij je metingen?', [{ html:'Bij een grotere energie is de halveringsdikte groter.', g:true }, { html:'Bij een grotere energie is de halveringsdikte kleiner.' }, { html:'De halveringsdikte hangt niet af van de energie.' }], { vast:true }),
+        keuzeStap('Een loden schort beschermt goed bij een röntgenfoto, maar nauwelijks tegen γ-straling uit een reactor. Welke verklaring past?', [
+          { html:'Röntgenstraling bij een foto heeft een veel kleinere energie: de halveringsdikte van lood is dan heel klein.', g:true },
+          { html:'Röntgenstraling is geen elektromagnetische straling.' }, { html:'Lood laat röntgenstraling nooit door.' }, { html:'γ-straling wordt door lood versterkt.' }])] }
+    ];
+  }
+});
+
+/* ================= 5. Stralingsdienst ================= */
+WPS.push({
+  id:'dosis', ruimte:'dosis', titel:'Dosis en bescherming', par:'S-05 · stralingsdienst', sim: RAD,
+  zetSim(o){ if (o && o.dos && DOS.cfg !== o.dos){ DOS.cfg = o.dos; Object.assign(DOS, o.dos); } },
+  uitleg: () => leerdoelen(
+      'Ik kan rekenen met de dosis D = E/m en de equivalente dosis H = w<sub>R</sub> · D.',
+      'Ik kan een dosis vergelijken met de achtergrondstraling en de norm.',
+      'Ik kan het verschil uitleggen tussen bestraling en besmetting.',
+      'Ik kan maatregelen voor bescherming noemen en uitleggen.') + `
+    <h3>Uitleg</h3>
+    <p>De <b>(geabsorbeerde) dosis</b> D is de stralingsenergie die per kg weefsel wordt opgenomen, in gray (Gy):</p>
+    <div class="reken">D = ${BR('E', 'm')} &nbsp; met 1 Gy = 1 ${BR('J', 'kg')}</div>
+    <p>Niet elke soort straling is even schadelijk. Daarom reken je met de <b>equivalente dosis</b> H, in sievert (Sv). De <b>stralingsweegfactor</b> w<sub>R</sub> is 20 voor α-straling en 1 voor β-, γ- en röntgenstraling (Binas).</p>
+    <div class="reken">H = w<sub>R</sub> · D</div>
+    <ul><li><b>Bestraling</b>: de straling komt van buiten. Na de bestraling zendt je lichaam geen straling uit.</li>
+    <li><b>Besmetting</b>: een radioactieve stof zit op of in je lichaam. Die blijft straling uitzenden.</li>
+    <li>Bescherming: <b>afstand</b> houden, <b>afscherming</b> gebruiken en de <b>tijd</b> beperken. Een medewerker draagt een <b>dosimeter</b>.</li></ul>`,
+  voorbeeld: {
+    vraag: 'Een medewerker van 75 kg absorbeert 1,5·10<sup>−3</sup> J aan β-straling. Bereken de equivalente dosis in mSv.',
+    stappen: [`D = ${BR('1,5·10<sup>−3</sup> J', '75 kg')} = 2,0·10<sup>−5</sup> Gy.`, 'Voor β-straling is w<sub>R</sub> = 1, dus H = 1 · 2,0·10<sup>−5</sup> = 2,0·10<sup>−5</sup> Sv.', 'H = 0,020 mSv.']
+  },
+  maakSerie: () => {
+    const m = kiesUit([60, 70, 80]), D = kiesUit([2.0e-4, 5.0e-4, 1.2e-3]), E = D * m;
+    const ma = kiesUit([0.10, 0.20, 0.40]), Da = kiesUit([1.0e-5, 2.0e-5, 5.0e-5]), Ea = Da * ma;
+    const dCfg = { r:1, tmin:30, scherm:false };
+    return [
+      { titel:'Dosis bij een onderzoek', vraag:`Een patiënt van ${m} kg absorbeert bij een onderzoek ${html10(E)} J aan γ-straling.`, stappen:[
+        getalStap('D =', D, 'Gy', `D = ${BR(html10(E) + ' J', m + ' kg')} = ${html10(D)} Gy.`, 'Gebruik D = E/m.', 0.02),
+        getalStap('H =', D * 1000, 'mSv', `Voor γ-straling is w<sub>R</sub> = 1: H = ${html10(D)} Sv = ${kom(D * 1000, 2)} mSv.`, 'Gebruik H = w<sub>R</sub> · D en reken om naar mSv.', 0.02)] },
+      { titel:'Een besmetting met een α-straler', vraag:`Na een besmetting met een α-straler absorbeert ${kom(ma * 1000, 0)} g weefsel ${html10(Ea)} J.`, stappen:[
+        getalStap('H =', 20 * Da * 1000, 'mSv', `D = ${BR(html10(Ea) + ' J', kom(ma, 2) + ' kg')} = ${html10(Da)} Gy. H = 20 · ${html10(Da)} = ${html10(20 * Da)} Sv = ${kom(20 * Da * 1000, 2)} mSv.`, 'Reken de massa om naar kg. Zoek w<sub>R</sub> voor α-straling op.', 0.03)] },
+      { titel:'Bestraling of besmetting', vraag:'Bekijk de situaties.', stappen:[
+        keuzeStap('Bij welke situaties is er sprake van besmetting? Kies alle juiste.', [
+          { html:'Iemand ademt radongas in.', g:true }, { html:'Een patiënt krijgt een injectie met een radioactieve tracer.', g:true },
+          { html:'Er komt radioactief stof op de kleding van een medewerker.', g:true }, { html:'Een patiënt krijgt een röntgenfoto van de pols.' },
+          { html:'Voedsel wordt bestraald om bacteriën te doden.' }, { html:'Een medewerker staat bij een afgeschermde γ-bron.' }], { meer:true }),
+        keuzeStap('Zendt bestraald voedsel daarna zelf straling uit?', [
+          { html:'Nee: er is geen radioactieve stof in het voedsel gekomen.', g:true }, { html:'Ja, een beetje, totdat de straling eruit is.' },
+          { html:'Ja, als het met γ-straling is bestraald.' }, { html:'Ja, want straling hoopt zich op.' }])] },
+      { titel:'Werken bij een bron', vraag:'Een medewerker moet 30 minuten werken in de ruimte met de γ-bron. Zorg dat zijn dosis kleiner is dan 2,0 µSv. De werktijd mag je niet veranderen.', dos: dCfg, stappen:[
+        simStap('Pas de situatie aan.', () => DOS.tmin === 30 && dosH() < 2, 'Verander de afstand en het scherm, en laat de werktijd op 30 min.', 'dosis onder 2,0 µSv'),
+        keuzeStap('Welke maatregelen verlagen de dosis? Kies alle juiste.', [{ html:'meer afstand tot de bron', g:true }, { html:'afscherming tussen bron en medewerker', g:true }, { html:'korter werken', g:true }, { html:'een dosimeter dragen' }, { html:'handschoenen dragen' }], { meer:true })] },
+      { titel:'Vergelijken met de achtergrond', ster:true, vraag:'Neem aan dat iemand in Nederland per jaar 2,5 mSv ontvangt door achtergrondstraling. Een CT-scan van de buik geeft 10 mSv.', stappen:[
+        getalStap('Dit is evenveel als … jaar achtergrondstraling.', 4, 'jaar', `${BR('10 mSv', '2,5 mSv')} = 4,0 jaar.`, 'Deel de dosis van de scan door de dosis per jaar.', 0.02)] }
+    ];
+  }
+});
+
+/* ================= 6. Isotopenfabriek ================= */
+WPS.push({
+  id:'tracer', ruimte:'tracer', titel:'Nucleaire diagnostiek', par:'I-06 · isotopenfabriek', sim: RAD,
+  zetSim(){},
+  uitleg: () => leerdoelen('Ik kan beargumenteren welke isotoop geschikt is als tracer.') + `
+    <h3>Uitleg</h3>
+    <p>Bij <b>nucleaire diagnostiek</b> krijgt een patiënt een kleine hoeveelheid radioactieve stof: een <b>tracer</b>. De tracer hoopt zich op in een orgaan. Een camera buiten het lichaam meet de straling en maakt zo een beeld van de werking van het orgaan.</p>
+    <ul><li>De straling moet buiten het lichaam gemeten kunnen worden: een <b>γ-straler</b>. α- en β-straling komen niet ver genoeg en geven een grote dosis in het lichaam.</li>
+    <li>De halveringstijd moet <b>lang genoeg</b> zijn om het onderzoek te doen.</li>
+    <li>De halveringstijd moet <b>kort genoeg</b> zijn, zodat de patiënt niet lang straling krijgt.</li></ul>
+    <div class="kader">Een onderzoeksreactor maakt deze isotopen. Rechts staan zes isotopen met hun straling en halveringstijd.</div>`,
+  voorbeeld: {
+    vraag: 'Een patiënt krijgt voor een onderzoek van de schildklier jood-131 (t<sub>½</sub> = 8,0 d) met een activiteit van 600 MBq. Bereken de activiteit na 16 dagen.',
+    stappen: [`n = ${BR('16 d', '8,0 d')} = 2.`, 'A = 600 MBq · (½)<sup>2</sup> = 150 MBq.', 'De activiteit is na 16 dagen 150 MBq. Omdat jood-131 ook β-straling uitzendt, wordt het tegenwoordig vooral gebruikt om de schildklier te behandelen.']
+  },
+  maakSerie: () => {
+    const A0 = kiesUit([320, 480, 640]);
+    return [
+      { titel:'Een tracer kiezen', vraag:'Voor een onderzoek van de botten wordt een tracer ingespoten. Het onderzoek duurt ongeveer 2 uur. Gebruik de kaarten rechts.', stappen:[
+        keuzeStap('Welke isotoop is het meest geschikt?', TRACERS.map(t => ({ html: t.n, g: t.n === 'Tc-99m' })), { vast:true, hint:'Welke straling moet je buiten het lichaam kunnen meten? En welke halveringstijd past bij een onderzoek van 2 uur?' }),
+        keuzeStap('Welke eigenschappen maken deze isotoop geschikt? Kies alle juiste.', [
+          { html:'Hij zendt γ-straling uit, die je buiten het lichaam kunt meten.', g:true }, { html:'De halveringstijd is lang genoeg voor het onderzoek.', g:true },
+          { html:'De halveringstijd is kort genoeg om de patiënt niet lang te bestralen.', g:true }, { html:'Hij zendt α-straling uit, die makkelijk te meten is.' }, { html:'De activiteit blijft dagenlang gelijk.' }], { meer:true })] },
+      { titel:'De volgende ochtend', vraag:`Om 8.00 uur heeft een dosis Tc-99m (t<sub>½</sub> = 6,0 h) een activiteit van ${A0} MBq. Bereken de activiteit om 8.00 uur de volgende ochtend.`, stappen:[
+        getalStap('A =', A0 / 16, 'MBq', `24 h is ${BR('24 h', '6,0 h')} = 4 halveringstijden: A = ${A0} · (½)<sup>4</sup> = ${kom(A0 / 16, 0)} MBq.`, 'Hoeveel halveringstijden passen in 24 uur?', 0.02)] },
+      { titel:'Te kort', vraag:'Kr-81m zendt ook alleen γ-straling uit.', stappen:[
+        keuzeStap('Waarom is Kr-81m niet geschikt voor het onderzoek van de botten?', [
+          { html:'De halveringstijd is zo kort dat de activiteit al bijna weg is voordat het onderzoek klaar is.', g:true },
+          { html:'γ-straling is niet buiten het lichaam te meten.' }, { html:'De halveringstijd is te lang.' }, { html:'Kr-81m is niet radioactief.' }])] },
+      { titel:'Vervoer naar het ziekenhuis', ster:true, vraag:'Ziekenhuizen krijgen geen Tc-99m geleverd, maar molybdeen-99 (t<sub>½</sub> = 66 h). Mo-99 vervalt tot Tc-99m.', stappen:[
+        keuzeStap('Welke reden past hierbij?', [
+          { html:'Tc-99m zou tijdens het vervoer grotendeels vervallen. Mo-99 maakt in het ziekenhuis steeds nieuw Tc-99m.', g:true },
+          { html:'Mo-99 is minder radioactief, dus het vervoer is veiliger.' }, { html:'Tc-99m kan niet in een reactor worden gemaakt.' }, { html:'Mo-99 zendt geen straling uit.' }])] }
+    ];
+  }
+});
+
+/* ================= 7. Ziekenhuisvleugel ================= */
+const TECH = [{ v:'r', t:'röntgenfoto' }, { v:'c', t:'CT-scan' }, { v:'e', t:'echografie' }, { v:'n', t:'nucleaire diagnostiek' }];
+WPS.push({
+  id:'beeld', ruimte:'beeld', titel:'Medische beeldvorming', par:'Z-07 · ziekenhuisvleugel', sim: RAD,
+  zetSim(o){ if (o && o.beeld){ BEELD.modus = o.beeld.modus; if (o.beeld.lagen) BEELD.lagen = o.beeld.lagen; } },
+  uitleg: () => leerdoelen(
+      'Ik kan uitleggen hoe bij een röntgenfoto contrast ontstaat, met de halveringsdikte van bot en weefsel.',
+      'Ik kan uitleggen wat een CT-scan extra geeft, en waarom de dosis hoger is.',
+      'Ik kan met de geluidssnelheid en de tijd tussen puls en echo de diepte van een grensvlak berekenen.',
+      'Ik kan per situatie een techniek kiezen en beargumenteren.') + `
+    <h3>Röntgenfoto en CT-scan</h3>
+    <p>Röntgenstraling gaat door het lichaam heen. Bot heeft een veel kleinere halveringsdikte dan zacht weefsel: er komt minder straling op de film. Waar veel straling komt, wordt de film donker; achter bot blijft hij licht. Bij een <b>CT-scan</b> draait de röntgenbuis om de patiënt. Een computer maakt van de vele opnames doorsneden van het lichaam. Dat geeft veel meer informatie, maar ook een veel grotere dosis.</p>
+    <h3>Echografie</h3>
+    <p>Een probe zendt korte pulsen <b>ultrasoon geluid</b> uit. Op een grensvlak tussen twee weefsels kaatst een deel terug: de echo. Het geluid gaat heen <b>en</b> terug:</p>
+    <div class="reken">s = v · t &nbsp; en &nbsp; diepte = ${BR('s', '2')}</div>
+    <p>Echografie gebruikt geen ioniserende straling. Daarom is het geschikt bij zwangerschap. Door bot en lucht komt geluid slecht heen.</p>
+    <h3>Nucleaire diagnostiek</h3>
+    <p>Met een tracer (werkplaats 6) meet je de <b>werking</b> van een orgaan, niet alleen de vorm.</p>`,
+  voorbeeld: {
+    vraag: `Bij een echo komt de echo van een grensvlak 52 µs na de puls terug. Neem aan dat de geluidssnelheid in weefsel 1,54·10<sup>3</sup> ${MS} is. Bereken hoe diep het grensvlak ligt.`,
+    stappen: [`s = v · t = 1,54·10<sup>3</sup> ${MS} · 52·10<sup>−6</sup> s = 0,080 m.`, 'Dit is de afstand heen en terug.', `Diepte = ${BR('0,080 m', '2')} = 0,040 m = 4,0 cm.`]
+  },
+  maakSerie: () => {
+    const vet = kiesUit([0.8, 1.0, 1.2]), spier = kiesUit([3.0, 3.5, 4.0, 4.5]), diep = vet + spier, t = 2 * diep / 100 / 1540 * 1e6;
+    const lagen = [vet, spier];
+    const sit = [['een gebroken pols', 'r'], ['de groei van een baby in de baarmoeder', 'e'], ['de werking van de schildklier', 'n'], ['inwendig letsel na een ongeluk, in doorsneden', 'c'], ['galstenen in de galblaas', 'e']];
+    return [
+      { titel:'Contrast op de foto', vraag:'Rechts zie je de doorsnede van een onderarm en de röntgenfilm eronder. Beweeg over de film.', beeld:{ modus:'rontgen' }, stappen:[
+        keuzeStap('Achter het bot blijft de film licht. Welke verklaring is juist?', [
+          { html:'Bot heeft een kleinere halveringsdikte dan zacht weefsel: er komt minder straling op de film.', g:true },
+          { html:'Bot heeft een grotere halveringsdikte dan zacht weefsel.' }, { html:'Bot zendt zelf licht uit.' }, { html:'Bot is radioactief.' }])] },
+      { titel:'Doorgelaten straling', vraag:'Neem aan: de halveringsdikte van zacht weefsel is 2,0 cm, die van bot 1,0 cm.', beeld:{ modus:'rontgen' }, stappen:[
+        getalStap('Doorgelaten door 6,0 cm zacht weefsel =', 12.5, '%', `${BR('6,0 cm', '2,0 cm')} = 3 halveringsdiktes: (½)<sup>3</sup> = 12,5%.`, 'Hoeveel halveringsdiktes zacht weefsel zijn het?', 0.02),
+        getalStap('Doorgelaten door 4,0 cm zacht weefsel en 2,0 cm bot =', 6.25, '%', '2 halveringsdiktes weefsel en 2 halveringsdiktes bot: (½)<sup>4</sup> = 6,25%. Controleer met het midden van de film rechts.', 'Tel de halveringsdiktes van weefsel en bot bij elkaar op.', 0.02)] },
+      { titel:'Een echo', vraag:`Rechts staat het scoopbeeld van een echo van de bovenarm. Neem aan dat de geluidssnelheid in weefsel 1,54·10<sup>3</sup> ${MS} is. Bepaal hoe diep het bot onder de huid ligt.`, beeld:{ modus:'echo', lagen }, stappen:[
+        getalStap('Tijd tussen de puls en de echo van het bot =', t, 'µs', `De echo van het bot komt na ${kom(t, 0)} µs. De kleinere echo daarvoor komt van het grensvlak tussen vet en spier.`, 'Bot weerkaatst sterk. Welke echo komt van het diepste grensvlak?', 0.04),
+        getalStap('Diepte van het bot =', diep, 'cm', `s = 1,54·10<sup>3</sup> ${MS} · ${kom(t, 0)}·10<sup>−6</sup> s = ${kom(2 * diep / 100, 3)} m. Diepte = ${BR(kom(2 * diep / 100, 3) + ' m', '2')} = ${kom(diep, 1)} cm.`, 'Het geluid gaat heen en terug.', 0.05)] },
+      { titel:'De juiste techniek', vraag:'Kies voor elke situatie de beste techniek.', stappen:[
+        { type:'selects', vr:'Welke techniek past het best?', selects: sit.map(([s]) => ({ lab: s, opties: TECH })), hint:'Denk aan: bot of zacht weefsel, vorm of werking, ioniserende straling bij zwangerschap, doorsneden.',
+          check: v => { if (v.some(x => !x)) return { ok:false, msg:'Kies bij elke situatie een techniek.' };
+            const fout = v.map((x, i) => x !== sit[i][1]).filter(Boolean).length;
+            return fout ? { ok:false, msg:`Nog ${fout} niet goed.` } : { ok:true, msg:'Goed! Echografie bij zwangerschap: geen ioniserende straling. Nucleaire diagnostiek voor de werking van een orgaan.' }; },
+          antwoord: () => sit.map(([s, k]) => s + ': ' + TECH.find(x => x.v === k).t).join('<br>'), goed: () => sit.map(x => x[1]) }] },
+      { titel:'Röntgenfoto of CT-scan', ster:true, vraag:'Vergelijk een CT-scan met een gewone röntgenfoto.', stappen:[
+        keuzeStap('Welke uitspraken zijn juist? Kies alle juiste.', [
+          { html:'Een CT-scan geeft doorsneden van het lichaam.', g:true }, { html:'De dosis van een CT-scan is veel groter.', g:true },
+          { html:'Een CT-scan gebruikt geen ioniserende straling.' }, { html:'Een CT-scan werkt met geluidsgolven.' }], { meer:true })] }
+    ];
+  }
+});
+
+/* ---------- start ---------- */
+$('#beamerknop').onclick = () => document.body.classList.toggle('beamer');
+$('#resetknop').onclick = () => { if (confirm('Alle voortgang wissen?')){ STAAT.voortgang = {}; bewaar({}); for (const k in PER_WP) delete PER_WP[k]; open(STAAT.wp); } };
+open(0);
+requestAnimationFrame(lus);
+</script>
+</body>
+</html>
