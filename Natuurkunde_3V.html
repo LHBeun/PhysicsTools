@@ -1450,6 +1450,49 @@ const LENS = {
     else { lijn([[x0, y0 - hv], [xb, y0 - hb]], '#6aa0d8', true); lijn([[xv, y0 - hv], [xb, y0 - hb]], '#e0845c', true); if (xb > 0){ c.strokeStyle = '#b38bd6'; c.lineWidth = 3; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(xb, y0); c.lineTo(xb, y0 - hb); c.stroke(); c.setLineDash([]); } } }
 };
 
+/* ---------- diagrambouwer: van verhaal naar (s,t)- en (v,t)-diagram ---------- */
+/* scenario: { naam, verhaal, segs:[{type:'opt'|'const'|'rem'|'stil', v0, v1, dt}], tmax, smax, vmax } */
+function bouwKnik(sc){ const r = [{ t:0, s:0, v:sc.segs[0].v0 }]; sc.segs.forEach(g => { const p = r[r.length - 1]; r.push({ t:p.t + g.dt, s:p.s + (g.v0 + g.v1) / 2 * g.dt, v:g.v1 }); }); return r; }
+function bouwVorm(g){ return g.type === 'stil' ? 'hor' : g.type === 'const' ? 'recht' : g.type === 'opt' ? 'steil' : 'minder'; }
+const BOUW = {
+  sc:null, rows:[], vorm:[], ok:false, fb:'',
+  VORMEN:[['', 'kies'], ['recht', 'rechte schuine lijn'], ['hor', 'horizontale lijn'], ['steil', 'steeds steiler'], ['minder', 'steeds minder steil']],
+  zet(sc){ if (!sc) return; this.sc = sc; this.rows = bouwKnik(sc).map(r => sc.vul ? { t:komma(r.t), s:komma(r.s), v:komma(r.v) } : { t:'', s:'', v:'' }); this.vorm = sc.segs.map(g => sc.vul ? bouwVorm(g) : ''); this.ok = false; this.fb = ''; if (this.host) this.init(this.host); },
+  opdracht(o){ const sc = o ? o.bouw : this.demo; if (sc && sc !== this.sc) this.zet(sc); },
+  init(host){ this.host = host; const sc = this.sc; if (!sc) return;
+    const cel = (i, k) => `<td><input class="bw_in" data-i="${i}" data-k="${k}" value="${this.rows[i][k]}" inputmode="decimal" style="width:64px"></td>`;
+    host.innerHTML = `<div class="paneel">${kop('Diagrambouwer', sc.naam || '')}
+      <div class="kader" style="margin-top:8px">${sc.verhaal}</div>
+      <table class="data"><tr><th>knikpunt</th><th>t (s)</th><th>s (m)</th><th>v (${MS})</th></tr>${this.rows.map((r, i) => `<tr><td>${i + 1}</td>${cel(i, 't')}${cel(i, 's')}${cel(i, 'v')}</tr>`).join('')}</table>
+      <div class="rijc">${sc.segs.map((g, j) => `<label>vorm (s,t) stuk ${j + 1} <select class="bw_vm" data-j="${j}">${this.VORMEN.map(([v, t]) => `<option value="${v}"${this.vorm[j] === v ? ' selected' : ''}>${t}</option>`).join('')}</select></label>`).join('')}</div>
+      <div id="bw_s"></div><div id="bw_v"></div>
+      <div class="rijc"><button class="knop" id="bw_ok">Controleer diagrammen</button><button class="knop g" id="bw_wis">Wis</button></div><div class="noot" id="bw_fb">${this.fb}</div></div>`;
+    this.cs = canvasIn($('#bw_s'), 560, 220, 'cnv papier'); this.cv = canvasIn($('#bw_v'), 560, 190, 'cnv papier');
+    host.querySelectorAll('.bw_in').forEach(el => el.oninput = () => { this.rows[+el.dataset.i][el.dataset.k] = el.value; this.ok = false; });
+    host.querySelectorAll('.bw_vm').forEach(el => el.onchange = () => { this.vorm[+el.dataset.j] = el.value; this.ok = false; });
+    $('#bw_ok').onclick = () => this.controleer(); $('#bw_wis').onclick = () => this.zet(this.sc); },
+  getal(x){ const v = leesGetal(String(x)); return isNaN(v) ? null : v; },
+  controleer(){ const goed = bouwKnik(this.sc), fout = [];
+    const dicht = (a, b) => a !== null && Math.abs(a - b) <= Math.max(0.02 * Math.abs(b), 0.05);
+    goed.forEach((g, i) => ['t', 's', 'v'].forEach(k => { if (!dicht(this.getal(this.rows[i][k]), g[k])) fout.push(k + ' bij knikpunt ' + (i + 1)); }));
+    const vf = this.sc.segs.map((g, j) => this.vorm[j] === bouwVorm(g) ? null : 'vorm van stuk ' + (j + 1)).filter(Boolean);
+    this.ok = !fout.length && !vf.length;
+    this.fb = this.ok ? '<b style="color:#62bb87">Klopt: tabel en diagrammen zijn goed.</b>' : 'Nog niet goed: ' + fout.concat(vf).join(', ') + '. Tip: reken per stuk de afstand uit en tel op; bij optrekken en afremmen met v<sub>gem</sub>.';
+    $('#bw_fb').innerHTML = this.fb; },
+  assen(ctx, ymax, ylab){ return new Assen(ctx, { x0:0, x1:this.sc.tmax, y0:0, y1:ymax, dx:this.sc.dt || 5, dy:ymax / 5, xlab:'t (s)', ylab, L:56, T:12, B:34 }); },
+  punten(k){ return this.rows.map(r => [this.getal(r.t), this.getal(r[k])]); },
+  draw(){ if (!this.cs || !this.sc) return; const sc = this.sc;
+    const a = this.assen(this.cs, sc.smax, 's (m)'), b = this.assen(this.cv, sc.vmax, 'v (m/s)'); a.rooster(true); b.rooster(true);
+    const ps = this.punten('s'), pv = this.punten('v'), c = this.cs;
+    for (let j = 0; j < sc.segs.length; j++){ const [t0, s0] = ps[j], [t1, s1] = ps[j + 1]; if ([t0, s0, t1, s1].some(x => x === null) || t1 <= t0) continue;
+      const vm = this.vorm[j], f = u => vm === 'steil' ? u * u : vm === 'minder' ? 1 - (1 - u) * (1 - u) : u;
+      a.kromme(t => s0 + (s1 - s0) * f((t - t0) / (t1 - t0)), t0, t1, vm ? '#1b3f8a' : '#9aa7b8', 2); }
+    ps.forEach(p => { if (p[0] !== null && p[1] !== null) a.kruis(p[0], p[1], '#b0432a'); });
+    const cv = this.cv; cv.strokeStyle = '#1b3f8a'; cv.lineWidth = 2; cv.beginPath(); let eerst = true;
+    pv.forEach(p => { if (p[0] === null || p[1] === null) { eerst = true; return; } eerst ? cv.moveTo(b.X(p[0]), b.Y(p[1])) : cv.lineTo(b.X(p[0]), b.Y(p[1])); eerst = false; }); cv.stroke();
+    pv.forEach(p => { if (p[0] !== null && p[1] !== null) b.kruis(p[0], p[1], '#b0432a'); }); }
+};
+
 /* =====================================================================
    Algemene opbouw: zijbalk, werkplaats, voorbeeld, opdrachten in stappen
    ===================================================================== */
@@ -1777,42 +1820,79 @@ dwp(H1, { id:'h1_snel', titel:'Snelheid', par:'1⁠.1 · v = s/t en omrekenen', 
       getalStap('Bereken hoeveel km Anna dan heeft gefietst:', 2.4, 'km', 's = 4,0 · 600 = 2400 m = 2,4 km.', 'Gebruik de tijd uit de vorige stap.', 0.01)] }
   ] });
 
-/* ---------- 1.2 bewegingen in diagrammen ---------- */
-const ST12 = { kop:'Figuur', sub:'(s,t)-diagram van een wandeling', assen:{ x0:0, x1:40, y0:0, y1:3000, dx:5, dy:500, xlab:'t (min)', ylab:'s (m)' },
-  krommen:[{ f: t => t < 10 ? 100 * t : t < 15 ? 1000 : t < 35 ? 1000 + 75 * (t - 15) : 2500 }], extra: lbl([['A', 0, 0], ['B', 10, 1000], ['C', 15, 1000], ['D', 35, 2500]]) };
+/* ---------- 1.2 van verhaal naar diagram en terug ---------- */
+const SC_CATO = { naam:'Cato op de fiets', verhaal:'Cato fietst weg vanaf een stoplicht. Ze trekt in 5,0 s gelijkmatig op tot 8,0 ' + MS + '. Daarna rijdt ze 15 s met die constante snelheid. Bij het volgende stoplicht remt ze in 4,0 s gelijkmatig af tot stilstand.',
+  segs:[{ type:'opt', v0:0, v1:8, dt:5 }, { type:'const', v0:8, v1:8, dt:15 }, { type:'rem', v0:8, v1:0, dt:4 }], tmax:25, smax:200, vmax:10 };
+const SC_HAN = { naam:'voorbeeld: Han op de fiets', vul:true, verhaal:'Voorbeeld uit de uitleg. Han trekt in 4,0 s gelijkmatig op tot 6,0 ' + MS + ', houdt die snelheid 10 s vast en remt in 6,0 s gelijkmatig af tot stilstand.',
+  segs:[{ type:'opt', v0:0, v1:6, dt:4 }, { type:'const', v0:6, v1:6, dt:10 }, { type:'rem', v0:6, v1:0, dt:6 }], tmax:20, smax:100, vmax:8 };
+const VT_JET = () => grafiekSVG({ kop:'figuur · (v,t)-diagram van Jet op de step', x:[0, 16], y:[0, 5], dx:2, dy:1, xlab:'t (s)', ylab:'v (m/s)', lijnen:[{ pts:[[0, 0], [3, 4], [9, 4], [11, 0], [16, 0]] }] });
+const ST_KOPPEL = () => grafiekSVG({ kop:'figuur · (s,t)-diagram van een kart', x:[0, 14], y:[0, 60], dx:2, dy:10, xlab:'t (s)', ylab:'s (m)', lijnen:[{ f: t => t < 4 ? 0.625 * t * t : t < 10 ? 10 + 5 * (t - 4) : 40 + 5 * (t - 10) - 0.625 * (t - 10) ** 2 }] });
+const VT_OPTIE = (pts, f) => grafiekSVG({ kop:'(v,t)-diagram', w:300, h:170, x:[0, 14], y:[0, 8], dx:2, dy:2, xlab:'t (s)', ylab:'v (m/s)', lijnen:[f ? { f } : { pts }] });
+const ST_TWEE = () => grafiekSVG({ kop:'figuur · (s,t)-diagram van Anne (lopend) en Ernst (fiets)', x:[0, 150], y:[0, 250], dx:25, dy:50, xlab:'t (s)', ylab:'s (m)', lijnen:[{ f: t => 1.5 * t }, { f: t => t < 60 ? 0 : 4 * (t - 60), kleur:'#b0432a' }],
+  extra: (X, Y) => `<text x="${X(130)}" y="${Y(1.5 * 130) + 18}" fill="#1b3f8a" font-weight="bold">Anne</text><text x="${X(118)}" y="${Y(4 * 58) - 6}" fill="#b0432a" font-weight="bold">Ernst</text>` });
 const VT12 = () => grafiekSVG({ kop:'figuur · (v,t)-diagram van een bus', x:[0, 60], y:[0, 15], dx:10, dy:5, xlab:'t (s)', ylab:'v (m/s)', lijnen:[{ pts:[[0, 0], [10, 12], [50, 12], [60, 0]] }] });
-dwp(H1, { id:'h1_diag', titel:'Bewegingen in diagrammen', par:'1⁠.2 · (s,t)- en (v,t)-diagram', sim:FIG, voorSim: () => FIG.std = ST12,
-  uitleg: () => leerdoelen('Ik herken in een (s,t)-diagram en een (v,t)-diagram een eenparige beweging, stilstand, versnellen en vertragen.', 'Ik bepaal een snelheid uit een (s,t)-diagram.', 'Ik bepaal de afgelegde afstand met de oppervlakte onder een (v,t)-diagram.', '★ Ik bereken een gemiddelde snelheid uit een (v,t)-diagram.') + `
-    <p>In een <b>(s,t)-diagram</b> staat de afgelegde afstand verticaal. Een rechte schuine lijn betekent een constante snelheid (<b>eenparige beweging</b>): hoe steiler, hoe sneller. Een horizontale lijn betekent stilstand.</p>
-    <p>In een <b>(v,t)-diagram</b> staat de snelheid verticaal. Een horizontale lijn betekent een constante snelheid, een stijgende lijn versnellen en een dalende lijn vertragen.</p>
-    <div class="kader">De <b>oppervlakte</b> onder een (v,t)-diagram is de afgelegde afstand. Rechthoek: v · t. Driehoek: ½ · basis · hoogte. Reken met de eenheden langs de assen.</div>`,
-  voorbeeld:{ vraag:'Een auto rijdt 20 s met 15 ' + MS + ' en remt dan in 6,0 s gelijkmatig af tot stilstand. Bepaal de afgelegde afstand met de oppervlakte onder het (v,t)-diagram.', stappen:['Rechthoek: 15 ' + MS + ' · 20 s = 300 m.', 'Driehoek: ½ · 6,0 s · 15 ' + MS + ' = 45 m.', 'Samen: 300 + 45 = 345 m.'] },
+dwp(H1, { id:'h1_diag', titel:'Van verhaal naar diagram en terug', par:'1⁠.2 · (s,t)- en (v,t)-diagrammen', sim:BOUW, voorSim: () => { BOUW.demo = SC_HAN; BOUW.zet(SC_HAN); },
+  uitleg: () => leerdoelen('Ik maak bij een verhaal een (s,t)- en een (v,t)-diagram: stukken, knikpunten, tabel en vorm per stuk.', 'Ik bereken de versnelling met a = ' + BR('Δv', 'Δt') + ' en de afstand tijdens gelijkmatig optrekken of afremmen met v<sub>gem</sub>.', 'Ik vertel bij een diagram het verhaal van de beweging.', 'Ik koppel een (s,t)-diagram aan het bijpassende (v,t)-diagram.', 'Ik bepaal de afstand met de oppervlakte onder een (v,t)-diagram.', '★ Ik bepaal waar en wanneer iemand een ander inhaalt.') + `
+    <p><b>Van verhaal naar diagram</b> in vijf stappen:</p>
+    <ol><li>Knip het verhaal in <b>stukken</b>: in elk stuk is de beweging steeds hetzelfde.</li><li>Waar de beweging verandert, ligt een <b>knikpunt</b>.</li><li>Reken voor elk knikpunt de tijd t, de afstand s en de snelheid v uit en zet ze in een <b>tabel</b>.</li><li>Zet de punten in het diagram.</li><li>Kies per stuk de <b>vorm</b>.</li></ol>
+    <table class="data"><tr><th style="text-align:left">beweging</th><th style="text-align:left">(s,t)-diagram</th><th style="text-align:left">(v,t)-diagram</th></tr>
+    <tr><td style="text-align:left">stilstand</td><td style="text-align:left">horizontale lijn</td><td style="text-align:left">lijn op v = 0</td></tr>
+    <tr><td style="text-align:left">constante snelheid</td><td style="text-align:left">rechte schuine lijn</td><td style="text-align:left">horizontale lijn</td></tr>
+    <tr><td style="text-align:left">gelijkmatig optrekken</td><td style="text-align:left">steeds steiler</td><td style="text-align:left">rechte stijgende lijn</td></tr>
+    <tr><td style="text-align:left">gelijkmatig afremmen</td><td style="text-align:left">steeds minder steil</td><td style="text-align:left">rechte dalende lijn</td></tr></table>
+    <div class="kader">Tijdens gelijkmatig optrekken of afremmen verandert de snelheid steeds. Reken dan met de gemiddelde snelheid: v<sub>gem</sub> = ${BR('v<sub>begin</sub> + v<sub>eind</sub>', '2')} en s = v<sub>gem</sub>·t.<br>De <b>versnelling</b> is de snelheidsverandering per seconde: a = ${BR('Δv', 'Δt')}, in ${MS2}. Bij afremmen is a negatief.</div>
+    <p><b>Van diagram naar verhaal</b> werkt andersom: zoek de knikpunten, bepaal per stuk de vorm en vertaal die naar de beweging. Let op: een horizontale lijn betekent in een (s,t)-diagram stilstand, maar in een (v,t)-diagram een constante snelheid. De oppervlakte onder een (v,t)-diagram is de afgelegde afstand.</p>
+    <p>Rechts staat de diagrambouwer met het voorbeeld van Han al ingevuld. In opdracht 2 vul je hem zelf in.</p>`,
+  voorbeeld:{ vraag:'Han trekt op de fiets in 4,0 s gelijkmatig op tot 6,0 ' + MS + '. Daarna houdt hij die snelheid 10 s vast. Tot slot remt hij in 6,0 s gelijkmatig af tot stilstand. Maak de tabel met knikpunten en beschrijf de vorm van de diagrammen.', stappen:[
+    'Stukken: optrekken (0–4 s), constante snelheid (4–14 s), afremmen (14–20 s). Knikpunten op t = 0, 4, 14 en 20 s.',
+    'Stuk 1: v<sub>gem</sub> = ' + BR('0 + 6,0', '2') + ' = 3,0 ' + MS + ', s = 3,0 · 4,0 = 12 m. Stuk 2: s = 6,0 · 10 = 60 m, samen 72 m. Stuk 3: v<sub>gem</sub> = 3,0 ' + MS + ', s = 3,0 · 6,0 = 18 m, samen 90 m.',
+    '<table class="data"><tr><th>t (s)</th><td>0</td><td>4</td><td>14</td><td>20</td></tr><tr><th>s (m)</th><td>0</td><td>12</td><td>72</td><td>90</td></tr><tr><th>v (' + MS + ')</th><td>0</td><td>6,0</td><td>6,0</td><td>0</td></tr></table>',
+    '(s,t): stuk 1 steeds steiler, stuk 2 recht, stuk 3 steeds minder steil. (v,t): drie rechte stukken: stijgend, horizontaal, dalend.'] },
   maakSerie: () => [
-    { titel:'Stukken van de wandeling', vraag:'Rechts staat het (s,t)-diagram van een wandeling.', stappen:[
-      selectsStap('Kies bij elk stuk de beweging.', [{ z:'A → B', a:'snel' }, { z:'B → C', a:'stil' }, { z:'C → D', a:'lang' }], [{ v:'snel', t:'eenparig, sneller dan het andere eenparige stuk' }, { v:'lang', t:'eenparig, langzamer dan het andere eenparige stuk' }, { v:'stil', t:'stilstand' }, { v:'vs', t:'versnellen' }, { v:'vt', t:'vertragen' }], 'Vergelijk hoe steil de stukken lopen. Horizontaal betekent dat de afstand niet toeneemt.')] },
-    { titel:'Snelheid aflezen', vraag:'Gebruik weer het (s,t)-diagram van de wandeling.', stappen:[
-      getalStap('Bepaal de snelheid tussen A en B in ' + MS + ':', 1.667, MS, 's = 1000 m in t = 10 min = 600 s; v = ' + BR('1000 m', '600 s') + ' = 1,7 ' + MS + '.', 'Lees s en t af en reken minuten om naar seconden.', 0.02),
-      getalStap('Bepaal de snelheid tussen C en D in ' + MS + ':', 1.25, MS, 's = 2500 − 1000 = 1500 m in t = 20 min = 1200 s; v = ' + BR('1500 m', '1200 s') + ' = 1,25 ' + MS + '.', 'Neem het verschil in afstand en het verschil in tijd.', 0.02)] },
-    { titel:'Gemiddeld', vraag:'Gebruik weer het (s,t)-diagram van de wandeling.', stappen:[
-      getalStap('Bereken de gemiddelde snelheid van t = 0 tot t = 35 min in ' + KMH + ':', 4.286, KMH, 's = 2,5 km, t = ' + BR('35', '60') + ' h = 0,583 h; v<sub>gem</sub> = ' + BR('2,5 km', '0,583 h') + ' = 4,3 ' + KMH + '.', 'Totale afstand en totale tijd, ook de stilstand. Reken om naar km en h.', 0.02)] },
-    { titel:'Bus', vraag:'Hieronder staat het (v,t)-diagram van een bus tussen twee haltes.' + VT12(), stappen:[
-      selectsStap('Kies bij elk stuk de beweging.', [{ z:'0 tot 10 s', a:'vs' }, { z:'10 tot 50 s', a:'eenp' }, { z:'50 tot 60 s', a:'vt' }], [{ v:'vs', t:'versnellen' }, { v:'eenp', t:'eenparige beweging' }, { v:'vt', t:'vertragen' }, { v:'stil', t:'stilstand' }, { v:'terug', t:'achteruit rijden' }], 'In een (v,t)-diagram betekent een horizontale lijn een constante snelheid, geen stilstand.'),
-      getalStap('Bepaal de afstand tussen de twee haltes:', 540, 'm', 'Driehoek ½ · 10 · 12 = 60 m, rechthoek 40 · 12 = 480 m, driehoek ½ · 10 · 12 = 60 m. Samen 540 m.', 'Verdeel de oppervlakte onder de grafiek in een rechthoek en twee driehoeken.', 0.01)] },
-    { titel:'Gemiddelde van de bus', ster:true, vraag:'Gebruik het (v,t)-diagram van de bus.', stappen:[
-      getalStap('Bereken de gemiddelde snelheid van de bus tussen de haltes:', 9.0, MS, 'v<sub>gem</sub> = ' + BR('540 m', '60 s') + ' = 9,0 ' + MS + '.', 'Gebruik je antwoord voor de afstand en de totale tijd.', 0.01),
-      getalStap('De chauffeur wil dezelfde afstand in 50 s afleggen. Optrekken en remmen duren weer elk 10 s. Bereken de topsnelheid die daarvoor nodig is:', 13.5, MS, 'Met topsnelheid v: ½·10·v + 30·v + ½·10·v = 40·v = 540 m, dus v = 13,5 ' + MS + '.', 'Schrijf de oppervlakte onder het nieuwe (v,t)-diagram op met de onbekende topsnelheid.', 0.02)] }
+    { titel:'Verhaal → tabel', vraag:'Eef loopt 4,0 min met 1,5 ' + MS + ' naar de bushalte. Daar wacht ze 6,0 min. Daarna rijdt de bus 8,0 min met een constante snelheid van 12 ' + MS + '. Neem aan dat de bus meteen op snelheid is.', stappen:[
+      getalStap('Bepaal het tijdstip van het derde knikpunt (het vertrek van de bus), in s:', 600, 's', 'Knikpunten: t = 0, 240, 600 en 1080 s. Het derde knikpunt ligt na 4,0 + 6,0 = 10 min = 600 s.', 'Reken de minuten om naar seconden en tel de stukken op.', 0.01),
+      getalStap('Bereken de afstand s bij het laatste knikpunt:', 6120, 'm', 'Stuk 1: 1,5 · 240 = 360 m. Stuk 2: 0 m. Stuk 3: 12 · 480 = 5760 m. Samen 6120 m = 6,1 km.', 'Bereken per stuk de afstand en tel op.', 0.01),
+      selectsStap('Kies de vorm van elk stuk in het (s,t)-diagram.', [{ z:'stuk 1 (lopen)', a:'recht' }, { z:'stuk 2 (wachten)', a:'hor' }, { z:'stuk 3 (bus)', a:'recht2' }], [{ v:'recht', t:'rechte schuine lijn, minder steil dan het andere schuine stuk' }, { v:'recht2', t:'rechte schuine lijn, steiler dan het andere schuine stuk' }, { v:'hor', t:'horizontale lijn' }, { v:'steil', t:'steeds steiler' }, { v:'minder', t:'steeds minder steil' }], 'Constante snelheid of stilstand? Vergelijk ook de snelheden.')] },
+    { titel:'Verhaal → diagram', bouw:SC_CATO, vraag:'Rechts staat de diagrambouwer met het verhaal van Cato.', stappen:[
+      simStap('Vul de tabel met knikpunten in en kies per stuk de vorm van het (s,t)-diagram. Klik daarna op <i>Controleer diagrammen</i>.', () => BOUW.ok, 'Werk het stappenplan uit de uitleg af. Bij optrekken en afremmen reken je met v<sub>gem</sub>.', 'knikpunten t = 0, 5, 20, 24 s; s = 0, 20, 140, 156 m; v = 0, 8, 8, 0 ' + MS + '; vormen: steeds steiler, recht, steeds minder steil'),
+      getalStap('Bereken de versnelling van Cato tijdens het optrekken:', 1.6, MS2, 'a = ' + BR('Δv', 'Δt') + ' = ' + BR('8,0 ' + MS, '5,0 s') + ' = 1,6 ' + MS2 + '.', 'a = ' + BR('Δv', 'Δt') + '.', 0.01),
+      getalStap('Bereken de gemiddelde snelheid van Cato tussen de twee stoplichten:', 6.5, MS, 'v<sub>gem</sub> = ' + BR('156 m', '24 s') + ' = 6,5 ' + MS + '.', 'Gebruik de totale afstand en de totale tijd uit je tabel.', 0.01)] },
+    { titel:'Diagram → verhaal', vraag:'Hieronder staat het (v,t)-diagram van Jet op de step.' + VT_JET(), stappen:[
+      selectsStap('Kies bij elk stuk de beweging.', [{ z:'0 tot 3 s', a:'opt' }, { z:'3 tot 9 s', a:'const' }, { z:'9 tot 11 s', a:'rem' }, { z:'11 tot 16 s', a:'stil' }], [{ v:'opt', t:'gelijkmatig optrekken' }, { v:'const', t:'constante snelheid' }, { v:'rem', t:'gelijkmatig afremmen' }, { v:'stil', t:'stilstand' }, { v:'terug', t:'achteruit' }], 'In een (v,t)-diagram betekent een horizontale lijn een constante snelheid; stilstand is v = 0.'),
+      keuzeStap('Welk verhaal past bij het diagram?', [
+        { html:'Jet zet zich af en komt in 3 s op snelheid. Ze rijdt 6 s met dezelfde snelheid, remt in 2 s af en staat daarna 5 s stil.', g:1 },
+        { html:'Jet zet zich af en komt in 3 s op snelheid. Ze rijdt 6 s met dezelfde snelheid, remt in 2 s af en rijdt daarna 5 s langzaam verder.', fb:'Na 11 s is v = 0.' },
+        { html:'Jet zet zich af en komt in 3 s op snelheid. Daarna gaat ze 6 s steeds harder, remt in 2 s af en staat daarna stil.', fb:'Tussen 3 en 9 s verandert v niet.' },
+        { html:'Jet staat 3 s stil, rijdt daarna 6 s met dezelfde snelheid, remt in 2 s af en staat daarna stil.', fb:'Dat zou een (s,t)-diagram zijn geweest.' }]),
+      getalStap('Bepaal de afstand die Jet aflegt:', 34, 'm', 'Driehoek ½ · 3 · 4 = 6 m, rechthoek 6 · 4 = 24 m, driehoek ½ · 2 · 4 = 4 m. Samen 34 m.', 'Gebruik de oppervlakte onder het (v,t)-diagram.', 0.01)] },
+    { titel:'Koppelen', vraag:'Hieronder staat het (s,t)-diagram van een kart.' + ST_KOPPEL(), stappen:[
+      keuzeStap('Welk (v,t)-diagram hoort bij deze beweging?', [
+        { html:VT_OPTIE([[0, 0], [4, 5], [10, 5], [14, 0]]), g:1 },
+        { html:VT_OPTIE(null, t => (t < 4 ? 0.625 * t * t : t < 10 ? 10 + 5 * (t - 4) : 40 + 5 * (t - 10) - 0.625 * (t - 10) ** 2) / 8), fb:'Dit diagram heeft dezelfde vorm als het (s,t)-diagram. Bepaal per stuk de snelheid.' },
+        { html:VT_OPTIE([[0, 0], [4, 5], [10, 5], [14, 5]]), fb:'Let op het laatste stuk: loopt het (s,t)-diagram daar nog even steil?' },
+        { html:VT_OPTIE([[0, 5], [4, 5], [10, 5], [14, 0]]), fb:'Begint de kart met snelheid, of vanuit stilstand?' }]),
+      getalStap('Bepaal de versnelling van de kart in het laatste stuk (10 tot 14 s):', -1.25, MS2, 'v daalt van 5,0 naar 0 ' + MS + ' in 4,0 s: a = ' + BR('0 − 5,0', '4,0') + ' = −1,25 ' + MS2 + '.', 'Bepaal eerst de snelheid aan het begin van het laatste stuk (helling van het rechte stuk).', 0.02)] },
+    { titel:'Bus tussen twee haltes', vraag:'Hieronder staat het (v,t)-diagram van een bus tussen twee haltes.' + VT12(), stappen:[
+      getalStap('Bepaal de afstand tussen de twee haltes:', 540, 'm', 'Driehoek ½ · 10 · 12 = 60 m, rechthoek 40 · 12 = 480 m, driehoek ½ · 10 · 12 = 60 m. Samen 540 m.', 'Verdeel de oppervlakte onder de grafiek in een rechthoek en twee driehoeken.', 0.01),
+      getalStap('De chauffeur wil dezelfde afstand in 50 s afleggen. Optrekken en remmen duren weer elk 10 s. Bereken de topsnelheid die daarvoor nodig is:', 13.5, MS, 'Met topsnelheid v: ½·10·v + 30·v + ½·10·v = 40·v = 540 m, dus v = 13,5 ' + MS + '.', 'Schrijf de oppervlakte onder het nieuwe (v,t)-diagram op met de onbekende topsnelheid.', 0.02)] },
+    { titel:'Inhalen', ster:true, vraag:'Anne loopt vanaf het hek met een constante snelheid. Ernst vertrekt later vanaf hetzelfde hek op de fiets. Hieronder staat het (s,t)-diagram.' + ST_TWEE(), stappen:[
+      getalStap('Bepaal op welk tijdstip Ernst Anne inhaalt:', 96, 's', 'Het snijpunt van de lijnen ligt bij t = 96 s (Anne: 1,5 ' + MS + ', Ernst: 4,0 ' + MS + ' vanaf t = 60 s: 1,5·t = 4,0·(t − 60)).', 'Zoek het snijpunt. Controleer met de snelheden uit het diagram.', 0.03),
+      getalStap('Bepaal hoe ver van het hek dat is:', 144, 'm', 's = 1,5 · 96 = 144 m.', 'Lees af bij het snijpunt of reken met de snelheid van Anne.', 0.03),
+      getalStap('Ernst vertrekt een volgende keer pas 90 s na Anne, met dezelfde snelheden. Bereken hoe ver van het hek hij haar dan inhaalt:', 216, 'm', '1,5·t = 4,0·(t − 90), dus 2,5·t = 360 en t = 144 s; s = 1,5 · 144 = 216 m.', 'Schrijf voor allebei s als functie van t en stel ze gelijk.', 0.02)] }
   ] });
 
 /* ---------- 1.3 krachten ---------- */
 const VEER13 = { kop:'Figuur', sub:'(F,u)-diagram van twee veren', assen:{ x0:0, x1:10, y0:0, y1:5, dx:1, dy:1, xlab:'u (cm)', ylab:'F (N)' },
   krommen:[{ f: u => 0.5 * u, kleur:'#1b3f8a' }, { f: u => 0.2 * u, kleur:'#b0432a' }],
   extra: (a, c) => { c.font = 'bold 13px Segoe UI'; c.fillStyle = '#1b3f8a'; c.fillText('veer P', a.X(8.4), a.Y(4.4)); c.fillStyle = '#b0432a'; c.fillText('veer Q', a.X(8.6), a.Y(1.4)); } };
-dwp(H1, { id:'h1_kracht', titel:'Krachten', par:'1⁠.3 · zwaartekracht, veerkracht, wrijving en F<sub>res</sub>', sim:FIG, voorSim: () => FIG.std = VEER13,
-  uitleg: () => leerdoelen('Ik bereken de zwaartekracht met F<sub>z</sub> = m·g.', 'Ik reken aan een veer met F<sub>veer</sub> = C·u.', 'Ik bepaal de resulterende kracht van krachten langs één lijn.', 'Ik leg met de resulterende kracht uit of een voorwerp versnelt, vertraagt of met constante snelheid beweegt.', '★ Ik combineer de zwaartekracht en een veer.') + `
+dwp(H1, { id:'h1_kracht', titel:'Krachten', par:'1⁠.3 · zwaartekracht, veerkracht, F<sub>res</sub> = m·a', sim:FIG, voorSim: () => FIG.std = VEER13,
+  uitleg: () => leerdoelen('Ik bereken de zwaartekracht met F<sub>z</sub> = m·g.', 'Ik reken aan een veer met F<sub>veer</sub> = C·u.', 'Ik bepaal de resulterende kracht van krachten langs één lijn.', 'Ik leg met de resulterende kracht uit of een voorwerp versnelt, vertraagt of met constante snelheid beweegt.', 'Ik reken met F<sub>res</sub> = m·a.', '★ Ik combineer de zwaartekracht en een veer.') + `
     <p>Een kracht meet je in newton (N). De <b>zwaartekracht</b> op een voorwerp is F<sub>z</sub> = m·g, met g = 9,81 ${NKG} op aarde. De zwaartekracht hangt van de massa af, en van de plek: op de maan is g kleiner.</p>
     <p>Een veer rekt uit als je eraan trekt. De <b>veerkracht</b> is F<sub>veer</sub> = C·u, met u de uitrekking en C de veerconstante (in ${BR('N', 'cm')} of ${NM}). Een stijve veer heeft een grote C.</p>
     <p>Werken er meer krachten langs één lijn, dan tel je krachten in dezelfde richting op en trek je tegengestelde krachten af. Dat levert de <b>resulterende kracht</b> F<sub>res</sub>.</p>
-    <div class="kader">F<sub>res</sub> = 0: het voorwerp staat stil of beweegt met constante snelheid. F<sub>res</sub> in de bewegingsrichting: versnellen. F<sub>res</sub> tegen de bewegingsrichting in: vertragen.</div>`,
+    <div class="kader">F<sub>res</sub> = 0: het voorwerp staat stil of beweegt met constante snelheid. F<sub>res</sub> in de bewegingsrichting: versnellen. F<sub>res</sub> tegen de bewegingsrichting in: vertragen.</div>
+    <p>Hoe groter de resulterende kracht en hoe kleiner de massa, hoe groter de versnelling: <b>F<sub>res</sub> = m·a</b>, met F<sub>res</sub> in N, m in kg en a in ${MS2}. Omschrijven: a = ${BR('F<sub>res</sub>', 'm')} en m = ${BR('F<sub>res</sub>', 'a')}.</p>
+    <p>Voorbeeld: op een kar van 40 kg werkt een resulterende kracht van 60 N. Dan is a = ${BR('F<sub>res</sub>', 'm')} = ${BR('60 N', '40 kg')} = 1,5 ${MS2}.</p>`,
   voorbeeld:{ vraag:'Een tas met een massa van 4,0 kg hangt aan een veer met C = 2,0 ' + BR('N', 'cm') + '. Gebruik g = 9,81 ' + NKG + '. Bereken de uitrekking.', stappen:['F<sub>z</sub> = m·g = 4,0 · 9,81 = 39,2 N. De veer houdt de tas in evenwicht: F<sub>veer</sub> = 39,2 N.', 'u = ' + BR('F<sub>veer</sub>', 'C') + ' = ' + BR('39,2 N', '2,0 ' + BR('N', 'cm')) + ' = 20 cm.'] },
   maakSerie: () => [
     { titel:'Zwaartekracht', vraag:'Een leerling heeft een massa van 55 kg. Op aarde is g = 9,81 ' + NKG + ', op de maan is g = 1,62 ' + NKG + '.', stappen:[
@@ -1826,6 +1906,9 @@ dwp(H1, { id:'h1_kracht', titel:'Krachten', par:'1⁠.3 · zwaartekracht, veerkr
       keuzeStap('De slee staat eerst stil. Wat doet de slee?', [{ html:'hij gaat versneld naar rechts', g:1 }, { html:'hij blijft stilstaan', fb:'F<sub>res</sub> is niet nul.' }, { html:'hij gaat met constante snelheid naar rechts', fb:'Daarvoor moet F<sub>res</sub> nul zijn.' }, { html:'hij gaat naar links' }])] },
     { titel:'Fietser', vraag:'Een fietser rijdt op een vlakke weg. De voorwaartse kracht op de fiets is 30 N.', stappen:[
       selectsStap('Kies bij elke situatie de beweging.', [{ z:'wrijvingskracht 30 N', a:'const' }, { z:'wrijvingskracht 20 N', a:'vs' }, { z:'wrijvingskracht 45 N', a:'vt' }], [{ v:'const', t:'constante snelheid' }, { v:'vs', t:'snelheid neemt toe' }, { v:'vt', t:'snelheid neemt af' }, { v:'stil', t:'direct stilstaan' }, { v:'terug', t:'achteruit rijden' }], 'Bepaal eerst F<sub>res</sub> en de richting ervan.')] },
+    { titel:'Scooter', vraag:'Een scooter met bestuurder heeft een massa van 120 kg. De motorkracht is 420 N en de wrijvingskracht 120 N.', stappen:[
+      getalStap('Bereken de versnelling van de scooter:', 2.5, MS2, 'F<sub>res</sub> = 420 − 120 = 300 N; a = ' + BR('F<sub>res</sub>', 'm') + ' = ' + BR('300 N', '120 kg') + ' = 2,5 ' + MS2 + '.', 'Bepaal eerst F<sub>res</sub>. Schrijf F<sub>res</sub> = m·a om naar a.', 0.01),
+      getalStap('Hoe groot moet de motorkracht zijn om met constante snelheid te rijden, bij dezelfde wrijvingskracht?', 120, 'N', 'Constante snelheid: F<sub>res</sub> = 0, dus de motorkracht is gelijk aan de wrijvingskracht: 120 N.', 'Wat geldt voor F<sub>res</sub> bij een constante snelheid?', 0.01)] },
     { titel:'Maanveer', ster:true, vraag:'Een astronaut hangt een steen aan een veer met C = 0,80 ' + BR('N', 'cm') + '. Op aarde (g = 9,81 ' + NKG + ') rekt de veer 12 cm uit.', stappen:[
       getalStap('Bereken de massa van de steen:', 0.9786, 'kg', 'F<sub>veer</sub> = 0,80 · 12 = 9,6 N = F<sub>z</sub>; m = ' + BR('9,6 N', '9,81 ' + NKG) + ' = 0,98 kg.', 'Bij evenwicht is F<sub>veer</sub> = F<sub>z</sub>. Schrijf F<sub>z</sub> = m·g om naar m.', 0.02),
       getalStap('Bereken de uitrekking van dezelfde veer op de maan (g = 1,62 ' + NKG + '):', 1.982, 'cm', 'F<sub>z</sub> = 0,979 · 1,62 = 1,59 N; u = ' + BR('1,59', '0,80') + ' = 2,0 cm.', 'Bereken eerst de zwaartekracht op de maan.', 0.02)] }
@@ -1836,6 +1919,7 @@ twp(H1, 'h1_toets', 'Skateboard', 'Een skater (massa samen met haar board 60 kg)
   getalStap('Bereken de zwaartekracht op de skater met haar board.', 588.6, 'N', 'F<sub>z</sub> = m·g = 60 · 9,81 = 5,9·10<sup>2</sup> N.', 'Gebruik F<sub>z</sub> = m·g.', 0.01),
   getalStap('Bereken de afstand die ze met constante snelheid aflegt.', 36, 'm', 's = v·t = 4,5 · 8,0 = 36 m.', 'Schrijf v = ' + BR('s', 't') + ' om naar s.', 0.01),
   getalStap('Bepaal de afstand die ze tijdens het remmen aflegt.', 6.75, 'm', 'Oppervlakte van de driehoek onder het (v,t)-diagram: ½ · 3,0 · 4,5 = 6,8 m.', 'Schets het (v,t)-diagram en gebruik de oppervlakte.', 0.02),
+  getalStap('Bereken de resulterende kracht op de skater tijdens het remmen.', 90, 'N', 'a = ' + BR('0 − 4,5', '3,0') + ' = −1,5 ' + MS2 + '; F<sub>res</sub> = m·a = 60 · 1,5 = 90 N, tegen de bewegingsrichting in.', 'Bereken eerst de versnelling met a = ' + BR('Δv', 'Δt') + '.', 0.01),
   zelfStap('Leg uit hoe groot de resulterende kracht is terwijl ze met constante snelheid rijdt, en welke kracht tijdens het remmen groter is: de voorwaartse kracht of de wrijvingskracht.', ['inzicht dat bij een constante snelheid F<sub>res</sub> = 0', 'inzicht dat bij vertragen F<sub>res</sub> tegen de bewegingsrichting in werkt', 'consequente conclusie: tijdens het remmen is de wrijvingskracht groter'], 'Bij een constante snelheid is de resulterende kracht 0 N: de voorwaartse kracht en de wrijvingskracht zijn even groot. Tijdens het remmen neemt de snelheid af, dus werkt F<sub>res</sub> tegen de beweging in. De wrijvingskracht is dan groter dan de voorwaartse kracht.')
 ], ['bereken', 'bepaal', 'legdat']);
 
