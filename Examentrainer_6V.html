@@ -398,6 +398,7 @@ table.data th{background:#16191c}
   .pfrij .bk,.pfrij .bk i{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .pflijst th{color:#555}.pflijst td,.pflijst th{border-bottom-color:#ddd}
 }
+.navf{width:100%;background:#16191c;color:var(--inkt);border:1px solid #3d434b;border-radius:6px;padding:6px 8px;font:inherit;font-size:13px;margin-bottom:4px}
 
 </style>
 </head>
@@ -606,7 +607,7 @@ class Assen {
   iY(py){ return this.y0 + (this.H - this.B - py) / (this.H - this.T - this.B) * (this.y1 - this.y0); }
   rooster(papier = true){
     const c = this.ctx, sub = this.sub || 5;
-    c.fillStyle = papier ? '#f3eee3' : '#16191c'; c.fillRect(0, 0, this.W, this.H);
+    if (this.vul !== false){ c.fillStyle = papier ? '#f3eee3' : '#16191c'; c.fillRect(0, 0, this.W, this.H); }
     const lijn = (a, b, d, e, groot) => { c.strokeStyle = papier ? (groot ? '#c98a6c' : '#e6c3b0') : (groot ? '#3b4149' : '#262b31'); c.lineWidth = groot ? 0.9 : 0.5; c.beginPath(); c.moveTo(a, b); c.lineTo(d, e); c.stroke(); };
     for (let k = 0; this.x0 + k * this.dx / sub <= this.x1 + 1e-9; k++){ const x = this.X(this.x0 + k * this.dx / sub); lijn(x, this.Y(this.y0), x, this.Y(this.y1), k % sub === 0); }
     for (let k = 0; this.y0 + k * this.dy / sub <= this.y1 + 1e-9; k++){ const y = this.Y(this.y0 + k * this.dy / sub); lijn(this.X(this.x0), y, this.X(this.x1), y, k % sub === 0); }
@@ -626,6 +627,28 @@ function canvasIn(host, w, h, cls = 'cnv'){ const ctx = maakCanvas(host, w, h); 
 function muisPos(ctx, e){ const r = ctx.canvas_.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * ctx.W, (e.clientY - r.top) / r.height * ctx.H]; }
 function schuif(id, lab, min, max, stap, waarde, fmt){ return `<label>${lab} <input type="range" id="${id}" min="${min}" max="${max}" step="${stap}" value="${waarde}"> <b id="${id}_t">${fmt ? fmt(waarde) : waarde}</b></label>`; }
 function koppelSchuif(id, fmt, fn){ const el = $('#' + id); const t = $('#' + id + '_t'); el.oninput = () => { const v = +el.value; t.innerHTML = fmt ? fmt(v) : v; fn(v); }; return el; }
+/* labs en werkplaatsen in meerdere tools hergebruiken */
+function labPush(w){ if (typeof LABKEUS !== 'undefined' && !LABKEUS.includes(w.id)) return; if (typeof LABGROEP !== 'undefined' && LABGROEP[w.id]) w.groep = LABGROEP[w.id]; WPS.push(w); }
+function sorteerWPS(volgorde){ const oud = WPS.slice(); WPS.length = 0; volgorde.forEach(g => { const l = oud.filter(w => w.groep === g); l.filter(w => w.icoon !== '✎').concat(l.filter(w => w.icoon === '✎')).forEach(w => WPS.push(w)); }); oud.filter(w => !volgorde.includes(w.groep)).forEach(w => WPS.push(w)); }
+
+const SP = (p, t) => `<span class="stempel">${p}p ${t}</span>`;
+function chipStap(vr, items, hint, o = {}){
+  const opts = o.vast ? items : schud(items);
+  return { type:'chips', vr, opties:opts, hint,
+    check: v => { const goed = opts.map((x, j) => x.g ? j : -1).filter(j => j >= 0);
+      const mis = goed.filter(j => !v.includes(j)).length, extra = v.filter(j => !opts[j].g).length;
+      if (!mis && !extra) return { ok:true, msg: o.goedMsg || 'Goed!' };
+      return { ok:false, msg: (extra ? `Je hebt ${extra} woord${extra > 1 ? 'en' : ''} aangeklikt dat er niet bij hoort. ` : '') + (mis ? `Je mist er nog ${mis}.` : '') }; },
+    antwoord: () => opts.filter(x => x.g).map(x => `<span class="chip aan" style="cursor:default">${x.html}</span>`).join(' ') };
+}
+function selectsStap(vr, zinnen, opties, hint){
+  const sel = schud(zinnen);
+  return { type:'selects', vr, hint, selects: sel.map(z => ({ lab:z.z, opties })),
+    check: v => { if (v.some(x => !x)) return { ok:false, msg:'Kies bij elke zin een antwoord.' };
+      const fout = v.filter((x, j) => x !== sel[j].a).length; return fout ? { ok:false, msg:`${fout} zin${fout > 1 ? 'nen zijn' : ' is'} nog niet goed.` } : { ok:true, msg:'Goed!' }; },
+    antwoord: () => sel.map(z => `${z.z} → <b>${opties.find(o => o.v === z.a).t}</b>`).join('<br>'), goed: () => sel.map(z => z.a) };
+}
+const vraagKader = t => `<div class="kader" style="border-left-color:var(--inkt2)">${t}</div>`;
 
 /* =====================================================================
    Simulaties en panelen (rechterkolom)
@@ -1319,9 +1342,9 @@ const DIAG = [
   { id:'B12', ww:'Bereken', p:3, type:'getal', w:254.8, tol:.025, nsig:2, eenh:MS,
     vraag:'Een gitaarsnaar is tussen de twee vaste punten 65 cm lang. De snaar trilt in de grondtoon met een frequentie van 196 Hz. Bereken de golfsnelheid in de snaar.' + SIGZIN,
     uitw:[[1, 'inzicht dat in de grondtoon geldt: l = ½λ, dus λ = 1,30 m'], [1, 'gebruik van v = f·λ en completeren: v = 196 · 1,30 = 2,5·10<sup>2</sup> ' + MS], [1, 'significantie: 2 cijfers (65 cm)']] },
-  { id:'B13', ww:'Bereken', p:2, type:'getal', w:1.2207, tol:.02, eenh:'mV',
-    vraag:'Een temperatuursensor levert een spanning tussen 0 V en 5,0 V. Een 12-bits AD-omzetter zet deze spanning om in een binair getal. Bereken de stapgrootte van de AD-omzetter in mV.',
-    uitw:[[1, 'inzicht dat een 12-bits omzetter 2<sup>12</sup> = 4096 stappen heeft'], [1, 'completeren: ' + BR('5,0 V', '4096') + ' = 1,2·10<sup>−3</sup> V = 1,2 mV']] }]},
+  { id:'B13', ww:'Bereken', p:2, type:'getal', w:0.25, tol:.04, eenh:'',
+    vraag:'Twee luidsprekers trillen met dezelfde frequentie van 250 Hz. De trilling van luidspreker B loopt 1,0 ms achter op die van luidspreker A. Bereken het faseverschil tussen de twee trillingen.',
+    uitw:[[1, 'gebruik van T = ' + BR('1', 'f') + ': T = 4,0 ms'], [1, 'gebruik van Δφ = ' + BR('Δt', 'T') + ' en completeren: Δφ = ' + BR('1,0', '4,0') + ' = 0,25']] }]},
  { sub:'B2', naam:'Medische beeldvorming', items:[
   { id:'B21', ww:'Bereken', p:2, type:'getal', w:12.5, tol:.05, eenh:'%',
     vraag:'Röntgenstraling gaat door 12 cm spierweefsel. De halveringsdikte van spierweefsel voor deze straling is 4,0 cm. Bereken welk percentage van de intensiteit door het weefsel wordt doorgelaten.',
@@ -1346,12 +1369,12 @@ const DIAG = [
   { id:'C21', ww:'Bereken', p:2, type:'getal', w:7.924, tol:.02, eenh:MS,
     vraag:'Een kind glijdt vanuit stilstand van een glijbaan van 3,2 m hoog. Neem aan dat de wrijving te verwaarlozen is. Bereken de snelheid van het kind onderaan de glijbaan.',
     uitw:[[1, 'inzicht dat E<sub>z</sub> wordt omgezet in E<sub>k</sub>: m·g·h = ½·m·v<sup>2</sup>'], [1, 'completeren: v = √(2 · 9,81 · 3,2) = 7,9 ' + MS]] },
-  { id:'C22', ww:'Bereken', p:3, type:'getal', w:92.9, tol:.025, eenh:'%',
-    vraag:'Een waterkoker met een vermogen van 2,0 kW verwarmt 1,0 L water van 20 °C tot 100 °C. Dat duurt 3,0 minuten. Bereken het rendement van de waterkoker.',
-    uitw:[[1, 'gebruik van Q = c·m·ΔT met c = 4,18·10<sup>3</sup> ' + BR('J', 'kg K') + ' en m = 1,0 kg: Q = 3,34·10<sup>5</sup> J'], [1, 'gebruik van E = P·t: E = 2,0·10<sup>3</sup> · 180 = 3,6·10<sup>5</sup> J'], [1, 'gebruik van η = ' + BR('E<sub>nuttig</sub>', 'E<sub>in</sub>') + ' en completeren: η = 93 %']] },
-  { id:'C23', ww:'Bereken', p:3, type:'getal', w:0.3079, tol:.03, eenh:'mol',
-    vraag:'Een fietsband heeft een volume van 2,5 L. De druk van de lucht in de band is 3,0·10<sup>5</sup> Pa en de temperatuur is 20 °C. Bereken de hoeveelheid lucht in de band in mol.',
-    uitw:[[1, 'gebruik van p·V = n·R·T'], [1, 'omrekenen: V = 2,5·10<sup>−3</sup> m<sup>3</sup> en T = 293 K'], [1, 'completeren: n = ' + BR('3,0·10<sup>5</sup> · 2,5·10<sup>−3</sup>', '8,31 · 293') + ' = 0,31 mol']] }]},
+  { id:'C22', ww:'Bereken', p:3, type:'getal', w:12.12, tol:.025, eenh:'%',
+    vraag:'Een scooter rijdt 50 km met constante snelheid en verbruikt daarbij 1,5 L benzine. De gemiddelde wrijvingskracht op de scooter is 120 N. De stookwaarde van benzine is 33·10<sup>9</sup> ' + BR('J', 'm<sup>3</sup>') + '. Bereken het rendement van de motor.',
+    uitw:[[1, 'inzicht dat de nuttige energie de arbeid tegen de wrijving is: W = F·s = 120 · 5,0·10<sup>4</sup> = 6,0·10<sup>6</sup> J'], [1, 'gebruik van E<sub>ch</sub> = r<sub>v</sub>·V met V = 1,5·10<sup>−3</sup> m<sup>3</sup>: E<sub>ch</sub> = 4,95·10<sup>7</sup> J'], [1, 'gebruik van η = ' + BR('E<sub>nuttig</sub>', 'E<sub>in</sub>') + ' en completeren: η = 12 %']] },
+  { id:'C23', ww:'Bereken', p:2, type:'getal', w:4821, tol:.02, eenh:'J',
+    vraag:'Een reiziger trekt een koffer 300 m over een perron. De trekkracht is 25 N en maakt een hoek van 50° met de grond. Bereken de arbeid die de reiziger op de koffer verricht.',
+    uitw:[[1, 'gebruik van W = F·s·cos α'], [1, 'completeren: W = 25 · 300 · cos 50° = 4,8·10<sup>3</sup> J']] }]},
  { sub:'C3', naam:'Gravitatie', items:[
   { id:'C31', ww:'Bereken', p:4, type:'getal', w:7666, tol:.012, nsig:3, eenh:MS,
     vraag:'Het ISS beweegt in een cirkelbaan op 410 km hoogte boven het aardoppervlak. Bereken de baansnelheid van het ISS.' + SIGZIN,
@@ -1393,9 +1416,9 @@ const DIAG = [
     vraag:'Een elektron in een waterstofatoom valt terug van energieniveau n = 3 naar energieniveau n = 2. Bereken de golflengte van het foton dat daarbij wordt uitgezonden, in nm.',
     uitw:[[1, 'gebruik van E<sub>n</sub> = −' + BR('13,6', 'n<sup>2</sup>') + ' eV: ΔE = 13,6·(' + BR('1', '4') + ' − ' + BR('1', '9') + ') = 1,89 eV'], [1, 'gebruik van E<sub>f</sub> = ' + BR('h·c', 'λ') + ' met omrekenen naar joule'], [1, 'completeren: λ = 6,56·10<sup>−7</sup> m = 656 nm']] }]},
  { sub:'F1', naam:'Quantumwereld', items:[
-  { id:'F11', ww:'Bereken', p:3, type:'getal', w:0.80, tol:.04, eenh:'eV',
-    vraag:'Licht met een golflengte van 400 nm valt op een metaal met een uittree-energie van 2,3 eV. Bereken de maximale kinetische energie van de vrijgemaakte elektronen in eV.',
-    uitw:[[1, 'gebruik van E<sub>f</sub> = ' + BR('h·c', 'λ') + ': E<sub>f</sub> = 4,97·10<sup>−19</sup> J = 3,10 eV'], [1, 'gebruik van E<sub>k,max</sub> = E<sub>f</sub> − E<sub>u</sub>'], [1, 'completeren: E<sub>k,max</sub> = 0,80 eV']] },
+  { id:'F11', ww:'Bereken', p:2, type:'getal', w:636.0, tol:.02, eenh:'nm',
+    vraag:'Laserlicht valt loodrecht op een tralie met 300 lijnen per mm. Het eerste-orde maximum ligt onder een hoek van 11,0° met de oorspronkelijke richting. Bereken de golflengte van het laserlicht in nm.',
+    uitw:[[1, 'gebruik van d·sin α = n·λ met d = ' + BR('1', '300') + ' mm = 3,33·10<sup>−6</sup> m'], [1, 'completeren: λ = 3,33·10<sup>−6</sup> · sin 11,0° = 6,36·10<sup>−7</sup> m = 636 nm']] },
   { id:'F12', ww:'Bereken', p:2, type:'getal', w:3.637e-10, tol:.02, eenh:'m',
     vraag:'Bereken de debroglie-golflengte van een elektron met een snelheid van 2,0·10<sup>6</sup> ' + MS + '.',
     uitw:[[1, 'gebruik van λ = ' + BR('h', 'p') + ' met p = m·v'], [1, 'completeren: λ = ' + BR('6,63·10<sup>−34</sup>', '9,11·10<sup>−31</sup> · 2,0·10<sup>6</sup>') + ' = 3,6·10<sup>−10</sup> m']] },
@@ -1406,9 +1429,10 @@ const DIAG = [
 const OORZAKEN = ['formule niet gevonden of verkeerd gekozen', 'omrekenen of eenheid', 'rekenfout', 'significantie', 'vraag of figuur verkeerd gelezen', 'uitleg onvolledig of conclusie vergeten', 'inhoud niet begrepen'];
 const WWGROEP = { 'Bereken':'Bereken', 'Bepaal':'Bepaal met figuur', 'Leg uit of':'Leg uit', 'Leg uit dat':'Leg uit', 'Leid af':'Leid af', 'Noteer':'Kort antwoord', 'Geef aan':'Kort antwoord' };
 const ADVIES = { A:['raaklijn', 'lin', 'form', 'sigc', 'binas'], B1:['bepaal', 'bereken'], B2:['bereken', 'form'], C1:['bepaal', 'opp', 'legof'], C2:['bereken', 'toon'], C3:['baan', 'leid'],
-  D1:['legof', 'bereken'], D2:['ms', 'cyc'], E2:['ster', 'legdat'], F1:['foto', 'doos'] };
+  D1:['legof', 'bereken'], D2:['ms', 'cyc'], E2:['ster', 'legdat'], F1:['doos'] };
 const ADVIES_WW = { 'Bereken':'bereken', 'Bepaal met figuur':'bepaal', 'Leg uit':'legof', 'Leid af':'leid', 'Kort antwoord':'noteer' };
 const ADVIES_OORZ = { 0:'binas', 1:'form', 3:'sigc', 4:'noteer', 5:'legdat' };
+const DOMEINTOOL = { B1:'Domein_B_Golven.html', B2:'Domein_B_Golven.html', C1:'Domein_C_Beweging.html', C2:'Domein_C_Beweging.html', C3:'Domein_C_Beweging.html', D1:'Domein_D_Lading_veld.html', D2:'Domein_D_Lading_veld.html', E2:'Domein_EF_Straling_quantum.html', F1:'Domein_EF_Straling_quantum.html' };
 const DGKEY = 'examentrainer-nk-diag';
 const DG = (() => { try { return JSON.parse(localStorage.getItem(DGKEY)) || { naam:'', items:{} }; } catch (e){ return { naam:'', items:{} }; } })();
 const dgBewaar = () => { try { localStorage.setItem(DGKEY, JSON.stringify(DG)); } catch (e){} };
@@ -1517,7 +1541,7 @@ function dgProfiel(host){
     <div class="pfblok"><h4>Per soort vraag</h4>${wwRij.join('')}
       <h4 style="margin-top:16px">Significantie</h4><div class="noot" style="color:inherit">${sigItems.length ? `Punt voor significantie behaald bij ${sigGoed} van de ${sigItems.length} vragen waarin erom gevraagd werd.` : 'Nog geen vragen met significantie gemaakt.'}</div>
       <h4 style="margin-top:16px">Oorzaken van puntverlies</h4>${oorzTel.length ? oorzTel.map(([o, n]) => `<div class="pfrij"><span style="grid-column:1/3">${o}</span><span>${n}×</span></div>`).join('') : '<div class="noot">Geen puntverlies.</div>'}</div></div>
-    <div class="pfadvies"><div class="pfblok"><h4>Advies: oefen eerst</h4>${advies.size ? '<ul>' + [...advies].map(a => `<li>${naamVan(a)}</li>`).join('') + '</ul>' : '<div class="noot">Geen subdomein onder de 70 %. Kies zelf een lab of werkwoord om te verdiepen.</div>'}</div></div>
+    <div class="pfadvies"><div class="pfblok"><h4>Advies: oefen eerst</h4>${(() => { const z = DIAG.filter(t => { const [a, b] = som(t.items.filter(it => DG.items[it.id])); return b && a / b < .7 && DOMEINTOOL[t.sub]; }); return z.length ? '<div class="noot" style="color:inherit;margin-bottom:4px">In de domeintools: ' + z.map(t => `<a href="${DOMEINTOOL[t.sub]}#${t.sub}" style="color:var(--rood)">${t.sub} ${t.naam}</a>`).join(' · ') + '</div><div class="noot" style="color:inherit">In deze trainer:</div>' : ''; })()}${advies.size ? '<ul>' + [...advies].map(a => `<li>${naamVan(a)}</li>`).join('') + '</ul>' : '<div class="noot">Geen subdomein onder de 70 %. Kies zelf een lab of werkwoord om te verdiepen.</div>'}</div></div>
     ${fouten.length ? `<div class="pfadvies"><div class="pfblok"><h4>Vragen met puntverlies</h4><table class="pflijst"><tr><th>vraag</th><th>soort</th><th>score</th><th>oorzaak</th></tr>${fouten.map(it => `<tr><td>${it.id} · ${it.subnaam}</td><td>${it.ww}</td><td>${DG.items[it.id].score}/${it.p}</td><td>${DG.items[it.id].oorzaak != null ? OORZAKEN[DG.items[it.id].oorzaak] : '—'}</td></tr>`).join('')}</table></div></div>` : ''}
     </div>`;
   $('#pfprint').onclick = () => window.print();
@@ -1528,24 +1552,6 @@ WPS.push({ id:'diag', groep:'Start', titel:'Diagnose', par:'per CE-subdomein →
 /* =====================================================================
    2 · Examentaal
    ===================================================================== */
-const SP = (p, t) => `<span class="stempel">${p}p ${t}</span>`;
-function chipStap(vr, items, hint, o = {}){
-  const opts = o.vast ? items : schud(items);
-  return { type:'chips', vr, opties:opts, hint,
-    check: v => { const goed = opts.map((x, j) => x.g ? j : -1).filter(j => j >= 0);
-      const mis = goed.filter(j => !v.includes(j)).length, extra = v.filter(j => !opts[j].g).length;
-      if (!mis && !extra) return { ok:true, msg: o.goedMsg || 'Goed!' };
-      return { ok:false, msg: (extra ? `Je hebt ${extra} woord${extra > 1 ? 'en' : ''} aangeklikt dat er niet bij hoort. ` : '') + (mis ? `Je mist er nog ${mis}.` : '') }; },
-    antwoord: () => opts.filter(x => x.g).map(x => `<span class="chip aan" style="cursor:default">${x.html}</span>`).join(' ') };
-}
-function selectsStap(vr, zinnen, opties, hint){
-  const sel = schud(zinnen);
-  return { type:'selects', vr, hint, selects: sel.map(z => ({ lab:z.z, opties })),
-    check: v => { if (v.some(x => !x)) return { ok:false, msg:'Kies bij elke zin een antwoord.' };
-      const fout = v.filter((x, j) => x !== sel[j].a).length; return fout ? { ok:false, msg:`${fout} zin${fout > 1 ? 'nen zijn' : ' is'} nog niet goed.` } : { ok:true, msg:'Goed!' }; },
-    antwoord: () => sel.map(z => `${z.z} → <b>${opties.find(o => o.v === z.a).t}</b>`).join('<br>'), goed: () => sel.map(z => z.a) };
-}
-const vraagKader = t => `<div class="kader" style="border-left-color:var(--inkt2)">${t}</div>`;
 function taalWp(o){ return Object.assign({ groep:'Examentaal', sim:SPIEK, voorSim: () => SPIEK.zet(o.rijen) }, o); }
 
 /* ---------- Bereken ---------- */
@@ -1881,7 +1887,7 @@ const bijna = (a, b, e = 1e-6) => Math.abs(a - b) < e;
 
 /* ---------- massaspectrometer ---------- */
 const B_CL = (() => { const s = Math.sqrt(2 * 1000 / K.e), d = Math.sqrt(u2kg(36.966)) - Math.sqrt(u2kg(34.969)); return 2 * s * d / 0.005; })();
-WPS.push({ id:'ms', groep:'Labs', titel:'Massaspectrometer', par:'D2 · ionen in een B-veld', sim:MSP,
+labPush({ id:'ms', groep:'Labs', titel:'Massaspectrometer', par:'D2 · ionen in een B-veld', sim:MSP,
   uitleg: () => leerdoelen('Ik leg uit hoe een massaspectrometer ionen scheidt op massa.', 'Ik bereken de massa van een ion uit de straal van zijn baan.', 'Ik leid af: r = ' + BR('1', 'B') + '·√' + BR('2m·U', 'q') + '.', '★ Ik bereken welk magnetisch veld nodig is om twee isotopen te scheiden.') + `
     <h3>Twee stappen</h3><p><b>Versnellen.</b> Een ion met lading q wordt vanuit (vrijwel) stilstand versneld door een spanning U. De elektrische energie wordt kinetische energie: q·U = ½·m·v<sup>2</sup>.</p>
     <p><b>Afbuigen.</b> In het homogene magnetische veld staat de lorentzkracht loodrecht op de snelheid. De lorentzkracht levert de middelpuntzoekende kracht: B·q·v = ${BR('m·v<sup>2</sup>', 'r')}, dus r = ${BR('m·v', 'B·q')}. Na een halve cirkel treft het ion de detector op een afstand d = 2r van de ingang.</p>
@@ -1908,7 +1914,7 @@ WPS.push({ id:'ms', groep:'Labs', titel:'Massaspectrometer', par:'D2 · ionen in
 
 /* ---------- cyclotron ---------- */
 const cycOk = (dl, B) => CYC.log.some(u => u.s === 'uit' && u.dl === dl && bijna(u.B, B, .001) && Math.abs(u.f * 1e6 - DEELTJES[dl].q * K.e * B / (2 * Math.PI * DEELTJES[dl].m)) / (u.f * 1e6) < 0.01);
-WPS.push({ id:'cyc', groep:'Labs', titel:'Cyclotron', par:'D2 · deeltjesversneller', sim:CYC,
+labPush({ id:'cyc', groep:'Labs', titel:'Cyclotron', par:'D2 · deeltjesversneller', sim:CYC,
   uitleg: () => leerdoelen('Ik leg uit hoe een cyclotron geladen deeltjes versnelt.', 'Ik bereken de frequentie van de wisselspanning met f = ' + BR('q·B', '2π·m') + '.', 'Ik bereken de kinetische energie waarmee een deeltje de cyclotron verlaat.', '★ Ik pas de frequentie aan voor een ander deeltje.') + `
     <h3>Zo werkt het</h3><p>Twee holle D-vormige elektroden staan in een homogeen magnetisch veld. In de D’s beschrijft het deeltje een halve cirkel. Steeds als het de spleet passeert, wordt het versneld door de spanning over de spleet. Daarna is de straal groter. Zo ontstaat een spiraal.</p>
     <p>De omlooptijd is T = ${BR('2π·m', 'B·q')}: hij hangt niet af van de snelheid. De wisselspanning heeft daarom een vaste frequentie: f = ${BR('q·B', '2π·m')}.</p>
@@ -1931,7 +1937,7 @@ WPS.push({ id:'cyc', groep:'Labs', titel:'Cyclotron', par:'D2 · deeltjesversnel
 
 /* ---------- cirkelbanen ---------- */
 const bLog = f => BAAN.log.some(f);
-WPS.push({ id:'baan', groep:'Labs', titel:'Cirkelbanen en ontsnappen', par:'C3 · gravitatie', sim:BAAN,
+labPush({ id:'baan', groep:'Labs', titel:'Cirkelbanen en ontsnappen', par:'C3 · gravitatie', sim:BAAN,
   uitleg: () => leerdoelen('Ik bereken de baansnelheid en de omlooptijd van een satelliet in een cirkelbaan.', 'Ik bereken de hoogte van een geostationaire baan.', 'Ik bereken de ontsnappingssnelheid met energiebehoud.', '★ Ik bepaal de massa van een planeet met de derde wet van Kepler.') + `
     <h3>Cirkelbaan</h3><p>De gravitatiekracht levert de middelpuntzoekende kracht: G·${BR('m·M', 'r<sup>2</sup>')} = ${BR('m·v<sup>2</sup>', 'r')}, dus v = √${BR('G·M', 'r')}. Met v = ${BR('2πr', 'T')} volgt ${BR('r<sup>3</sup>', 'T<sup>2</sup>')} = ${BR('G·M', '4π<sup>2</sup>')} (derde wet van Kepler).</p>
     <div class="kader">r is de afstand tot het <b>middelpunt</b> van de aarde: r = R<sub>aarde</sub> + h.</div>
@@ -1956,7 +1962,7 @@ WPS.push({ id:'baan', groep:'Labs', titel:'Cirkelbanen en ontsnappen', par:'C3 �
   ] });
 
 /* ---------- sterren en spectra ---------- */
-WPS.push({ id:'ster', groep:'Labs', titel:'Sterren en spectra', par:'E2 · Wien, Stefan-Boltzmann, lijnen', sim:STER,
+labPush({ id:'ster', groep:'Labs', titel:'Sterren en spectra', par:'E2 · Wien, Stefan-Boltzmann, lijnen', sim:STER,
   uitleg: () => leerdoelen('Ik bepaal de temperatuur van een ster met de wet van Wien.', 'Ik bereken de straal van een ster met de wet van Stefan-Boltzmann.', 'Ik herken elementen aan hun spectraallijnen.', '★ Ik koppel een spectraallijn aan een overgang tussen energieniveaus.') + `
     <h3>Zwarte straler</h3><p>Een ster straalt als een zwarte straler. <b>Wet van Wien:</b> λ<sub>max</sub>·T = k<sub>W</sub> = 2,898·10<sup>−3</sup> m K. Een hetere ster heeft de top bij een kleinere golflengte.</p>
     <p><b>Wet van Stefan-Boltzmann:</b> P = σ·A·T<sup>4</sup>, met A = 4πR<sup>2</sup> en σ = 5,670·10<sup>−8</sup> ${BR('W', 'm<sup>2</sup> K<sup>4</sup>')}.</p>
@@ -1979,9 +1985,10 @@ WPS.push({ id:'ster', groep:'Labs', titel:'Sterren en spectra', par:'E2 · Wien,
 
 /* ---------- foto-elektrisch effect ---------- */
 const FT = { int:new Set() };
-WPS.push({ id:'foto', groep:'Labs', titel:'Foto-elektrisch effect', par:'F1 · fotonen maken elektronen vrij', sim:FOTO,
+labPush({ id:'foto', groep:'Labs', ster:true, titel:'Foto-elektrisch effect', par:'verdieping · geen CE-stof', sim:FOTO,
   voorSim: () => {},
   uitleg: () => leerdoelen('Ik bepaal de maximale kinetische energie van foto-elektronen met de remspanning.', 'Ik leg uit welke invloed de golflengte en de intensiteit van het licht hebben.', 'Ik bepaal de constante van Planck en de grensfrequentie uit een (E<sub>k</sub>,f)-diagram.', '★ Ik bereken de grensgolflengte van een metaal.') + `
+    <div class="kader" style="border-left-color:var(--inkt2)"><b>Verdieping.</b> Het foto-elektrisch effect staat niet in de CE-syllabus vwo. Het laat wel mooi zien dat licht uit fotonen bestaat. Het idee lijkt op ontsnappen uit een gravitatieveld: een elektron heeft een minimale energie (de uittree-energie) nodig om los te komen, en wat het foton meer geeft, houdt het over als kinetische energie.</div>
     <h3>Fotonen</h3><p>Licht bestaat uit fotonen met energie E<sub>f</sub> = h·f = ${BR('h·c', 'λ')}. Eén foton geeft zijn energie aan één elektron. Het elektron heeft de uittree-energie E<sub>u</sub> nodig om los te komen: E<sub>k,max</sub> = h·f − E<sub>u</sub>.</p>
     <h3>Remspanning</h3><p>Een spanning tussen kathode en anode remt de elektronen af. Bij de <b>remspanning</b> U<sub>r</sub> bereikt net geen elektron de anode: e·U<sub>r</sub> = E<sub>k,max</sub>. In eV: E<sub>k,max</sub> (in eV) = U<sub>r</sub> (in V).</p>
     <div class="kader">Zet je E<sub>k,max</sub> uit tegen f, dan krijg je een rechte lijn: de richtingscoëfficiënt is h en het snijpunt met de f-as is de grensfrequentie f<sub>0</sub> = ${BR('E<sub>u</sub>', 'h')}. De metalen in deze simulatie hebben modelwaarden.</div>`,
@@ -2009,7 +2016,7 @@ WPS.push({ id:'foto', groep:'Labs', titel:'Foto-elektrisch effect', par:'F1 · f
 const E1 = L => K.h ** 2 / (8 * K.me * (L * 1e-9) ** 2);
 const L_120 = Math.sqrt(3 * K.h ** 2 * 120e-9 / (8 * K.me * K.h * K.c)) * 1e9;
 const L_DOOS_STER = 11 * E1(1.4);
-WPS.push({ id:'doos', groep:'Labs', titel:'Deeltje in een doos', par:'F1 · quantisatie van energie', sim:DOOS,
+labPush({ id:'doos', groep:'Labs', titel:'Deeltje in een doos', par:'F1 · quantisatie van energie', sim:DOOS,
   uitleg: () => leerdoelen('Ik bereken de energieniveaus van een deeltje in een eendimensionale doos.', 'Ik leg uit hoe de energie afhangt van de lengte van de doos.', 'Ik bereken de golflengte van een foton bij een overgang, en omgekeerd de lengte van de doos.', '★ Ik pas het model toe op een kleurstofmolecuul.') + `
     <h3>Staande golven</h3><p>Een elektron opgesloten in een doos met lengte L gedraagt zich als een staande golf: in de doos passen alleen golflengtes λ<sub>n</sub> = ${BR('2L', 'n')}. Met λ = ${BR('h', 'p')} en E<sub>k</sub> = ${BR('p<sup>2</sup>', '2m')} volgt:</p>
     <div class="formule" style="text-align:center">E<sub>n</sub> = ${BR('n<sup>2</sup>·h<sup>2</sup>', '8m·L<sup>2</sup>')}</div>
