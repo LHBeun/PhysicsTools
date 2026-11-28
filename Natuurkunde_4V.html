@@ -1391,7 +1391,7 @@ const CIRKEL = {
     this.ctx = canvasIn($('#ck_doek'), 560, 320);
     koppelSchuif('ck_r', v => komma(v.toFixed(1)) + ' m', v => this.r = v); koppelSchuif('ck_T', v => komma(v.toFixed(1)) + ' s', v => this.T = v); koppelSchuif('ck_m', v => v + ' kg', v => this.m = v); },
   update(dt){ this.hoek += 2 * Math.PI * dt / this.T; const el = $('#ck_mt'); if (!el) return; const f = x => komma(x.toPrecision(3));
-    el.innerHTML = `<div>v<b>${f(this.v())} m/s</b></div><div>F<sub>mpz</sub><b>${f(this.F())} N</b></div>`; },
+    el.innerHTML = `<div>v<b>${f(this.v())} ${MS}</b></div><div>F<sub>mpz</sub><b>${f(this.F())} N</b></div>`; },
   pijl(x0, y0, x1, y1, k){ const c = this.ctx, a = Math.atan2(y1 - y0, x1 - x0); c.strokeStyle = c.fillStyle = k; c.lineWidth = 2.4; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); c.beginPath(); c.moveTo(x1, y1); c.lineTo(x1 - 10 * Math.cos(a - .4), y1 - 10 * Math.sin(a - .4)); c.lineTo(x1 - 10 * Math.cos(a + .4), y1 - 10 * Math.sin(a + .4)); c.fill(); },
   draw(){ const c = this.ctx; if (!c) return; c.fillStyle = '#16191c'; c.fillRect(0, 0, c.W, c.H);
     const cx = 210, cy = 160, s = 24, R = this.r * s, x = cx + R * Math.cos(this.hoek), y = cy - R * Math.sin(this.hoek);
@@ -1697,7 +1697,7 @@ function exWp(groep, id, titel, context, vragen, rijen){
 }
 
 /* hulpjes voor de leerjaartools */
-const KMH = BR('km', 'h'), NM = BR('N', 'm');
+const KMH = BR('km', 'h'), NM = BR('N', 'm'), KGM3 = BR('kg', 'm<sup>3</sup>'), GCM3 = BR('g', 'cm<sup>3</sup>');
 /* terugblik: startvragen over eerdere hoofdstukken (ophalen uit het geheugen) */
 function terug(groep, id, over, opdrachten){
   dwp(groep, { id, titel:'Terugblik', par:'startvragen over ' + over, icoon:'↺', sim:KAART,
@@ -1794,7 +1794,7 @@ dwp(H1, { id:'h1_eenh', titel:'Grootheden en eenheden', par:'1⁠.4 · SI, voorv
   uitleg: () => leerdoelen('Ik ken van de belangrijkste grootheden het symbool en de SI-eenheid.', 'Ik reken eenheden om, ook met voorvoegsels en machten van tien.', 'Ik geef een antwoord in het juiste aantal significante cijfers.') + `
     <p>Een <b>grootheid</b> is iets wat je kunt meten (massa m, tijd t). De <b>eenheid</b> zegt waarin je meet (kg, s). Reken altijd eerst om naar SI-eenheden: m, kg, s, A.</p>
     <p><b>Significante cijfers:</b> alle cijfers behalve de nullen vooraan. 0,0250 heeft er 3. Bij vermenigvuldigen en delen krijgt je antwoord evenveel significante cijfers als het gegeven met de minste. Bij optellen en aftrekken let je op het aantal decimalen.</p>
-    <div class="kader">Wetenschappelijke notatie maakt het aantal significante cijfers duidelijk: 2,6·10<sup>3</sup> kg/m<sup>3</sup> heeft er 2, 2600 is onduidelijk.</div>`,
+    <div class="kader">Wetenschappelijke notatie maakt het aantal significante cijfers duidelijk: 2,6·10<sup>3</sup> ${KGM3} heeft er 2, 2600 is onduidelijk.</div>`,
   voorbeeld:{ vraag:'Een auto rijdt 12,0 km in 0,25 h. Bereken de snelheid in ' + KMH + ' en in ' + MS + ', in het juiste aantal significante cijfers.', stappen:['v = ' + BR('12,0 km', '0,25 h') + ' = 48 ' + KMH + ' (0,25 heeft 2 significante cijfers).', BR('48', '3,6') + ' = 13 ' + MS + '.'] },
   maakSerie: () => [
     { titel:'Grootheid en eenheid', vraag:'Bij elke grootheid hoort een SI-eenheid.', stappen:[
@@ -1806,7 +1806,7 @@ dwp(H1, { id:'h1_eenh', titel:'Grootheden en eenheden', par:'1⁠.4 · SI, voorv
     { titel:'Significant', vraag:'Een atleet loopt 400 m in 52,7 s.', stappen:[
       sigStap('Bereken de gemiddelde snelheid. Noteer je antwoord in het juiste aantal significante cijfers.', 7.590, MS, 3, 'v = ' + BR('400', '52,7') + ' = 7,59 ' + MS + ': 3 significante cijfers, net als de gegevens.', 'Delen: evenveel significante cijfers als het gegeven met de minste.')] },
     { titel:'Dichtheid', ster:true, vraag:'Een steen heeft een massa van 1,25 kg en een volume van 0,48 dm<sup>3</sup>.', stappen:[
-      sigStap('Bereken de dichtheid in kg/m<sup>3</sup>. Noteer je antwoord in het juiste aantal significante cijfers.', 2604, 'kg/m<sup>3</sup>', 2, 'V = 0,48·10<sup>−3</sup> m<sup>3</sup>; ρ = ' + BR('m', 'V') + ' = ' + BR('1,25', '0,48·10<sup>−3</sup>') + ' = 2,6·10<sup>3</sup> kg/m<sup>3</sup> (2 significante cijfers).', 'Reken het volume eerst om naar m<sup>3</sup>. Gebruik wetenschappelijke notatie voor het juiste aantal cijfers.')] }
+      sigStap('Bereken de dichtheid in ' + KGM3 + '. Noteer je antwoord in het juiste aantal significante cijfers.', 2604, KGM3, 2, 'V = 0,48·10<sup>−3</sup> m<sup>3</sup>; ρ = ' + BR('m', 'V') + ' = ' + BR('1,25', '0,48·10<sup>−3</sup>') + ' = 2,6·10<sup>3</sup> ' + KGM3 + ' (2 significante cijfers).', 'Reken het volume eerst om naar m<sup>3</sup>. Gebruik wetenschappelijke notatie voor het juiste aantal cijfers.')] }
   ] });
 
 /* ---------- 1.5 wiskundig gereedschap ---------- */
@@ -2392,6 +2392,218 @@ twp(H6, 'h6_toets', 'Waterkrachtcentrale', 'In een waterkrachtcentrale valt wate
   zelfStap('Leg uit waar de rest van de energie blijft.', ['inzicht dat de rest vooral wordt omgezet in warmte', 'een oorzaak genoemd: wrijving in de buizen, de turbine of de generator'], 'De rest wordt vooral omgezet in warmte door wrijving van het water in de buizen en in de turbine en generator. Ook heeft het wegstromende water nog wat kinetische energie.')
 ], ['bereken', 'legdat']);
 
+/* =====================================================================
+   Extra opdrachten per paragraaf (komen vóór de ★-opdracht)
+   ===================================================================== */
+const VT2b = () => grafiekSVG({ kop:'figuur · (v,t)-diagram van een fietser die remt', x:[0, 8], y:[0, 10], dx:1, dy:2, xlab:'t (s)', ylab:'v (m/s)', lijnen:[{ pts:[[0, 8], [2, 8], [6, 0], [8, 0]] }] });
+const EXTRA = {
+  /* ---------- H1 ---------- */
+  h1_xt: () => [
+    { titel:'Afstand en verplaatsing', vraag:'Gebruik weer het (x,t)-diagram van de wandelaar.', stappen:[
+      getalStap('Bepaal de afstand die de wandelaar in totaal aflegt:', 30, 'm', '15 m heen en 15 m terug: 30 m. De verplaatsing is 0 m.', 'Tel de afstand heen en terug op.', 0.01),
+      getalStap('Bepaal op welk tijdstip de wandelaar op de terugweg nog 6,0 m van het beginpunt is:', 22, 's', 'Op de terugweg: x = 15 − 1,5·(t − 16) = 6,0, dus t − 16 = 6,0 s en t = 22 s.', 'Lees af in het diagram, of reken met de snelheid op de terugweg.', 0.02)] },
+    { titel:'Trein', vraag:'Een trein rijdt 45 km in 30 minuten, staat 6,0 minuten stil op een station en rijdt daarna nog 27 km in 18 minuten.', stappen:[
+      getalStap('Bereken de gemiddelde snelheid in ' + KMH + ':', 80, KMH, 'Δx = 72 km, Δt = 54 min = 0,90 h; v<sub>gem</sub> = ' + BR('72 km', '0,90 h') + ' = 80 ' + KMH + '.', 'Tel de stilstand mee in de tijd. Reken minuten om naar uren.', 0.02),
+      getalStap('Reken deze gemiddelde snelheid om naar ' + MS + ':', 22.22, MS, BR('80', '3,6') + ' = 22 ' + MS + '.', 'Delen door 3,6.', 0.02)] }
+  ],
+  h1_vt: () => [
+    { titel:'Raaklijn later', vraag:'Gebruik weer het (x,t)-diagram van de optrekkende auto rechts.', stappen:[
+      simStap('Sleep de lijn zo dat hij de grafiek raakt op t = 8,0 s.', () => RL.isRaak(8), 'Leg de lijn langs de kromme bij t = 8,0 s.', 'raaklijn bij t = 8,0 s'),
+      getalStap('Bepaal de snelheid op t = 8,0 s:', 6.4, MS, 'De helling van de raaklijn is 6,4 ' + MS + '.', 'Kies twee punten ver uit elkaar op de raaklijn.', 0.06)] },
+    { titel:'Remmende fietser', vraag:'Hieronder staat het (v,t)-diagram van een fietser die remt voor een stoplicht.', stappen:[
+      getalStap('Bepaal de afstand die de fietser vanaf t = 0 aflegt tot hij stilstaat:', 32, 'm', 'Rechthoek 0–2 s: 8 · 2 = 16 m. Driehoek 2–6 s: ½ · 4 · 8 = 16 m. Samen 32 m.', 'Gebruik de oppervlakte onder het diagram tot de fietser stilstaat.', 0.02)] }
+  ].map(o => o.titel === 'Remmende fietser' ? Object.assign(o, { vraag: o.vraag + VT2b() }) : o),
+  h1_a: () => [
+    { titel:'Raket', vraag:'Een raket vertrekt vanuit stilstand en versnelt 12 s lang eenparig met 25 ' + MS2 + '.', stappen:[
+      getalStap('Bereken de snelheid na 12 s:', 300, MS, 'v = a·t = 25 · 12 = 3,0·10<sup>2</sup> ' + MS + '.', 'Vanuit stilstand: v = a·t.', 0.02),
+      getalStap('Bereken de hoogte na 12 s, in m:', 1800, 'm', 's = ½·a·t<sup>2</sup> = ½ · 25 · 12<sup>2</sup> = 1,8·10<sup>3</sup> m.', 'Gebruik s = ½·a·t<sup>2</sup> of v<sub>gem</sub>·t.', 0.02)] }
+  ],
+  h1_eenh: () => [
+    { titel:'Nog meer omrekenen', vraag:'Reken om naar de gevraagde eenheid.', stappen:[
+      getalStap('1,2 ' + GCM3 + ' in ' + KGM3 + ':', 1200, KGM3, '1 ' + GCM3 + ' = 1000 ' + KGM3 + ', dus 1,2·10<sup>3</sup> ' + KGM3 + '.', '1 g = 10<sup>−3</sup> kg en 1 cm<sup>3</sup> = 10<sup>−6</sup> m<sup>3</sup>.', 0.01),
+      getalStap('250 cm<sup>2</sup> in m<sup>2</sup>:', 0.025, 'm<sup>2</sup>', '1 cm<sup>2</sup> = 10<sup>−4</sup> m<sup>2</sup>, dus 2,5·10<sup>−2</sup> m<sup>2</sup>.', 'Let op: het kwadraat geldt ook voor de factor 10<sup>−2</sup>.', 0.01)] },
+    { titel:'Optellen', vraag:'Een plank van 12,5 m en een plank van 3,27 m worden achter elkaar gelegd.', stappen:[
+      sigStap('Bereken de totale lengte. Noteer je antwoord in het juiste aantal significante cijfers.', 15.77, 'm', 3, '12,5 + 3,27 = 15,77 → 15,8 m: bij optellen telt het kleinste aantal decimalen (1).', 'Bij optellen kijk je naar het aantal cijfers achter de komma.')] }
+  ],
+  h1_wisk: () => [
+    { titel:'Reistijd', vraag:'Voor een rit van 60 km geldt: hoe groter de snelheid, hoe korter de reistijd.', stappen:[
+      keuzeStap('Wat gebeurt er met de reistijd als je twee keer zo snel rijdt?', [{ html:'die wordt half zo groot', g:1 }, { html:'die wordt twee keer zo groot' }, { html:'die wordt vier keer zo klein', fb:'Dat zou bij een kwadratisch verband horen.' }, { html:'die blijft gelijk' }]),
+      getalStap('Bij 80 ' + KMH + ' duurt de rit 0,75 h. Bereken de reistijd bij 120 ' + KMH + ':', 0.50, 'h', 't = ' + BR('60 km', '120 ' + KMH) + ' = 0,50 h. Ook: 1,5× zo snel geeft ' + BR('0,75', '1,5') + ' = 0,50 h.', 'Omgekeerd evenredig: t·v is constant.', 0.02)] }
+  ],
+  /* ---------- H2 ---------- */
+  h2_lading: () => [
+    { titel:'Bliksem', vraag:'Bij een blikseminslag gaat in 0,20 ms een lading van 25 C naar de aarde.', stappen:[
+      getalStap('Bereken de gemiddelde stroomsterkte:', 1.25e5, 'A', 'I = ' + BR('25 C', '0,20·10<sup>−3</sup> s') + ' = 1,3·10<sup>5</sup> A.', 'Reken ms om naar s. Typ bijvoorbeeld 1,3e5.', 0.03)] },
+    { titel:'Elektronen en lading', vraag:'Door een draad gaan in een bepaalde tijd 3,0·10<sup>20</sup> elektronen.', stappen:[
+      getalStap('Bereken de lading die erdoor gaat:', 48.06, 'C', 'Q = 3,0·10<sup>20</sup> · 1,602·10<sup>−19</sup> = 48 C.', 'Vermenigvuldig het aantal met de lading van één elektron.', 0.02)] }
+  ],
+  h2_spanning: () => [
+    { titel:'Auto-accu', vraag:'Een auto-accu van 12 V kan een lading van 60 Ah leveren.', stappen:[
+      getalStap('Reken de lading om naar coulomb:', 2.16e5, 'C', '60 A · 3600 s = 2,16·10<sup>5</sup> C.', '1 Ah is 1 A gedurende 3600 s.', 0.02),
+      getalStap('Bereken de energie die in de accu is opgeslagen:', 2.592e6, 'J', 'E = U·Q = 12 · 2,16·10<sup>5</sup> = 2,6·10<sup>6</sup> J.', 'E = U·Q.', 0.02)] },
+    { titel:'Meter verkeerd', vraag:'Een leerling schakelt per ongeluk een spanningsmeter in serie met een lampje.', stappen:[
+      keuzeStap('Wat neemt de leerling waar?', [{ html:'het lampje brandt (bijna) niet, want de spanningsmeter heeft een heel grote weerstand', g:1 }, { html:'het lampje brandt normaal en de meter wijst 0 V aan' }, { html:'de meter gaat kapot door een te grote stroom', fb:'Dat gebeurt eerder met een stroommeter die parallel staat.' }, { html:'het lampje brandt feller' }])] }
+  ],
+  h2_weerstand: () => [
+    { titel:'Gloeilamp', vraag:'Een gloeilamp brandt op 230 V. De stroom is dan 0,26 A.', stappen:[
+      getalStap('Bereken de weerstand van de brandende lamp:', 884.6, 'Ω', 'R = ' + BR('230', '0,26') + ' = 8,8·10<sup>2</sup> Ω.', 'R = ' + BR('U', 'I') + '.', 0.02),
+      getalStap('Bereken de geleidbaarheid:', 1.130e-3, 'S', 'G = ' + BR('1', '885') + ' = 1,1·10<sup>−3</sup> S.', 'G = ' + BR('1', 'R') + '. Typ bijvoorbeeld 1,1e-3.', 0.03)] },
+    { titel:'Verwarmingsdraad', vraag:'Je wilt een verwarmingsdraad maken van 10 Ω van constantaan (ρ = 0,45·10<sup>−6</sup> Ω·m) met een doorsnede van 0,20 mm<sup>2</sup>.', stappen:[
+      getalStap('Bereken hoe lang de draad moet zijn:', 4.444, 'm', 'A = 0,20·10<sup>−6</sup> m<sup>2</sup>; ℓ = ' + BR('R·A', 'ρ') + ' = ' + BR('10 · 0,20·10<sup>−6</sup>', '0,45·10<sup>−6</sup>') + ' = 4,4 m.', 'Schrijf R = ρ·' + BR('ℓ', 'A') + ' om naar ℓ; mm<sup>2</sup> naar m<sup>2</sup>.', 0.02)] }
+  ],
+  h2_serpar: () => [
+    { titel:'Kerstverlichting', vraag:'Een lichtsnoer bestaat uit 20 gelijke lampjes in serie op 230 V. De stroom is 0,15 A.', stappen:[
+      getalStap('Bereken de spanning over één lampje:', 11.5, 'V', 'In serie verdeelt de spanning zich gelijk: ' + BR('230', '20') + ' = 11,5 V.', 'Tel in serie de spanningen op.', 0.02),
+      getalStap('Bereken de weerstand van één lampje:', 76.67, 'Ω', 'R = ' + BR('11,5', '0,15') + ' = 77 Ω.', 'Door elk lampje loopt dezelfde stroom.', 0.02)] },
+    { titel:'Drie parallel', vraag:'Weerstanden van 30 Ω, 60 Ω en 60 Ω staan parallel op 6,0 V.', stappen:[
+      getalStap('Bereken de vervangingsweerstand:', 15, 'Ω', BR('1', 'R<sub>v</sub>') + ' = ' + BR('1', '30') + ' + ' + BR('1', '60') + ' + ' + BR('1', '60') + ' = ' + BR('4', '60') + ', dus R<sub>v</sub> = 15 Ω.', 'Tel de omgekeerden op en keer om.', 0.02),
+      getalStap('Bereken de stroom uit de bron:', 0.40, 'A', 'I = ' + BR('6,0', '15') + ' = 0,40 A.', 'I = ' + BR('U', 'R<sub>v</sub>') + '.', 0.02)] }
+  ],
+  h2_combi: () => [
+    { titel:'Andere waarden', vraag:'Stel rechts in: U = 9,0 V, R<sub>1</sub> = 40 Ω, R<sub>2</sub> = 60 Ω en R<sub>3</sub> = 30 Ω. Reken eerst, controleer daarna met de meters.', stappen:[
+      getalStap('Bereken de vervangingsweerstand:', 60, 'Ω', 'R<sub>p</sub> = 20 Ω (' + BR('1', '60') + ' + ' + BR('1', '30') + ' = ' + BR('1', '20') + '); R<sub>v</sub> = 40 + 20 = 60 Ω.', 'Eerst het parallelle deel.', 0.02),
+      getalStap('Bereken de spanning over R<sub>1</sub>:', 6.0, 'V', 'I = ' + BR('9,0', '60') + ' = 0,15 A; U<sub>1</sub> = 0,15 · 40 = 6,0 V.', 'Bereken eerst de stroom uit de bron.', 0.02)] },
+    { titel:'Lampjes', vraag:'R<sub>1</sub> = 10 Ω staat in serie met twee parallelle lampjes van elk 30 Ω. De bron levert 5,0 V.', stappen:[
+      getalStap('Bereken de stroom uit de bron:', 0.20, 'A', 'R<sub>p</sub> = 15 Ω; R<sub>v</sub> = 25 Ω; I = ' + BR('5,0', '25') + ' = 0,20 A.', 'Vervang de twee gelijke lampjes door één weerstand.', 0.02),
+      getalStap('Bereken de stroom door één lampje:', 0.10, 'A', 'De stroom verdeelt zich gelijk over twee gelijke lampjes: 0,10 A.', 'Twee gelijke takken.', 0.02)] },
+    { titel:'Terugrekenen', vraag:'R<sub>1</sub> staat in serie met twee parallelle weerstanden van 20 Ω. De bron levert 12 V en de stroom uit de bron is 0,40 A.', stappen:[
+      getalStap('Bereken R<sub>1</sub>:', 20, 'Ω', 'R<sub>v</sub> = ' + BR('12', '0,40') + ' = 30 Ω; R<sub>p</sub> = 10 Ω, dus R<sub>1</sub> = 30 − 10 = 20 Ω.', 'Bereken eerst R<sub>v</sub> uit U en I.', 0.02)] }
+  ],
+  h2_gebruik: () => [
+    { titel:'Stofzuiger', vraag:'Een stofzuiger van 750 W wordt elke week 2,0 uur gebruikt, een heel jaar (52 weken) lang.', stappen:[
+      getalStap('Bereken het energieverbruik per jaar in kWh:', 78, 'kWh', 'E = 0,75 kW · 2,0 h · 52 = 78 kWh.', 'Vermogen in kW maal het totaal aantal uren.', 0.02)] }
+  ],
+  /* ---------- H3 ---------- */
+  h3_soorten: () => [
+    { titel:'Op de maan', vraag:'Een astronaut heeft met zijn ruimtepak een massa van 85 kg. Op de maan is g = 1,62 ' + BR('N', 'kg') + '.', stappen:[
+      getalStap('Bereken de zwaartekracht op de astronaut op de maan:', 137.7, 'N', 'F<sub>z</sub> = 85 · 1,62 = 1,4·10<sup>2</sup> N.', 'Gebruik de g van de maan.', 0.02),
+      keuzeStap('Wat is er op de maan anders dan op aarde?', [{ html:'de zwaartekracht, niet de massa', g:1 }, { html:'de massa, niet de zwaartekracht' }, { html:'zowel de massa als de zwaartekracht' }, { html:'niets', fb:'g is op de maan kleiner.' }])] },
+    { titel:'Veermetingen', ster:true, vraag:'Bij een veer is gemeten: 1,0 N geeft 2,5 cm uitrekking, 2,0 N geeft 5,0 cm en 3,0 N geeft 7,5 cm.', stappen:[
+      getalStap('Bepaal de veerconstante:', 40, NM, 'C = ' + BR('1,0 N', '0,025 m') + ' = 40 ' + NM + ' (bij elke meting hetzelfde).', 'Gebruik C = ' + BR('F', 'u') + ' met u in m.', 0.02),
+      getalStap('Welke massa (in g) moet je aan de veer hangen voor 6,0 cm uitrekking?', 244.6, 'g', 'F = 40 · 0,060 = 2,4 N; m = ' + BR('2,4', '9,81') + ' = 0,24 kg = 2,4·10<sup>2</sup> g.', 'Bereken eerst de benodigde kracht.', 0.02)] }
+  ],
+  h3_samen: () => [
+    { titel:'Nog een constructie', constr:{ type:'vector', F1:[200, 0], F2:[200, 200] }, vraag:'Op de uitwerkbijlage werken F<sub>1</sub> en F<sub>2</sub> op één punt. Schaal: 1 cm ≙ 100 N.', stappen:[
+      simStap('Construeer F<sub>res</sub>.', () => CONSTR.ok(), 'Gebruik de parallellogrammethode of zet de krachten kop aan staart.', 'F<sub>res</sub> geconstrueerd'),
+      getalStap('Bepaal de grootte van F<sub>res</sub>:', 447.2, 'N', 'Horizontaal 400 N, verticaal 200 N: F<sub>res</sub> = √(400<sup>2</sup> + 200<sup>2</sup>) = 4,5·10<sup>2</sup> N.', 'Meet je pijl, of tel de horizontale en verticale delen op.', 0.04)] },
+    { titel:'Tractor', vraag:'Een tractor trekt een ploeg met 1200 N vooruit. De wrijving van de grond is 350 N en de luchtweerstand 250 N.', stappen:[
+      getalStap('Bereken de resulterende kracht:', 600, 'N', 'F<sub>res</sub> = 1200 − 350 − 250 = 6,0·10<sup>2</sup> N, vooruit.', 'Tegenwerkende krachten trek je af.', 0.01)] }
+  ],
+  h3_ontbind: () => [
+    { titel:'Steilere helling', constr:{ type:'helling', hoek:40, Fz:300 }, vraag:'Op de uitwerkbijlage staat een blok op een helling van 40°. F<sub>z</sub> is getekend (1 cm ≙ 100 N).', stappen:[
+      simStap('Teken de component van F<sub>z</sub> langs de helling.', () => CONSTR.ok(), 'Langs de helling, naar beneden, vanuit het aangrijpingspunt.', 'component getekend'),
+      getalStap('Bereken de grootte van deze component:', 192.8, 'N', 'F<sub>z,∥</sub> = 300 · sin 40° = 1,9·10<sup>2</sup> N.', 'F<sub>z</sub>·sin α.', 0.02)] },
+    { titel:'Rolstoel', vraag:'Een rolstoel met persoon (samen 95 kg) staat op een oprit met een hellingshoek van 6,0°.', stappen:[
+      getalStap('Bereken met welke kracht de rolstoel langs de helling naar beneden getrokken wordt:', 97.42, 'N', 'F<sub>z,∥</sub> = 95 · 9,81 · sin 6,0° = 97 N.', 'Component van F<sub>z</sub> langs de helling.', 0.02)] }
+  ],
+  h3_n1: () => [
+    { titel:'Hanglamp', vraag:'Een lamp van 1,8 kg hangt stil aan een snoer.', stappen:[
+      getalStap('Bereken de spankracht in het snoer:', 17.66, 'N', 'F<sub>res</sub> = 0, dus F<sub>s</sub> = F<sub>z</sub> = 1,8 · 9,81 = 18 N.', 'De lamp hangt stil.', 0.02)] },
+    { titel:'Slee', vraag:'Je trekt een slee met een horizontale kracht van 45 N. De slee beweegt met een constante snelheid.', stappen:[
+      getalStap('Hoe groot is de wrijvingskracht op de slee?', 45, 'N', 'Constante snelheid: F<sub>res</sub> = 0, dus F<sub>w</sub> = 45 N.', 'Eerste wet van Newton.', 0.01),
+      keuzeStap('Je trekt nu met 60 N. Wat gebeurt er met de slee?', [{ html:'de slee gaat steeds sneller', g:1 }, { html:'de slee beweegt met een hogere, constante snelheid', fb:'Er is nu een resulterende kracht: de snelheid blijft toenemen.' }, { html:'er verandert niets' }, { html:'de slee remt af' }])] }
+  ],
+  h3_n2: () => [
+    { titel:'Tennisbal', vraag:'Een tennisbal van 58 g krijgt bij de opslag in 4,0 ms een snelheid van 50 ' + MS + ', vanuit stilstand.', stappen:[
+      getalStap('Bereken de gemiddelde kracht van het racket op de bal:', 725, 'N', 'a = ' + BR('50', '4,0·10<sup>−3</sup>') + ' = 1,25·10<sup>4</sup> ' + MS2 + '; F = 0,058 · 1,25·10<sup>4</sup> = 7,3·10<sup>2</sup> N.', 'Reken g en ms om; bereken eerst a.', 0.02)] },
+    { titel:'Boodschappenkar', vraag:'Je duwt een boodschappenkar van 25 kg met 80 N. De wrijvingskracht is 30 N.', stappen:[
+      getalStap('Bereken de versnelling van de kar:', 2.0, MS2, 'F<sub>res</sub> = 80 − 30 = 50 N; a = ' + BR('50', '25') + ' = 2,0 ' + MS2 + '.', 'Bereken eerst de resulterende kracht.', 0.02)] }
+  ],
+  h3_cirkel: () => [
+    { titel:'Wasmachine', vraag:'De trommel van een wasmachine heeft een straal van 0,25 m en draait 1200 rondjes per minuut. Een sok van 0,10 kg zit tegen de wand.', stappen:[
+      getalStap('Bereken de omlooptijd van de trommel:', 0.05, 's', 'T = ' + BR('60 s', '1200') + ' = 0,050 s.', 'Hoeveel seconden duurt één rondje?', 0.02),
+      getalStap('Bereken de baansnelheid van de sok:', 31.42, MS, 'v = ' + BR('2π · 0,25', '0,050') + ' = 31 ' + MS + '.', 'v = ' + BR('2π·r', 'T') + '.', 0.02),
+      getalStap('Bereken de middelpuntzoekende kracht op de sok:', 394.8, 'N', 'F<sub>mpz</sub> = ' + BR('0,10 · 31,4<sup>2</sup>', '0,25') + ' = 3,9·10<sup>2</sup> N.', 'F<sub>mpz</sub> = ' + BR('m·v<sup>2</sup>', 'r') + '.', 0.02)] },
+    { titel:'Kogelslingeren', vraag:'Een kogelslingeraar laat een kogel van 7,26 kg rondgaan met een straal van 1,9 m en een snelheid van 25 ' + MS + '.', stappen:[
+      getalStap('Bereken de spankracht in de kabel:', 2388, 'N', 'F<sub>s</sub> = F<sub>mpz</sub> = ' + BR('7,26 · 25<sup>2</sup>', '1,9') + ' = 2,4·10<sup>3</sup> N (de zwaartekracht verwaarloos je).', 'De spankracht levert de middelpuntzoekende kracht.', 0.02)] }
+  ],
+  /* ---------- H4 ---------- */
+  h4_eig: () => [
+    { titel:'Tweede oscillogram', osc:{ tmax:20, umax:4, dx:2, dy:1, sporen:[{ A:2, T:5, fase:0 }] }, vraag:'Rechts staat een nieuw oscillogram.', stappen:[
+      getalStap('Bepaal de amplitude:', 2.0, 'cm', 'De grootste uitwijking is 2,0 cm.', 'Lees de top af vanaf de evenwichtsstand.', 0.03),
+      getalStap('Bepaal de frequentie:', 200, 'Hz', 'In 20 ms passen 4 trillingen: T = 5,0 ms; f = ' + BR('1', '5,0·10<sup>−3</sup>') + ' = 2,0·10<sup>2</sup> Hz.', 'Bepaal eerst T over meerdere trillingen.', 0.03)] },
+    { titel:'Slinger tellen', vraag:'Een slinger maakt 12 volledige trillingen in 20,4 s.', stappen:[
+      getalStap('Bereken de trillingstijd:', 1.7, 's', 'T = ' + BR('20,4 s', '12') + ' = 1,70 s.', 'Deel de totale tijd door het aantal trillingen.', 0.02),
+      getalStap('Bereken de frequentie:', 0.5882, 'Hz', 'f = ' + BR('1', '1,70') + ' = 0,588 Hz.', 'f = ' + BR('1', 'T') + '.', 0.02)] }
+  ],
+  h4_diag: () => [
+    { titel:'Tegenfase', osc:{ tmax:20, umax:4, dx:2, dy:1, sporen:[{ A:3, T:8, fase:0 }, { A:3, T:8, fase:0.5, kleur:'#b0432a' }] }, vraag:'Rechts staan nu twee andere trillingen A en B.', stappen:[
+      getalStap('Bepaal het faseverschil tussen A en B:', 0.5, '', 'B ligt 4,0 ms achter: Δφ = ' + BR('4,0', '8,0') + ' = 0,50: tegenfase.', 'Meet Δt tussen twee toppen en deel door T.', 0.04)] },
+    { titel:'Uitwijking II', vraag:'Een harmonische trilling heeft een amplitude van 4,0 cm en een trillingstijd van 0,50 s. Op t = 0 is u = 0 en beweegt het voorwerp omhoog.', stappen:[
+      getalStap('Bereken de uitwijking op t = 0,10 s:', 3.804, 'cm', 'u = 4,0 · sin(2π · ' + BR('0,10', '0,50') + ') = 4,0 · sin(1,257) = 3,8 cm.', 'Rekenmachine op radialen.', 0.02)] }
+  ],
+  h4_kracht: () => [
+    { titel:'Veerconstante bepalen', vraag:'Een leerling hangt 0,25 kg aan een onbekende veer en meet voor 10 trillingen 6,3 s.', stappen:[
+      getalStap('Bereken de veerconstante:', 24.87, NM, 'T = 0,63 s; C = ' + BR('4π<sup>2</sup>·m', 'T<sup>2</sup>') + ' = ' + BR('39,5 · 0,25', '0,63<sup>2</sup>') + ' = 25 ' + NM + '.', 'Schrijf T = 2π·√' + BR('m', 'C') + ' om naar C.', 0.02)] },
+    { titel:'Secondenslinger', vraag:'Een slinger met T = 2,0 s heet een secondenslinger: elke slag naar één kant duurt 1 s.', stappen:[
+      getalStap('Bereken de lengte van een secondenslinger:', 0.9940, 'm', 'ℓ = g·(' + BR('T', '2π') + ')<sup>2</sup> = 9,81 · (' + BR('2,0', '2π') + ')<sup>2</sup> = 0,99 m.', 'Kwadrateer beide kanten van T = 2π·√' + BR('ℓ', 'g') + '.', 0.02)] }
+  ],
+  h4_res: () => [
+    { titel:'Verkeersdrempels', vraag:'Op een weg liggen om de 12 m kleine drempels. De vering van een auto heeft een eigenfrequentie van 1,5 Hz.', stappen:[
+      getalStap('Bereken bij welke snelheid de auto het hevigst gaat schudden:', 18, MS, 'Resonantie als er 1,5 drempels per seconde passeren: v = 12 · 1,5 = 18 ' + MS + '.', 'Hoeveel drempels per seconde moet de auto passeren?', 0.02)] },
+    { titel:'Wasmachine', vraag:'Een wasmachine schudt bij het opstarten van de centrifuge even heel hevig en draait daarna weer rustig.', stappen:[
+      zelfStap('Leg dit uit.', ['inzicht dat de wasmachine (op zijn pootjes) een eigenfrequentie heeft', 'inzicht dat de draaifrequentie bij het opstarten door die eigenfrequentie heen gaat, zodat er even resonantie is', 'inzicht dat bij een hogere draaifrequentie geen resonantie meer is'], 'De wasmachine heeft een eigenfrequentie. Bij het opstarten neemt de draaifrequentie toe en komt even gelijk aan de eigenfrequentie: resonantie, dus hevig schudden. Daarna is de draaifrequentie veel hoger dan de eigenfrequentie en is de amplitude weer klein.')] }
+  ],
+  /* ---------- H5 ---------- */
+  h5_bron: () => [
+    { titel:'Uranium-235', vraag:'In een kerncentrale wordt uranium-235 (<sup>235</sup><sub>92</sub>U) gebruikt.', stappen:[
+      getalStap('Hoeveel neutronen heeft een U-235-kern?', 143, '', 'N = 235 − 92 = 143.', 'Massagetal min atoomnummer.', 0.001)] },
+    { titel:'Achtergrondstraling', vraag:'Je ontvangt elke dag een beetje ioniserende straling.', stappen:[
+      chipStap('Kies alle bronnen van ioniserende achtergrondstraling.', [{ html:'radon uit de bodem en bouwmaterialen', g:1 }, { html:'kosmische straling uit de ruimte', g:1 }, { html:'kalium-40 in je eigen lichaam', g:1 }, { html:'de wifi-router' }, { html:'een magnetron' }, { html:'een mobiele telefoon' }], 'Wifi, magnetron en telefoon zenden geen ioniserende straling uit.')] }
+  ],
+  h5_kern: () => [
+    { titel:'Kalium-40', vraag:'Kalium-40 (<sup>40</sup><sub>19</sub>K) is een β<sup>−</sup>-straler.', stappen:[
+      getalStap('Bepaal het atoomnummer van de dochterkern:', 20, '', '19 = Z − 1, dus Z = 20: calcium, <sup>40</sup><sub>20</sub>Ca.', 'Bij β<sup>−</sup>-verval wordt Z 1 groter.', 0.001)] }
+  ],
+  h5_dring: () => [
+    { titel:'Ioniseren', vraag:'De drie soorten straling verschillen in hoe sterk ze ioniseren.', stappen:[
+      keuzeStap('Welke straling is het gevaarlijkst als de bron in je lichaam terechtkomt (bijvoorbeeld ingeademd)?', [{ html:'α-straling, want die ioniseert het sterkst', g:1 }, { html:'γ-straling, want die dringt het verst door', fb:'Binnen in het lichaam is ioniseren belangrijker dan doordringen.' }, { html:'β-straling' }, { html:'alle drie even gevaarlijk' }])] },
+    { titel:'Water als afscherming', vraag:'Voor een γ-bron is de halveringsdikte van water 10 cm.', stappen:[
+      getalStap('Bereken hoeveel procent er door 20 cm water komt:', 25, '%', 'n = 2; (½)<sup>2</sup> · 100 % = 25 %.', 'Tel het aantal halveringsdiktes.', 0.02)] }
+  ],
+  h5_halv: () => [
+    { titel:'Aflezen en rekenen', vraag:'Gebruik weer de grafiek van de Tc-99m-bron rechts.', stappen:[
+      bereikStap('Bepaal de activiteit op t = 9,0 h:', 270, 295, 'MBq', 'Ongeveer 2,8·10<sup>2</sup> MBq.', 'Lees af bij t = 9,0 h.'),
+      getalStap('Na hoeveel uur is de activiteit 100 MBq?', 18, 'h', '800 → 400 → 200 → 100: 3 halveringstijden = 18 h.', 'Tel hoe vaak je moet halveren.', 0.02)] },
+    { titel:'Koolstof-14', vraag:'Koolstof-14 heeft een halveringstijd van 5730 jaar.', stappen:[
+      getalStap('Hoeveel procent van de C-14 is na 11 460 jaar nog over?', 25, '%', '11 460 jaar = 2 halveringstijden: 25 %.', 'Deel de tijd door de halveringstijd.', 0.02)] }
+  ],
+  /* ---------- H6 ---------- */
+  h6_arb: () => [
+    { titel:'Hijsen', vraag:'Een kraan hijst een pallet van 250 kg met constante snelheid 8,0 m omhoog.', stappen:[
+      getalStap('Bereken de arbeid van de hijskracht:', 19620, 'J', 'F = F<sub>z</sub> = 2453 N; W = 2453 · 8,0 = 2,0·10<sup>4</sup> J.', 'Bij constante snelheid is de hijskracht gelijk aan F<sub>z</sub>.', 0.02)] },
+    { titel:'Positief of negatief', vraag:'Bekijk per situatie de arbeid van de genoemde kracht.', stappen:[
+      selectsStap('Kies of de arbeid positief, negatief of nul is.', [{ z:'de zwaartekracht op een bal die omhoog vliegt', a:'neg' }, { z:'de zwaartekracht op een vallende bal', a:'pos' }, { z:'de normaalkracht op een auto die over een vlakke weg rijdt', a:'nul' }, { z:'de remkracht op een fiets', a:'neg' }], [{ v:'pos', t:'positief' }, { v:'neg', t:'negatief' }, { v:'nul', t:'nul' }], 'Vergelijk de richting van de kracht met de richting van de beweging.')] }
+  ],
+  h6_esoort: () => [
+    { titel:'Duiker', vraag:'Een duiker van 60 kg staat op een platform 10 m boven het water.', stappen:[
+      getalStap('Bereken de zwaarte-energie ten opzichte van het water:', 5886, 'J', 'E<sub>z</sub> = 60 · 9,81 · 10 = 5,9·10<sup>3</sup> J.', 'E<sub>z</sub> = m·g·h.', 0.02)] },
+    { titel:'Kogel', vraag:'Een kogel van 8,0 g vliegt met 350 ' + MS + '.', stappen:[
+      getalStap('Bereken de kinetische energie:', 490, 'J', 'E<sub>k</sub> = ½ · 0,0080 · 350<sup>2</sup> = 4,9·10<sup>2</sup> J.', 'Reken gram om naar kg.', 0.02)] },
+    { titel:'Trampoline', vraag:'Een trampoline gedraagt zich als een veer met C = 5,0·10<sup>3</sup> ' + NM + '. Bij een sprong wordt hij 30 cm ingedrukt.', stappen:[
+      getalStap('Bereken de veerenergie:', 225, 'J', 'E<sub>veer</sub> = ½ · 5,0·10<sup>3</sup> · 0,30<sup>2</sup> = 2,3·10<sup>2</sup> J.', 'E<sub>veer</sub> = ½·C·u<sup>2</sup>.', 0.02)] }
+  ],
+  h6_behoud: () => [
+    { titel:'Slinger', vraag:'Een slingerbal wordt losgelaten op 0,45 m boven zijn laagste punt. Verwaarloos de wrijving.', stappen:[
+      getalStap('Bereken de snelheid in het laagste punt:', 2.971, MS, 'v = √(2 · 9,81 · 0,45) = 3,0 ' + MS + '.', 'E<sub>z</sub> boven = E<sub>k</sub> onder.', 0.02)] }
+  ],
+  h6_verbr: () => [
+    { titel:'Kaars', vraag:'Een kaars verbrandt 18 g paraffine. De stookwaarde van paraffine is 42·10<sup>6</sup> ' + BR('J', 'kg') + '.', stappen:[
+      getalStap('Bereken de vrijgekomen energie:', 7.56e5, 'J', 'E = 42·10<sup>6</sup> · 0,018 = 7,6·10<sup>5</sup> J.', 'Reken gram om naar kg.', 0.02)] },
+    { titel:'Hoeveel benzine?', vraag:'Benzine heeft een stookwaarde van 33·10<sup>9</sup> ' + BR('J', 'm<sup>3</sup>') + '.', stappen:[
+      getalStap('Bereken hoeveel liter benzine je moet verbranden voor 1,0·10<sup>9</sup> J:', 30.30, 'L', 'V = ' + BR('1,0·10<sup>9</sup>', '33·10<sup>9</sup>') + ' = 0,030 m<sup>3</sup> = 30 L.', 'Schrijf E = r<sub>V</sub>·V om; m<sup>3</sup> naar L.', 0.02)] }
+  ],
+  h6_verm: () => [
+    { titel:'Waterpomp', vraag:'Een pomp pompt in 60 s 1200 kg water 4,0 m omhoog.', stappen:[
+      getalStap('Bereken het nuttige vermogen van de pomp:', 784.8, 'W', 'E<sub>z</sub> = 1200 · 9,81 · 4,0 = 4,71·10<sup>4</sup> J; P = ' + BR('4,71·10<sup>4</sup>', '60') + ' = 7,8·10<sup>2</sup> W.', 'Bereken de energie en deel door de tijd.', 0.02)] },
+    { titel:'Ledlamp', vraag:'Een ledlamp neemt 7,0 W op en zendt 2,1 W aan licht uit.', stappen:[
+      getalStap('Bereken het rendement in procent:', 30, '%', 'η = ' + BR('2,1', '7,0') + ' · 100 % = 30 %.', 'Nuttig gedeeld door opgenomen.', 0.02)] }
+  ]
+};
+/* invoegen vóór de ★-opdracht */
+WPS.forEach(w => { const f = EXTRA[w.id]; if (!f) return; const orig = w.maakSerie;
+  w.maakSerie = () => { const s = orig(), x = f(), i = s.findIndex(o => o.ster); const st = x.filter(o => o.ster), gw = x.filter(o => !o.ster);
+    if (i < 0) return s.concat(gw, st); return s.slice(0, i).concat(gw, s.slice(i), st); }; });
 
 sorteerWPS(['H1 Bewegen in beeld', 'H2 Elektriciteit', 'H3 Krachten', 'H4 Trillingen', 'H5 Straling', 'H6 Arbeid en energie']);
 /* =====================================================================
