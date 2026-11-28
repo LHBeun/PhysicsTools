@@ -399,6 +399,39 @@ table.data th{background:#16191c}
   .pflijst th{color:#555}.pflijst td,.pflijst th{border-bottom-color:#ddd}
 }
 .navf{width:100%;background:#16191c;color:var(--inkt);border:1px solid #3d434b;border-radius:6px;padding:6px 8px;font:inherit;font-size:13px;margin-bottom:4px}
+/* docentmodus */
+.docent{border:1px dashed #b38bd6;background:rgba(179,139,214,.07);border-radius:8px;padding:10px 14px;margin-top:16px}
+.docent .dkop,.docvoet .dlabel{font:700 11px var(--mono);letter-spacing:1.2px;text-transform:uppercase;color:#c9a6ea;margin-bottom:6px}
+.dstap{display:flex;gap:10px;margin:8px 0;align-items:flex-start}
+.dstap .n{flex:none;width:22px;height:22px;border-radius:50%;background:#b38bd6;color:#1c1f23;font:700 12px var(--mono);display:flex;align-items:center;justify-content:center;margin-top:2px}
+.dvr{color:var(--grijs);font-size:13.5px;margin-bottom:2px}
+.dant{color:var(--inkt)}
+.docvoet{border:1px dashed #b38bd6;border-radius:8px;padding:8px;margin-bottom:8px;display:flex;flex-direction:column;gap:6px}
+.docvoet button{border-color:#6d5a85!important}
+#ablad{display:none}
+body.ablad-open #ablad{display:block;position:fixed;inset:0;z-index:1000;overflow:auto;background:#fff;color:#141414;padding:28px 56px 60px;font-size:14.5px;line-height:1.5}
+#ablad h1{font:600 26px var(--serif);margin:10px 0 2px}
+#ablad h2{font:600 20px var(--serif);border-bottom:2px solid #b85a36;margin:26px 0 8px;padding-bottom:3px;color:#141414}
+#ablad h3{font:700 13px var(--mono);letter-spacing:1px;text-transform:uppercase;color:#b85a36;margin:18px 0 6px}
+#ablad .ameta{font:12.5px var(--mono);color:#555}
+#ablad .aopd{border:1px solid #ddd5c8;border-radius:6px;padding:10px 14px;margin:8px 0;break-inside:avoid}
+#ablad .atitel{font-weight:700;margin-bottom:4px}
+#ablad .avraag{margin-bottom:6px}
+#ablad .dvr{color:#555}#ablad .dant{color:#141414}
+#ablad .dstap .n{background:#b85a36;color:#fff}
+#ablad .stempel{color:#2d7a4a;border-color:#2d7a4a}
+#ablad .model{border-left-color:#2d7a4a}
+#ablad .kader{background:#f6f2ea;border-color:#ddd5c8;color:#141414}
+#ablad table.data th{background:#f3eee3}#ablad table.data th,#ablad table.data td{border-color:#ccc;color:#141414}
+#ablad .ablknop{display:flex;gap:10px;align-items:center;position:sticky;top:-28px;background:#fff;padding:8px 0;border-bottom:1px solid #eee}
+#ablad .ablknop .noot{color:#666}
+#ablad .btn.g{color:#141414;border-color:#bbb}
+@media print{
+  body.ablad-open{background:#fff!important}
+  body.ablad-open .app,body.ablad-open #parkeer{display:none!important}
+  body.ablad-open #ablad{position:static;overflow:visible;padding:0}
+  #ablad .geenprint{display:none!important}
+}
 
 </style>
 </head>
@@ -539,7 +572,7 @@ function bereikStap(vr, lo, hi, eenheid, uitleg, hint){
 }
 /* zelf nakijken met scorepunten uit het correctievoorschrift */
 function zelfStap(vr, punten, model, o = {}){
-  const st = { type:'zelf', vr, punten, noot: o.noot || 'Een conclusie zonder uitleg levert geen punten op.', hint: o.hint || 'Begin met de natuurkunde die geldt (formule of regel). Trek pas daarna je conclusie.',
+  const st = { type:'zelf', vr, punten, model, noot: o.noot || 'Een conclusie zonder uitleg levert geen punten op.', hint: o.hint || 'Begin met de natuurkunde die geldt (formule of regel). Trek pas daarna je conclusie.',
     check: v => {
       if (v.tekst.trim().length < 8) return { ok:false, neutraal:true, msg:'Schrijf eerst je eigen antwoord op, zoals op het examen.' };
       if (v.cv.style.display === 'none'){ v.cv.style.display = ''; v.knop.textContent = 'Klaar met nakijken'; v.tv.readOnly = true;
@@ -2037,6 +2070,65 @@ labPush({ id:'doos', groep:'Labs', titel:'Deeltje in een doos', par:'F1 · quant
     { titel:'Kleurstof', ster:true, vraag:'De geconjugeerde keten van een kleurstofmolecuul gedraagt zich als een doos van 1,4 nm voor de elektronen. De absorptie met de langste golflengte hoort bij de overgang van n = 5 naar n = 6.', stappen:[
       getalStap('Bereken de golflengte van deze absorptie:', K.h * K.c / L_DOOS_STER * 1e9, 'nm', 'ΔE = (36 − 25)·' + BR('h<sup>2</sup>', '8m·L<sup>2</sup>') + ' = 11 · 3,07·10<sup>−20</sup> = 3,38·10<sup>−19</sup> J; λ = ' + BR('h·c', 'ΔE') + ' = 5,9·10<sup>2</sup> nm.', 'ΔE = (6<sup>2</sup> − 5<sup>2</sup>)·E<sub>1</sub>.', 0.02)] }
   ] });
+
+/* =====================================================================
+   Docentmodus: uitwerkingen bij elke opdracht en een antwoordenblad
+   Aanzetten met #docent achter de link.
+   ===================================================================== */
+const DOCKEY = 'nk-docentmodus';
+if (/docent/.test(location.hash)) try { localStorage.setItem(DOCKEY, '1'); } catch (e){}
+let DOCENT = false; try { DOCENT = localStorage.getItem(DOCKEY) === '1'; } catch (e){}
+function docStap(st){
+  try {
+    if (st.type === 'zelf') return spLijst(st.punten.map(p => [1, p])) + (st.model ? `<div class="model">${st.model}</div>` : '');
+    if (st.type === 'sim') return '<i>Leerling stelt in:</i> ' + (st.hint || '');
+    if (st.type === 'chips') return st.opties.filter(x => x.g).map(x => x.html).join(' · ');
+    const a = st.antwoord ? st.antwoord() : '';
+    return a && !/undefined|null|NaN/.test(a) ? a : (st.hint || '—');
+  } catch (e){ return '<i>Hangt af van de meting van de leerling.</i> ' + (st.hint || ''); }
+}
+function docOpdracht(o, kop){
+  return `<div class="dopd">${kop ? `<div class="dtitel">${kop}</div>` : ''}${o.stappen.map((st, k) => `<div class="dstap"><span class="n">${k + 1}</span><div><div class="dvr">${st.vr || ''}</div><div class="dant">${docStap(st)}</div></div></div>`).join('')}</div>`;
+}
+const _renderOpdracht = renderOpdracht;
+renderOpdracht = function(w, p){
+  let h = _renderOpdracht(w, p);
+  if (DOCENT){ const o = p.serie[p.idx]; h += `<div class="docent"><div class="dkop">Docent · uitwerking van deze opdracht</div>${docOpdracht(o)}</div>`; }
+  return h;
+};
+function antwoordenblad(){
+  let filter = ''; try { if (typeof NAVFILTER !== 'undefined') filter = localStorage.getItem(NAVFILTER) || ''; } catch (e){}
+  const titel = document.title;
+  let h = `<div class="geenprint ablknop"><button class="btn" id="abl_print">Opslaan als pdf / printen</button><button class="btn g" id="abl_dicht">Sluiten</button>
+    <span class="noot">Opdrachten met willekeurige getallen staan hier met de getallen van de huidige serie.</span></div>
+    <h1>${titel} · antwoordenblad</h1><div class="ameta">${filter ? filter + ' · ' : ''}${new Date().toLocaleDateString('nl-NL', { day:'numeric', month:'long', year:'numeric' })}</div>`;
+  let groep = null;
+  WPS.forEach(w => {
+    if (filter && w.groep !== filter) return;
+    if (w.eigen){
+      if (typeof DIAG !== 'undefined'){ h += `<h2>Diagnose</h2>` + DIAG.map(sd => `<h3>${sd.sub} ${sd.naam}</h3>` + sd.items.map(it => `<div class="aopd"><div class="atitel">${it.id} · ${it.ww} · ${it.p}p</div>${it.fig || ''}<div class="avraag">${it.vraag}</div>
+        ${it.type === 'getal' ? `<div class="dant"><b>Antwoord:</b> ${tien(it.w, it.nsig || 3)} ${it.eenh}${it.nsig ? ` (${it.nsig} significante cijfers)` : ''}</div>` : ''}
+        ${it.type === 'keuze' ? `<div class="dant"><b>Antwoord:</b> ${it.opties.filter(o => o.g).map(o => o.html).join(' · ')}</div>` : ''}${spLijst(it.uitw)}</div>`).join('')).join(''); }
+      return;
+    }
+    if (w.groep !== groep){ groep = w.groep; h += `<h2>${groep}</h2>`; }
+    if (!PER_WP[w.id]) nieuweSerie(w);
+    const p = PER_WP[w.id];
+    h += `<h3>${w.titel}${w.ster ? ' ★' : ''}</h3>` + p.serie.map((o, k) => `<div class="aopd"><div class="atitel">${o.ster ? '★' : 'Opdracht ' + (k + 1)} · ${o.titel}</div>${o.vraag ? `<div class="avraag">${o.vraag}</div>` : ''}${docOpdracht(o)}</div>`).join('');
+  });
+  let el = $('#ablad'); if (!el){ el = document.createElement('div'); el.id = 'ablad'; document.body.appendChild(el); }
+  el.innerHTML = h; document.body.classList.add('ablad-open'); el.scrollTop = 0;
+  $('#abl_dicht').onclick = () => document.body.classList.remove('ablad-open');
+  $('#abl_print').onclick = () => window.print();
+}
+if (DOCENT){
+  const v = document.querySelector('aside .voet');
+  if (v){ const d = document.createElement('div'); d.className = 'docvoet';
+    d.innerHTML = `<div class="dlabel">Docentmodus</div><button id="ablknop">Antwoordenblad</button><button id="docuit">Docentmodus uit</button>`;
+    v.prepend(d);
+    $('#ablknop').onclick = antwoordenblad;
+    $('#docuit').onclick = () => { try { localStorage.removeItem(DOCKEY); } catch (e){} location.hash = ''; location.reload(); }; }
+}
 
 /* ---------- start ---------- */
 $('#beamerknop').onclick = () => document.body.classList.toggle('beamer');
