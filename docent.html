@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docentpagina — natuurkunde en scheikunde</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --bg:#ffffff; --panel:#ffffff; --panel-alt:#f4f5f7; --border:#d9dde3;
+    --text:#1c232c; --muted:#6b7684;
+    --serif:'Iowan Old Style','Palatino Linotype',Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,'SF Mono',Consolas,'Liberation Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.5;padding:40px 20px 60px;}
+  .shell{max-width:1020px;margin:0 auto;}
+  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  h1{font-family:var(--serif);font-size:2.2rem;font-weight:600;margin:0 0 8px;}
+  .sub{color:var(--muted);font-size:1rem;max-width:640px;margin:0 0 28px;}
+  .sectie{margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:34px;}
+  .card{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px 20px;box-shadow:0 1px 3px rgba(28,35,44,.06);transition:transform .15s, box-shadow .15s;}
+  .card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(28,35,44,.1);}
+  .cat-tag{display:inline-block;font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:5px;margin-bottom:10px;background:#e3eef8;color:#1f4f7a;}
+  .card h3{font-family:var(--serif);font-size:1.08rem;font-weight:600;margin:0 0 6px;}
+  .card p{font-size:.86rem;color:var(--muted);margin:0 0 12px;}
+  .card .open{font-family:var(--mono);font-size:.76rem;font-weight:600;color:#1f4f7a;}
+  .card.leeg{border-style:dashed;box-shadow:none;color:var(--muted);display:flex;align-items:center;justify-content:center;min-height:150px;font-size:.86rem;}
+  footer{color:var(--muted);font-size:.8rem;border-top:1px solid var(--border);padding-top:16px;}
+  footer a{color:inherit;}
+  .card .open.d{color:#6d3fa0;}
+  .uitleg{background:var(--panel-alt);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin:0 0 28px;font-size:.92rem;}
+  .uitleg li{margin:3px 0;}
+  .tag-d{background:#efe6f8;color:#6d3fa0;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="eyebrow">Alleen voor de docent</div>
+  <h1>Docentpagina</h1>
+  <p class="sub">Alle tools in docentmodus: bij elke opdracht de uitwerking, en per tool of subdomein een antwoordenblad.</p>
+  <div class="uitleg"><ul>
+    <li>Een link op deze pagina zet de docentmodus aan. Die blijft aan in die browser, tot je linksonder op <b>Docentmodus uit</b> klikt.</li>
+    <li>Onder elke opdracht staat dan de uitwerking: berekening, goed antwoord of scorepunten met modelantwoord.</li>
+    <li><b>Antwoordenblad</b> (linksonder) zet alle opdrachten met uitwerking onder elkaar, klaar om als pdf op te slaan. Kies eerst een subdomein in het menu als je alleen dat deel wilt.</li>
+    <li>Opdrachten met willekeurige getallen staan op het antwoordenblad met de getallen van de serie die op dat moment geladen is.</li>
+  </ul></div>
+
+  <div class="sectie">Natuurkunde vwo</div>
+  <div class="grid">
+    <a class="card" href="Examentrainer_6V.html#docent">
+      <span class="cat-tag tag-d">Examen · 6V</span>
+      <h3>Examentrainer natuurkunde vwo</h3>
+      <p>Antwoordenblad met alle 30 diagnosevragen, de examentaal, de vaardigheden en de labs.</p>
+      <span class="open d">Open in docentmodus →</span>
+    </a>
+    <a class="card" href="Domein_B_Golven.html#docent">
+      <span class="cat-tag tag-d">Domein B</span>
+      <h3>Golven</h3>
+      <p>B1 Informatieoverdracht en B2 Medische beeldvorming.</p>
+      <span class="open d">Open in docentmodus →</span>
+    </a>
+    <a class="card" href="Domein_C_Beweging.html#docent">
+      <span class="cat-tag tag-d">Domein C</span>
+      <h3>Beweging en wisselwerking</h3>
+      <p>C1 Kracht en beweging, C2 Energie, C3 Gravitatie.</p>
+      <span class="open d">Open in docentmodus →</span>
+    </a>
+    <a class="card" href="Domein_D_Lading_veld.html#docent">
+      <span class="cat-tag tag-d">Domein D</span>
+      <h3>Lading en veld</h3>
+      <p>D1 Elektrische systemen en D2 Velden.</p>
+      <span class="open d">Open in docentmodus →</span>
+    </a>
+    <a class="card" href="Domein_EF_Straling_quantum.html#docent">
+      <span class="cat-tag tag-d">Domein E en F</span>
+      <h3>Straling en quantumwereld</h3>
+      <p>E2 Straling en materie en F1 Quantumwereld.</p>
+      <span class="open d">Open in docentmodus →</span>
+    </a>
+  </div>
+
+  <div class="sectie">Scheikunde</div>
+  <div class="grid">
+    <div class="card leeg">Docentmodus voor de scheikundetools volgt</div>
+  </div>
+
+  <footer>Deze pagina staat niet in het overzicht voor leerlingen. Echt afgeschermd is het niet: wie de broncode leest, kan de antwoorden vinden.</footer>
+</div>
+</body>
+</html>
